@@ -34,22 +34,24 @@ load(File.join(File.expand_path(File.dirname(__FILE__)), "tools.rb"))
 load(File.join(File.expand_path(File.dirname(__FILE__)), "query.rb"))
 
 class Fetch
-    def initialize(package)
+    def initialize()
         if File.exists?("/tmp/post")
             FileUtils.rm_r("/tmp/post")
         end
         FileUtils.mkdir("/tmp/post")
         FileUtils.cd("/tmp/post")
-        queue = []
-        for dependency in Query.getDependencies(package)
-            queue.push(dependency)
-        end
-        queue.push(package)
-        fetchPackages(queue)
     end
-            
-    def fetchPackages(queue)
-        for package in queue
+          
+    def buildQueue(package)
+        @queue = []
+        if Query.getAvailable(package)
+            for dependency in Query.getDependencies(package)
+                @queue.push(dependency)
+            end
+        @queue.push(package)
+    end  
+    def fetchPackages()
+        for package in @queue
             url = Query.getUrl(package)
             filename = Query.getFileName(package)
             Tools.getFile(url, filename)
@@ -69,7 +71,7 @@ class Fetch
         end
         for file in installedFiles
             Tools.installFile(file, file)
-        endd
+        end
         installScript = File.read(".install")
         eval(installScript)
     end
