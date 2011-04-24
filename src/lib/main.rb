@@ -27,14 +27,18 @@
 
 require("optparse")
 load(File.join(File.expand_path(File.dirname(__FILE__)), "fetch.rb"))
+load(File.join(File.expand_path(File.dirname(__FILE__)), "erase.rb"))
 load(File.join(File.expand_path(File.dirname(__FILE__)), "tools.rb"))
 load(File.join(File.expand_path(File.dirname(__FILE__)), "query.rb"))
 
 OPTIONS = {
     :install  => "",
+    :remove  => "",
 }
 
 install = nil
+remove = nil
+sync = nil
 
 ARGV.options do |o|
 
@@ -54,6 +58,10 @@ ARGV.options do |o|
     if (Process.uid == 0)
         o.on("-i", "--fetch ", String,
             "Install or update a package.")  { |v| OPTIONS[:install] = v; install = true}
+        o.on("-r", "--erase ", String, 
+            "Erase a package.") { |v| OPTIONS[:remove] = v; remove = true}
+        o.on("-s", "--refresh", 
+            "Refresh the package database") { |v| sync = true}
     end
     
     o.on_tail("-h", "--help",
@@ -64,6 +72,14 @@ ARGV.options do |o|
     o.parse!
 
     if (install)
-        fetch = Fetch.new(OPTIONS[:install])
+        fetch = Fetch.new()
+        fetch.buildQueue(OPTIONS[:install])
+        fetch.fetchPackages()
+    elsif (remove)
+        erase = Erase.new()
+        erase.buildQueue(OPTIONS[:remove])
+        erase.removePackages()
+    elsif (sync)
+        refresh()
     end
 end

@@ -50,6 +50,8 @@ mkdir_p("#{destdir}/etc/post/repos.d/")
 
 system("install -m 755 src/bin/post.rb #{destdir}#{prefix}/bin/post")
 system("install -m 644 src/lib/fetch.rb #{destdir}#{prefix}/lib/post/fetch.rb")
+system("install -m 644 src/lib/erase.rb #{destdir}#{prefix}/lib/post/erase.rb")
+system("install -m 644 src/lib/refresh.rb #{destdir}#{prefix}/lib/post/refresh.rb")
 system("install -m 644 src/lib/main.rb #{destdir}#{prefix}/lib/post/main.rb")
 system("install -m 644 src/lib/query.rb #{destdir}#{prefix}/lib/post/query.rb")
 system("install -m 644 src/lib/tools.rb #{destdir}#{prefix}/lib/post/tools.rb")

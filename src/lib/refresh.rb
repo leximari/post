@@ -1,5 +1,6 @@
-# Copyright (C) Thomas Chace 2010-2011 <ithomashc@gmail.com>
-# Ruby Build System
+# Copyright (C) Thomas Chace 2011 <ithomashc@gmail.com>
+#
+# This file is part of Post.
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are
@@ -11,9 +12,6 @@
 #   copyright notice, this list of conditions and the following disclaimer
 #   in the documentation and/or other materials provided with the
 #   distribution.
-# * Neither the name of the  nor the names of its
-#   contributors may be used to endorse or promote products derived from
-#   this software without specific prior written permission.
 # 
 # THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
 # "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
@@ -26,54 +24,27 @@
 # THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-# 
 
 require("rubygems")
-require('rbconfig')
+require("fileutils")
+require("xmlsimple")
+require("net/http")
 
-$ruby = RbConfig::CONFIG["bindir"] + "/" + RbConfig::CONFIG["ruby_install_name"]
+load(File.join(File.expand_path(File.dirname(__FILE__)), "tools.rb"))
+load(File.join(File.expand_path(File.dirname(__FILE__)), "query.rb"))
 
-puts("Using: #{$ruby}")
-
-if $ruby =~ /rbx/
-    $ruby = "#{$ruby} -Xcompiler.no_rbc"
-end
-
-begin
-    unless (RUBY_ENGINE == "rbx") or (RUBY_ENGINE == "jruby")
-        puts("Your ruby VM is not supported.")
+def refresh()
+    if File.exists?("/tmp/post")
+        FileUtils.rm_r("/tmp/post")
     end
-rescue NameError
-    puts("Your ruby VM is not supported.")
-end
-
-begin
-    require("optparse")
-rescue
-    puts("Could not load optparse.")
-    puts("Testing: FAILED")
-end
-
-begin
-    require("xmlsimple")
-rescue
-    puts("Could not load xmlsimple.")
-    puts("Testing: FAILED")
-end
-
-unless (RbConfig::CONFIG["host_os"] =~ /linux/) or (RbConfig::CONFIG["host_os"] =~ /mac/)
-    puts("Host operating system not supported.")
-    puts("Testing: FAILED")
-end
-
-puts("Testing...")
-
-begin
-    load("src/lib/fetch.rb")
-    load("src/lib/erase.rb")
-    load("src/lib/refresh.rb")
-    load("src/lib/tools.rb")
-    load("src/lib/query.rb")
-rescue
-    puts("Testing: FAILED")
+    FileUtils.mkdir("/tmp/post")
+    FileUtils.cd("/tmp/post")
+    if File.exists?(Tools.getRoot() + "var/lib/post/available")
+        FileUtils.rm_r(Tools.getRoot() + "var/lib/post/available")
+    end
+    FileUtils.mkdir(Tools.getRoot() + "var/lib/post/available")
+    channel = Query.getCurrentChannel()
+    Tools.getUrl(channel['url'] + "/info.tar", "info.tar")
+    Tools.extract("info.tar")
+    FileUtils.cp(info, Tools.getRoot() + "var/lib/post/available") 
 end

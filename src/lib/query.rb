@@ -62,6 +62,9 @@ module Query
                 file.puts(installedFiles)
             end
         end
+        def removeInstalledPackage(package)
+            FileUtils.rm_r(Tools.getRoot() +"var/lib/post/installed/" + package)
+        end
         def getAvailable(package)
             if Tools.exists?("var/lib/post/available/" + package + ".xml")
                 return true

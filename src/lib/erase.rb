@@ -33,18 +33,19 @@ require("net/http")
 load(File.join(File.expand_path(File.dirname(__FILE__)), "tools.rb"))
 load(File.join(File.expand_path(File.dirname(__FILE__)), "query.rb"))
 
-class Fetch
-    def initialize(package)
-        queue = []
-        for dependency in Query.getReverseDependencies(package)
-            queue.push(dependency)
+class Erase
+    def buildQueue(package)
+        @queue = []
+        if Query.getInstalled(package)
+            for dependency in Query.getReverseDependencies(package)
+                @queue.push(dependency)
+            end
+            @queue.push(package)
         end
-        queue.push(package)
-        fetchPackages(queue)
     end
             
-    def removePackages(queue)
-        for package in queue
+    def removePackages()
+        for package in @queue
             removePackage(package)
         end
     end
