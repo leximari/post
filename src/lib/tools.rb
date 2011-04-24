@@ -48,18 +48,14 @@ module Tools
             file = getRoot() + filename
             return XmlSimple.xml_in(file, { 'KeyAttr' => 'name' })
         end
-        def exists?(file)
-            if File.exists?("/" + file)
-                return true
-            else
-                return false
-            end
-        end
         def mkdir(dir)
             FileUtils.mkdir_p("/" + dir)
         end
         def installFile(file, destination)
             FileUtils.cp(file, "/" + destination)
+        end
+        def removeFile(file)
+            FileUtils.rm("/" + file)
         end
         def getFile(url, file)
             if ENV['http_proxy']

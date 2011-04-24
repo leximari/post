@@ -25,45 +25,37 @@
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-require("optparse")
-load(File.join(File.expand_path(File.dirname(__FILE__)), "fetch.rb"))
+require("rubygems")
+require("fileutils")
+require("xmlsimple")
+require("net/http")
+
 load(File.join(File.expand_path(File.dirname(__FILE__)), "tools.rb"))
 load(File.join(File.expand_path(File.dirname(__FILE__)), "query.rb"))
 
-OPTIONS = {
-    :install  => "",
-}
-
-install = nil
-
-ARGV.options do |o|
-
-    o.set_summary_indent("    ")
-    o.banner =    "Usage: post [OPTIONS] [PACKAGES]"
-    o.version =   "Post 1.0"
-    o.define_head "Copyright (C) Thomas Chace 2011 <ithomashc@gmail.com>"
-    o.separator   "Released under the BSD license."
-    o.separator   "Remember to seperate package lists by commas, NOT spaces."
-    o.separator   "
-▄██████████████▄▐█▄▄▄▄█▌
-██████▌▄▌▄▐▐▌███▌▀▀██▀▀
-████▄█▌▄▌▄▐▐▌▀███▄▄█▌
-▄▄▄▄▄██████████████▀"
-    o.separator   ""
-
-    if (Process.uid == 0)
-        o.on("-i", "--fetch ", String,
-            "Install or update a package.")  { |v| OPTIONS[:install] = v; install = true}
+class Fetch
+    def initialize(package)
+        queue = []
+        for dependency in Query.getReverseDependencies(package)
+            queue.push(dependency)
+        end
+        queue.push(package)
+        fetchPackages(queue)
     end
-    
-    o.on_tail("-h", "--help",
-        "Show this help message.") { puts(o); exit() }
-    
-    o.on_tail("-v", "--version",
-        "Show version information.") { puts (o.version); exit() }
-    o.parse!
-
-    if (install)
-        fetch = Fetch.new(OPTIONS[:install])
+            
+    def removePackages(queue)
+        for package in queue
+            removePackage(package)
+        end
+    end
+        
+    def removePackage(package)
+        Tools.puts("Removing: " + package)
+        for file in Query.getFiles()
+            Tools.removeFile(file)
+        end
+        removeScript = Query.getRemoveScript()
+        eval(removeScript)
+        Query.removeInstalledPackage(package)
     end
 end
