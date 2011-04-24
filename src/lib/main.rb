@@ -30,10 +30,11 @@ load(File.join(File.expand_path(File.dirname(__FILE__)), "fetch.rb"))
 load(File.join(File.expand_path(File.dirname(__FILE__)), "erase.rb"))
 load(File.join(File.expand_path(File.dirname(__FILE__)), "tools.rb"))
 load(File.join(File.expand_path(File.dirname(__FILE__)), "query.rb"))
+load(File.join(File.expand_path(File.dirname(__FILE__)), "refresh.rb"))
 
 OPTIONS = {
-    :install  => "",
-    :remove  => "",
+    :install  => [],
+    :remove  => [],
 }
 
 install = nil
@@ -43,43 +44,40 @@ sync = nil
 ARGV.options do |o|
 
     o.set_summary_indent("    ")
-    o.banner =    "Usage: post [OPTIONS] [PACKAGES]"
-    o.version =   "Post 1.0"
+    o.banner =    "Usage: post [OPTIONS]=[PACKAGES]"
+    o.version =   "Post 1.0 Pre Alpha(2011.4)"
     o.define_head "Copyright (C) Thomas Chace 2011 <ithomashc@gmail.com>"
-    o.separator   "Released under the BSD license."
-    o.separator   "Remember to seperate package lists by commas, NOT spaces."
-    o.separator   "
-▄██████████████▄▐█▄▄▄▄█▌
-██████▌▄▌▄▐▐▌███▌▀▀██▀▀
-████▄█▌▄▌▄▐▐▌▀███▄▄█▌
-▄▄▄▄▄██████████████▀"
     o.separator   ""
 
     if (Process.uid == 0)
-        o.on("-i", "--fetch ", String,
+        o.on("-i", "--fetch=", Array,
             "Install or update a package.")  { |v| OPTIONS[:install] = v; install = true}
-        o.on("-r", "--erase ", String, 
+        o.on("-r", "--erase=", Array, 
             "Erase a package.") { |v| OPTIONS[:remove] = v; remove = true}
         o.on("-s", "--refresh", 
             "Refresh the package database") { |v| sync = true}
     end
     
-    o.on_tail("-h", "--help",
+    o.on("-h", "--help",
         "Show this help message.") { puts(o); exit() }
     
-    o.on_tail("-v", "--version",
+    o.on("-v", "--version",
         "Show version information.") { puts (o.version); exit() }
     o.parse!
 
-    if (install)
+    if (sync)
+        refresh()
+    elsif (install)
         fetch = Fetch.new()
-        fetch.buildQueue(OPTIONS[:install])
+        for package in OPTIONS[:install]
+            fetch.buildQueue(package)
+        end
         fetch.fetchPackages()
     elsif (remove)
         erase = Erase.new()
-        erase.buildQueue(OPTIONS[:remove])
+        for package in OPTIONS[:remove]
+            erase.buildQueue(package)
+        end
         erase.removePackages()
-    elsif (sync)
-        refresh()
     end
 end

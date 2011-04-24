@@ -41,12 +41,12 @@ end
 
 puts("Installing...")
 
-mkdir_p("#{destdir}/var/cache/post/")
-mkdir_p("#{destdir}/var/cache/post/available/")
-mkdir_p("#{destdir}/var/cache/post/installed/")
+mkdir_p("#{destdir}/var/lib/post/")
+mkdir_p("#{destdir}/var/lib/post/available/")
+mkdir_p("#{destdir}/var/lib/post/installed/")
 mkdir_p("#{destdir}/#{prefix}/bin/")
 mkdir_p("#{destdir}/#{prefix}/lib/post/")
-mkdir_p("#{destdir}/etc/post/repos.d/")
+mkdir_p("#{destdir}/etc/post/")
 
 system("install -m 755 src/bin/post.rb #{destdir}#{prefix}/bin/post")
 system("install -m 644 src/lib/fetch.rb #{destdir}#{prefix}/lib/post/fetch.rb")

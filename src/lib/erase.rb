@@ -35,12 +35,16 @@ load(File.join(File.expand_path(File.dirname(__FILE__)), "query.rb"))
 
 class Erase
     def buildQueue(package)
-        @queue = []
+        unless(@queue)
+            @queue = []
+        end
         if Query.getInstalled(package)
             for dependency in Query.getReverseDependencies(package)
                 @queue.push(dependency)
             end
             @queue.push(package)
+        else
+            puts("No package: '" + package + "' installed.")
         end
     end
             
@@ -51,7 +55,7 @@ class Erase
     end
         
     def removePackage(package)
-        Tools.puts("Removing: " + package)
+        puts("Removing: " + package)
         for file in Query.getFiles()
             Tools.removeFile(file)
         end

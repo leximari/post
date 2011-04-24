@@ -42,9 +42,9 @@ def refresh()
     if File.exists?(Tools.getRoot() + "var/lib/post/available")
         FileUtils.rm_r(Tools.getRoot() + "var/lib/post/available")
     end
-    FileUtils.mkdir(Tools.getRoot() + "var/lib/post/available")
+    FileUtils.mkdir_p(Tools.getRoot() + "var/lib/post/available")
     channel = Query.getCurrentChannel()
-    Tools.getUrl(channel['url'] + "/info.tar", "info.tar")
+    Tools.getFile(channel['url'].to_s + "/info.tar", "info.tar")
     Tools.extract("info.tar")
     FileUtils.cp(info, Tools.getRoot() + "var/lib/post/available") 
 end
