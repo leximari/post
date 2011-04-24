@@ -63,13 +63,14 @@ class Fetch
         Tools.puts("Installing: " + filename)
         installedFiles = Dir["**/*"].reject {|fn| File.directory?(fn) }
         installedDirectories = Dir["**/*"].reject {|fn| File.file?(fn) }
-        Query.addInstalledPackage('.packageData.xml', '.install.sh', '.remove.sh', installedFiles)
+        Query.addInstalledPackage('.packageData.xml', '.install', '.remove', installedFiles)
         for directory in installedDirectories
            Tools.mkdir(directory)
         end
         for file in installedFiles
             Tools.installFile(file, file)
-        end
-        Tools.run('./.install.sh')
+        endd
+        installScript = File.read(".install")
+        eval(installScript)
     end
 end

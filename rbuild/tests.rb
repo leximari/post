@@ -1,4 +1,3 @@
-#!/usr/bin/env ruby
 # Copyright (C) Thomas Chace 2010-2011 <ithomashc@gmail.com>
 # Ruby Build System
 #
@@ -12,6 +11,9 @@
 #   copyright notice, this list of conditions and the following disclaimer
 #   in the documentation and/or other materials provided with the
 #   distribution.
+# * Neither the name of the  nor the names of its
+#   contributors may be used to endorse or promote products derived from
+#   this software without specific prior written permission.
 # 
 # THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
 # "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
@@ -24,16 +26,52 @@
 # THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+# 
 
-load(File.join(File.expand_path(File.dirname(__FILE__)), "rbuild/tests.rb"))
+require("rubygems")
+require('rbconfig')
 
-puts("Setting variables...")
-unless ENV['PREFIX']
-    ENV['PREFIX'] = '/usr/'
+$ruby = RbConfig::CONFIG["bindir"] + "/" + RbConfig::CONFIG["ruby_install_name"]
+
+puts("Using: #{$ruby}")
+
+if $ruby =~ /rbx/
+    $ruby = "#{$ruby} -Xcompiler.no_rbc"
 end
 
-unless ENV['DESTDIR']
-    ENV['DESTDIR'] = '/'
+begin
+    unless (RUBY_ENGINE == "rbx") or (RUBY_ENGINE == "jruby")
+        puts("Your ruby VM is not supported.")
+    end
+rescue NameError
+    puts("Your ruby VM is not supported.")
 end
 
-load(File.join(File.expand_path(File.dirname(__FILE__)), "rbuild/install.rb"))
+begin
+    require("optparse")
+rescue
+    puts("Could not load optparse.")
+    puts("Testing: FAILED")
+end
+
+begin
+    require("xmlsimple")
+rescue
+    puts("Could not load xmlsimple.")
+    puts("Testing: FAILED")
+end
+
+unless (RbConfig::CONFIG["host_os"] =~ /linux/) or (RbConfig::CONFIG["host_os"] =~ /mac/)
+    puts("Host operating system not supported.")
+    puts("Testing: FAILED")
+end
+
+puts("Testing...")
+
+begin
+    load("src/lib/fetch.rb")
+    load("src/lib/tools.rb")
+    load("src/lib/query.rb")
+rescue
+    puts("Testing: FAILED")
+end

@@ -1,4 +1,3 @@
-#!/usr/bin/env ruby
 # Copyright (C) Thomas Chace 2010-2011 <ithomashc@gmail.com>
 # Ruby Build System
 #
@@ -25,15 +24,32 @@
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-load(File.join(File.expand_path(File.dirname(__FILE__)), "rbuild/tests.rb"))
+require('fileutils')
+include(FileUtils)
 
-puts("Setting variables...")
-unless ENV['PREFIX']
-    ENV['PREFIX'] = '/usr/'
+prefix = ENV["PREFIX"]
+destdir = ENV["DESTDIR"]
+
+puts("Configuring...")
+
+rm("src/bin/post.rb")
+
+File.open("src/bin/post.rb", "w") do |file|
+    file.puts("#!#{$ruby}")
+    file.puts("load('#{prefix}/lib/post/main.rb')")
 end
 
-unless ENV['DESTDIR']
-    ENV['DESTDIR'] = '/'
-end
+puts("Installing...")
 
-load(File.join(File.expand_path(File.dirname(__FILE__)), "rbuild/install.rb"))
+mkdir_p("#{destdir}/var/cache/post/")
+mkdir_p("#{destdir}/var/cache/post/available/")
+mkdir_p("#{destdir}/var/cache/post/installed/")
+mkdir_p("#{destdir}/#{prefix}/bin/")
+mkdir_p("#{destdir}/#{prefix}/lib/post/")
+mkdir_p("#{destdir}/etc/post/repos.d/")
+
+system("install -m 755 src/bin/post.rb #{destdir}#{prefix}/bin/post")
+system("install -m 644 src/lib/fetch.rb #{destdir}#{prefix}/lib/post/fetch.rb")
+system("install -m 644 src/lib/main.rb #{destdir}#{prefix}/lib/post/main.rb")
+system("install -m 644 src/lib/query.rb #{destdir}#{prefix}/lib/post/query.rb")
+system("install -m 644 src/lib/tools.rb #{destdir}#{prefix}/lib/post/tools.rb")

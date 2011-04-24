@@ -43,15 +43,34 @@ module Query
             url += "/" + package + "-" + getLatestVersion(package) + "-" + getPackageArch(package) + ".pst"
             return url
         end
+        def getFileList(package)
+            File.read(Tools.getRoot() + "var/lib/post/installed/" + package + "/files")
+        end
+        def getRemoveScript(package)
+            File.read(Tools.getRoot() + "var/lib/post/installed/" + package + "/remove")
+        end
+        def getInstallScript(package)
+            File.read(Tools.getRoot() + "var/lib/post/installed/" + package + "/install")
+        end
         def addInstalledPackage(packageData, installFile, removeFile, installedFiles)
             data = Tools.openXML(packageData)
             Tools.mkdir("var/lib/post/installed/" + data['name'][0])
             Tools.installFile(packageData, "var/lib/post/installed/" + data['name'][0] + "/packageData.xml")
             Tools.installFile(installFile, "var/lib/post/installed/" + data['name'][0] + "/install.sh")
             Tools.installFile(removeFile, "var/lib/post/installed/" + data['name'][0] + "/remove.sh")
+            File.open(Tools.getRoot() + "var/lib/post/installed/" + data['name'][0] + "/files", 'w') do |file|
+                file.puts(installedFiles)
+            end
         end
         def getAvailable(package)
             if Tools.exists?("var/lib/post/available/" + package + ".xml")
+                return true
+            else
+                return false
+            end
+        end
+        def getInstalled(package)
+            if File.exists?(Tools.getRoot() + "var/lib/post/installed/" + package + "/packageData.xml")
                 return true
             else
                 return false
@@ -62,8 +81,6 @@ module Query
                 data = Tools.openXML("var/lib/post/available/" + package + ".xml")
                 #architectureList = data['architecture']
                 return data['architecture'][0]
-            else
-                return nil
             end
         end
         def getLatestVersion(package)
