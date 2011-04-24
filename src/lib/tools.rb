@@ -38,9 +38,6 @@ module Tools
         def extract(filename)
             system("tar xf " + filename)
         end
-        def puts(string)
-            puts(string)
-        end
         def run(command)
             system(command)
         end
