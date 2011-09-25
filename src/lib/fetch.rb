@@ -47,9 +47,13 @@ class Fetch
             @queue = []
         end
         if Query.getAvailable(package)
-            #for dependency in Query.getDependencies(package)
-            #    @queue.push(dependency)
-            #end
+            for dependency in Query.getDependencies(package)
+                if Query.getAvailable(dependency)
+                    @queue.push(dependency)
+                else
+                    puts("No package: '" + dependency.to_s + "' available.")
+                end
+            end
             @queue.push(package)
         else
             puts("No package: '" + package + "' available.")
@@ -62,13 +66,14 @@ class Fetch
             filename = Query.getFileName(package)
             Tools.getFile(url, filename)
             installPackage(filename)
-            FileUtils.rm(filename)
+            #FileUtils.rm(filename)
         end
     end
         
     def installPackage(filename)
         Tools.extract(filename)
         puts("Installing: " + filename)
+        FileUtils.rm(filename)
         installedFiles = Dir["**/*"].reject {|fn| File.directory?(fn) }
         installedDirectories = Dir["**/*"].reject {|fn| File.file?(fn) }
         Query.addInstalledPackage("#{Dir.pwd()}/.packageData.xml", "#{Dir.pwd()}/.install", "#{Dir.pwd()}/.remove", installedFiles)

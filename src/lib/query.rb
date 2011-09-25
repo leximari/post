@@ -44,6 +44,10 @@ module Query
             url = "#{channelUrl}/#{getFileName(package)}"
             return url
         end
+        def getFiles(package)
+            files = open(Tools.getRoot() + "var/lib/post/installed/#{package}/files", 'r')
+            return files.readlines()
+        end
         def getFileName(package)
             return "#{package}-#{getLatestVersion(package)}-#{getPackageArch(package)}.pst"
         end
@@ -51,10 +55,10 @@ module Query
             File.read(Tools.getRoot() + "var/lib/post/installed/" + package + "/files")
         end
         def getRemoveScript(package)
-            File.read(Tools.getRoot() + "var/lib/post/installed/" + package + "/remove")
+            File.read(Tools.getRoot() + "var/lib/post/installed/" + package + "/remove.rb")
         end
         def getInstallScript(package)
-            File.read(Tools.getRoot() + "var/lib/post/installed/" + package + "/install")
+            File.read(Tools.getRoot() + "var/lib/post/installed/" + package + "/install.rb")
         end
         def addInstalledPackage(packageData, installFile, removeFile, installedFiles)
             data = Tools.openXML(packageData)
@@ -67,10 +71,9 @@ module Query
             end
         end
         def removeInstalledPackage(package)
-            FileUtils.rm_r(Tools.getRoot() +"var/lib/post/installed/" + package.to_s())
+            FileUtils.rm_r(Tools.getRoot() +"var/lib/post/installed/" + package)
         end
         def getAvailable(package)
-            package = package.to_s()
             if File.exists?(Tools.getRoot() + "var/lib/post/available/" + package + ".xml")
                 return true
             else
@@ -78,7 +81,7 @@ module Query
             end
         end
         def getInstalled(package)
-            if File.exists?(Tools.getRoot() + "var/lib/post/installed/" + package.to_s() + "/packageData.xml")
+            if File.exists?(Tools.getRoot() + "var/lib/post/installed/" + package + "/packageData.xml")
                 return true
             else
                 return false
@@ -105,7 +108,11 @@ module Query
             package = package.to_s()
             if (getAvailable(package))
                 data = Tools.openXML("var/lib/post/available/" + package + ".xml")
-                return data['dependencies']
+                if (data['dependencies'].to_s() == "")
+                    return []
+                else
+                    return data['dependencies']
+                end
             else
                 return []
             end

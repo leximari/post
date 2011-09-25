@@ -52,7 +52,7 @@ module Tools
             FileUtils.cp(file, "/" + destination)
         end
         def removeFile(file)
-            FileUtils.rm("/" + file)
+            FileUtils.rm_r(getRoot() + file)
         end
         def getFile(url, file)
             if ENV['http_proxy']

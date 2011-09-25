@@ -39,9 +39,9 @@ class Erase
             @queue = []
         end
         if Query.getInstalled(package)
-            for dependency in Query.getReverseDependencies(package)
-                @queue.push(dependency)
-            end
+            #for dependency in Query.getReverseDependencies(package)
+            #    @queue.push(dependency)
+            #end
             @queue.push(package)
         else
             puts("No package: '" + package + "' installed.")
@@ -56,10 +56,10 @@ class Erase
         
     def removePackage(package)
         puts("Removing: " + package)
-        for file in Query.getFiles()
-            Tools.removeFile(file)
+        for file in Query.getFiles(package)
+            Tools.removeFile(file.strip())
         end
-        removeScript = Query.getRemoveScript()
+        removeScript = Query.getRemoveScript(package)
         eval(removeScript)
         Query.removeInstalledPackage(package)
     end
