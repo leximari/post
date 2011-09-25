@@ -38,10 +38,16 @@ module Query
             return Tools.openXML("etc/post/channel.xml")
         end
         def getUrl(package)
+            package = package.to_s()
             channel = getCurrentChannel()
-            url = channel['url']
-            url += "/" + package + "-" + getLatestVersion(package) + "-" + getPackageArch(package) + ".pst"
+            channelUrl = channel['url'][0]
+            #return "http://thomaschace.dyndns.org/PostChannel/zile-2.3.9-i386.pst"
+            url = "#{channelUrl}/#{getFileName(package)}"
+            puts url
             return url
+        end
+        def getFileName(package)
+            return "#{package}-#{getLatestVersion(package)}-#{getPackageArch(package)}.pst"
         end
         def getFileList(package)
             File.read(Tools.getRoot() + "var/lib/post/installed/" + package + "/files")
@@ -56,16 +62,17 @@ module Query
             data = Tools.openXML(packageData)
             Tools.mkdir("var/lib/post/installed/" + data['name'][0])
             Tools.installFile(packageData, "var/lib/post/installed/" + data['name'][0] + "/packageData.xml")
-            Tools.installFile(installFile, "var/lib/post/installed/" + data['name'][0] + "/install.sh")
-            Tools.installFile(removeFile, "var/lib/post/installed/" + data['name'][0] + "/remove.sh")
+            Tools.installFile(installFile, "var/lib/post/installed/" + data['name'][0] + "/install.rb")
+            Tools.installFile(removeFile, "var/lib/post/installed/" + data['name'][0] + "/remove.rb")
             File.open(Tools.getRoot() + "var/lib/post/installed/" + data['name'][0] + "/files", 'w') do |file|
                 file.puts(installedFiles)
             end
         end
         def removeInstalledPackage(package)
-            FileUtils.rm_r(Tools.getRoot() +"var/lib/post/installed/" + package)
+            FileUtils.rm_r(Tools.getRoot() +"var/lib/post/installed/" + package.to_s())
         end
         def getAvailable(package)
+            package = package.to_s()
             if File.exists?(Tools.getRoot() + "var/lib/post/available/" + package + ".xml")
                 return true
             else
@@ -73,28 +80,31 @@ module Query
             end
         end
         def getInstalled(package)
-            if File.exists?(Tools.getRoot() + "var/lib/post/installed/" + package + "/packageData.xml")
+            if File.exists?(Tools.getRoot() + "var/lib/post/installed/" + package.to_s() + "/packageData.xml")
                 return true
             else
                 return false
             end
         end
         def getPackageArch(package)
+            package = package.to_s()
             if (getAvailable(package))
                 data = Tools.openXML("var/lib/post/available/" + package + ".xml")
                 #architectureList = data['architecture']
-                return data['architecture'][0]
+                return data['architecture'][0].to_s()
             end
         end
         def getLatestVersion(package)
+            package = package.to_s()
             if (getAvailable(package))
                 data = Tools.openXML("var/lib/post/available/" + package + ".xml")
-                return data['version'][0]
+                return data['version'][0].to_s
             else
                 return 0
             end
         end
         def getDependencies(package)
+            package = package.to_s()
             if (getAvailable(package))
                 data = Tools.openXML("var/lib/post/available/" + package + ".xml")
                 return data['dependencies']
