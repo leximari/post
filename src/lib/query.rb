@@ -74,6 +74,7 @@ module Query
             FileUtils.rm_r(Tools.getRoot() +"var/lib/post/installed/" + package)
         end
         def getAvailable(package)
+            package = package.to_s
             if File.exists?(Tools.getRoot() + "var/lib/post/available/" + package + ".xml")
                 return true
             else
@@ -105,13 +106,12 @@ module Query
             end
         end
         def getDependencies(package)
-            package = package.to_s()
             if (getAvailable(package))
                 data = Tools.openXML("var/lib/post/available/" + package + ".xml")
-                if (data['dependencies'].to_s() == "")
-                    return []
-                else
+                if (data['dependencies'] != nil)
                     return data['dependencies']
+                else
+                    return []
                 end
             else
                 return []
