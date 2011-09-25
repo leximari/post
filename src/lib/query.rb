@@ -41,9 +41,7 @@ module Query
             package = package.to_s()
             channel = getCurrentChannel()
             channelUrl = channel['url'][0]
-            #return "http://thomaschace.dyndns.org/PostChannel/zile-2.3.9-i386.pst"
             url = "#{channelUrl}/#{getFileName(package)}"
-            puts url
             return url
         end
         def getFileName(package)

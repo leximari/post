@@ -51,7 +51,6 @@ class Fetch
             #    @queue.push(dependency)
             #end
             @queue.push(package)
-            puts @queue
         else
             puts("No package: '" + package + "' available.")
         end
