@@ -55,7 +55,7 @@ ARGV.options do |o|
         o.on("-r", "--erase=", Array, 
             "Erase a package.") { |v| OPTIONS[:remove] = v; remove = true}
         o.on("-s", "--refresh", 
-            "Refresh the package database") { |v| sync = true}
+            "Refresh the package database") {sync = true}
     end
     
     o.on("-h", "--help",
