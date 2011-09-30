@@ -70,7 +70,6 @@ class Fetch
             #FileUtils.rm(filename)
         end
     end
-
     def installPackage(filename)
         Tools.extract(filename)
         puts("Installing: " + filename)
