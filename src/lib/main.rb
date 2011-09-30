@@ -45,7 +45,7 @@ ARGV.options do |o|
 
     o.set_summary_indent("    ")
     o.banner =    "Usage: post [OPTIONS]=[PACKAGES]"
-    o.version =   "Post 1.0 Pre Alpha(2011.4)"
+    o.version =   "Post 1.0 Pre Alpha(201109)"
     o.define_head "Copyright (C) Thomas Chace 2011 <ithomashc@gmail.com>"
     o.separator   ""
 

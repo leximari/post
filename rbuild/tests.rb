@@ -47,6 +47,8 @@ rescue NameError
     puts("Your ruby VM is not supported.")
 end
 
+puts("Testing...")
+
 begin
     require("optparse")
 rescue
@@ -66,8 +68,6 @@ unless (RbConfig::CONFIG["host_os"] =~ /linux/) or (RbConfig::CONFIG["host_os"] 
     puts("Testing: FAILED")
 end
 
-puts("Testing...")
-
 begin
     load("src/lib/fetch.rb")
     load("src/lib/erase.rb")
@@ -75,5 +75,6 @@ begin
     load("src/lib/tools.rb")
     load("src/lib/query.rb")
 rescue
+    puts("Count not load libraries.")
     puts("Testing: FAILED")
 end
