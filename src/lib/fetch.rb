@@ -5,14 +5,14 @@
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are
 # met:
-# 
+#
 # * Redistributions of source code must retain the above copyright
 #   notice, this list of conditions and the following disclaimer.
 # * Redistributions in binary form must reproduce the above
 #   copyright notice, this list of conditions and the following disclaimer
 #   in the documentation and/or other materials provided with the
 #   distribution.
-# 
+#
 # THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
 # "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
 # LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
@@ -40,25 +40,25 @@ class Fetch
         end
         FileUtils.mkdir("/tmp/post")
         FileUtils.cd("/tmp/post")
-    end
-          
-    def buildQueue(package)
+
         unless(@queue)
             @queue = []
         end
+    end
+    def buildQueue(package)
         if Query.getAvailable(package)
-            for dependency in Query.getDependencies(package)
-                if Query.getAvailable(dependency)
-                    @queue.push(dependency)
-                else
-                    puts("No package: '" + dependency.to_s + "' available.")
+            if Query.getLatestVersion(package) > Query.getInstalledVersion(package)
+                for dependency in Query.getDependencies(package)
+                    buildQueue(dependency)
                 end
+                @queue.push(package)
+            else
+                puts("Latest version of #{package} installed.")
             end
-            @queue.push(package)
         else
             puts("No package: '" + package + "' available.")
         end
-    end  
+    end
     def fetchPackages()
         for package in @queue
             package = package.to_s()
@@ -66,10 +66,11 @@ class Fetch
             filename = Query.getFileName(package)
             Tools.getFile(url, filename)
             installPackage(filename)
+            initialize()
             #FileUtils.rm(filename)
         end
     end
-        
+
     def installPackage(filename)
         Tools.extract(filename)
         puts("Installing: " + filename)
