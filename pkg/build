@@ -6,4 +6,4 @@ spec = YAML::load(file)
 
 FileUtils.cd("Post")
 ENV['DESTDIR'] = "../data/"
-system("ruby build.rb DESTDIR=../data/")
+system("env ruby build.rb")
