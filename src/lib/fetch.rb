@@ -76,7 +76,7 @@ class Fetch
         FileUtils.rm(filename)
         installedFiles = Dir["**/*"].reject {|fn| File.directory?(fn) }
         installedDirectories = Dir["**/*"].reject {|fn| File.file?(fn) }
-        Query.addInstalledPackage("#{Dir.pwd()}/.packageData.xml", "#{Dir.pwd()}/.install", "#{Dir.pwd()}/.remove", installedFiles)
+        Query.addInstalledPackage("#{Dir.pwd()}/.packageData", "#{Dir.pwd()}/.install", "#{Dir.pwd()}/.remove", installedFiles)
         for directory in installedDirectories
            Tools.mkdir(directory)
         end

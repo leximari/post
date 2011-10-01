@@ -27,21 +27,17 @@
 
 require("rubygems")
 require("fileutils")
-require("xmlsimple")
-require("net/http")
 
 load(File.join(File.expand_path(File.dirname(__FILE__)), "tools.rb"))
 
 module Query
     class << self
         def getCurrentChannel()
-            return Tools.openXML("etc/post/channel.xml")
+            return Tools.openYAML("etc/post/channel")
         end
         def getUrl(package)
-            package = package.to_s()
             channel = getCurrentChannel()
-            channelUrl = channel['url'][0]
-            url = "#{channelUrl}/#{getFileName(package)}"
+            url = "#{channel['url']}/#{getFileName(package)}"
             return url
         end
         def getFiles(package)
@@ -61,12 +57,13 @@ module Query
             File.read(Tools.getRoot() + "var/lib/post/installed/" + package + "/install.rb")
         end
         def addInstalledPackage(packageData, installFile, removeFile, installedFiles)
-            data = Tools.openXML(packageData)
-            Tools.mkdir("var/lib/post/installed/" + data['name'][0])
-            Tools.installFile(packageData, "var/lib/post/installed/" + data['name'][0] + "/packageData.xml")
-            Tools.installFile(installFile, "var/lib/post/installed/" + data['name'][0] + "/install.rb")
-            Tools.installFile(removeFile, "var/lib/post/installed/" + data['name'][0] + "/remove.rb")
-            File.open(Tools.getRoot() + "var/lib/post/installed/" + data['name'][0] + "/files", 'w') do |file|
+            data = Tools.openYAML(packageData)
+            Tools.mkdir("var/lib/post/installed/" + data['name'])
+            Tools.installFile(packageData, "var/lib/post/installed/" + data['name'] + "/packageData")
+            Tools.installFile(installFile, "var/lib/post/installed/" + data['name'] + "/install.rb")
+            Tools.installFile(removeFile, "var/lib/post/installed/" + data['name'] + "/remove.rb")
+            File.open(Tools.getRoot() + "var/lib/post/installed/" + data['name'] + "/files", 'w') do
+                |file|
                 file.puts(installedFiles)
             end
         end
@@ -74,49 +71,40 @@ module Query
             FileUtils.rm_r(Tools.getRoot() +"var/lib/post/installed/" + package)
         end
         def getAvailable(package)
-            package = package.to_s
-            if File.exists?(Tools.getRoot() + "var/lib/post/available/" + package + ".xml")
+            if File.exists?(Tools.getRoot() + "var/lib/post/available/" + package)
                 return true
-            else
-                return false
             end
         end
         def getInstalled(package)
-            if File.exists?(Tools.getRoot() + "var/lib/post/installed/" + package + "/packageData.xml")
+            if File.exists?(Tools.getRoot() + "var/lib/post/installed/" + package + "/packageData")
                 return true
-            else
-                return false
             end
         end
         def getPackageArch(package)
-            package = package.to_s()
             if (getAvailable(package))
-                data = Tools.openXML("var/lib/post/available/" + package + ".xml")
-                #architectureList = data['architecture']
-                return data['architecture'][0].to_s()
+                data = Tools.openYAML("var/lib/post/available/" + package)
+                return data['architecture']
             end
         end
         def getLatestVersion(package)
-            package = package.to_s()
             if (getAvailable(package))
-                data = Tools.openXML("var/lib/post/available/" + package + ".xml")
-                return data['version'][0]
+                data = Tools.openYAML("var/lib/post/available/" + package)
+                return data['version']
             else
                 return "0"
             end
         end
         def getInstalledVersion(package)
-            package = package.to_s()
             if (getInstalled(package))
-                data = Tools.openXML("var/lib/post/installed/" + package + "/packageData.xml")
-                return data['version'][0]
+                data = Tools.openYAML("var/lib/post/installed/" + package + "/packageData")
+                return data['version']
             else
                 return "0"
             end
         end
         def getDependencies(package)
             if (getAvailable(package))
-                data = Tools.openXML("var/lib/post/available/" + package + ".xml")
+                data = Tools.openYAML("var/lib/post/available/" + package)
                 if (data['dependencies'] != nil)
                     return data['dependencies']
                 else

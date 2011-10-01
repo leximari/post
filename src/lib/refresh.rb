@@ -5,14 +5,14 @@
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are
 # met:
-# 
+#
 # * Redistributions of source code must retain the above copyright
 #   notice, this list of conditions and the following disclaimer.
 # * Redistributions in binary form must reproduce the above
 #   copyright notice, this list of conditions and the following disclaimer
 #   in the documentation and/or other materials provided with the
 #   distribution.
-# 
+#
 # THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
 # "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
 # LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
@@ -44,7 +44,7 @@ def refresh()
     end
     FileUtils.mkdir_p(Tools.getRoot() + "var/lib/post/")
     channel = Query.getCurrentChannel()
-    Tools.getFile(channel['url'][0] + "/info.tar", "info.tar")
+    Tools.getFile(channel['url'] + "/info.tar", "info.tar")
     Tools.extract("info.tar")
-    FileUtils.cp_r("info", Tools.getRoot() + "var/lib/post/available") 
+    FileUtils.cp_r("info", Tools.getRoot() + "var/lib/post/available")
 end

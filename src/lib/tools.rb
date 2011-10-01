@@ -5,14 +5,14 @@
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are
 # met:
-# 
+#
 # * Redistributions of source code must retain the above copyright
 #   notice, this list of conditions and the following disclaimer.
 # * Redistributions in binary form must reproduce the above
 #   copyright notice, this list of conditions and the following disclaimer
 #   in the documentation and/or other materials provided with the
 #   distribution.
-# 
+#
 # THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
 # "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
 # LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
@@ -27,7 +27,7 @@
 
 require("rubygems")
 require("fileutils")
-require("xmlsimple")
+require("yaml")
 require("net/http")
 
 module Tools
@@ -45,11 +45,15 @@ module Tools
             file = getRoot() + filename
             return XmlSimple.xml_in(file, { 'KeyAttr' => 'name' })
         end
+        def openYAML(filename)
+            file = open(getRoot() + filename, 'r')
+            return YAML::load(file)
+        end
         def mkdir(dir)
             FileUtils.mkdir_p("/" + dir)
         end
         def installFile(file, destination)
-            FileUtils.cp(file, "/" + destination)
+            FileUtils.install(file, "/" + destination)
         end
         def removeFile(file)
             FileUtils.rm_r(getRoot() + file)
