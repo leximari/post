@@ -1,0 +1,13 @@
+maintainer: Thomas Chace <ithomashc@gmail.com>
+name: post
+version: 201109
+license: GPL
+architecture: i686
+conflicts: ~
+dependencies: ~
+url: http://github.com/thomashc/Post
+description:  A lightweightand feature rich package manager with a focus on speed and good design.
+source:
+- git://github.com/thomashc/Post.git
+build-dependencies:
+- ruby
