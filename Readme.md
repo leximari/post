@@ -6,17 +6,19 @@ Post is available under the BSD license.
 
 Post is a powerful package manager that focuses on clean design, efficiency, and simplicity.
 
-Post is supported running on the Rubinius(1.1+), but works well on Ruby 1.8 or 1.9.
+Post is supported running on the Rubinius(1.1+), but works well on Ruby 1.8+.
 
 ## Installing Post
 
         git clone git://github.com/thomashc/Post.git
         cd Post
-        sudo rbx build.rb
+        sudo rbx build.rb # For Rubinius
+        sudo ruby1.8 build.rb # For Ruby 1.8
+        sudo ruby1.9 build.rb # For Ruby 1.9
 
 ## Setuping The Test Repository
 
-        cp src/etc/post/channel /etc/post/channel
+        sudo cp src/etc/post/channel /etc/post/channel
 
 ## Testing The Installation
 
