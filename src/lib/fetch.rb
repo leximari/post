@@ -47,7 +47,7 @@ class Fetch
     end
     def buildQueue(package)
         if Query.getAvailable(package)
-            if Query.getLatestVersion(package) > Query.getInstalledVersion(package)
+            if Query.getLatestVersion(package).to_i() > Query.getInstalledVersion(package).to_i()
                 for dependency in Query.getDependencies(package)
                     buildQueue(dependency)
                 end
