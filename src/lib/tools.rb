@@ -41,10 +41,6 @@ module Tools
         def run(command)
             system(command)
         end
-        def openXML(filename)
-            file = getRoot() + filename
-            return XmlSimple.xml_in(file, { 'KeyAttr' => 'name' })
-        end
         def openYAML(filename)
             file = open(getRoot() + filename, 'r')
             return YAML::load(file)
