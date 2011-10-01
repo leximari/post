@@ -1,8 +1,8 @@
-# License
+## License
 
 Post is available under the BSD license.
 
-# What Is Post?
+## What Is Post?
 
 Post is a powerful package manager that focuses on clean design, efficiency, and simplicity.
 
