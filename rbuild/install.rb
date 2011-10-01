@@ -34,7 +34,10 @@ puts("Configuring...")
 
 if File.exists?("src/bin/post.rb")
     rm("src/bin/post.rb")
+    rm_r("src/bin/")
 end
+
+mkdir_p("src/bin")
 
 File.open("src/bin/post.rb", "w") do |file|
     file.puts("#!#{$ruby}")
