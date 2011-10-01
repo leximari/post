@@ -103,16 +103,14 @@ module Query
             end
         end
         def getDependencies(package)
+            dependencies = []
             if (getAvailable(package))
-                data = Tools.openYAML("var/lib/post/available/" + package)
-                if (data['dependencies'] != nil)
-                    return data['dependencies']
-                else
-                    return []
+                dependencies = Tools.openYAML("var/lib/post/available/#{package}")['dependencies']
+                if (dependencies == nil)
+                    dependencies = []
                 end
-            else
-                return []
             end
+            return dependencies
         end
     end
 end

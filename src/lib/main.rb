@@ -5,14 +5,14 @@
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are
 # met:
-# 
+#
 # * Redistributions of source code must retain the above copyright
 #   notice, this list of conditions and the following disclaimer.
 # * Redistributions in binary form must reproduce the above
 #   copyright notice, this list of conditions and the following disclaimer
 #   in the documentation and/or other materials provided with the
 #   distribution.
-# 
+#
 # THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
 # "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
 # LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
@@ -34,7 +34,7 @@ load(File.join(File.expand_path(File.dirname(__FILE__)), "refresh.rb"))
 
 OPTIONS = {
     :install  => [],
-    :remove  => [],
+    :remove   => [],
 }
 
 install = nil
@@ -42,42 +42,36 @@ remove = nil
 sync = nil
 
 ARGV.options do |o|
-
     o.set_summary_indent("    ")
-    o.banner =    "Usage: post [OPTIONS]=[PACKAGES]"
+    o.banner =    "Usage: post [OPTIONS] [PACKAGES]"
     o.version =   "Post 1.0 Pre Alpha(201109)"
     o.define_head "Copyright (C) Thomas Chace 2011 <ithomashc@gmail.com>"
-    o.separator   ""
 
     if (Process.uid == 0)
         o.on("-i", "--fetch=", Array,
             "Install or update a package.")  { |v| OPTIONS[:install] = v; install = true}
-        o.on("-r", "--erase=", Array, 
+        o.on("-r", "--erase=", Array,
             "Erase a package.") { |v| OPTIONS[:remove] = v; remove = true}
-        o.on("-s", "--refresh", 
-            "Refresh the package database") {sync = true}
+        o.on("-s", "--refresh", "Refresh the package database") {sync = true}
     end
-    
-    o.on("-h", "--help",
-        "Show this help message.") { puts(o); exit() }
-    
-    o.on("-v", "--version",
-        "Show version information.") { puts (o.version); exit() }
-    o.parse!
 
-    if (sync)
-        refresh()
-    elsif (install)
-        fetch = Fetch.new()
-        for package in OPTIONS[:install]
-            fetch.buildQueue(package)
-        end
-        fetch.fetchPackages()
-    elsif (remove)
-        erase = Erase.new()
-        for package in OPTIONS[:remove]
-            erase.buildQueue(package)
-        end
-        erase.removePackages()
+    o.on("-h", "--help", "Show this help message.") {puts(o)}
+    o.on("-v", "--version", "Show version information.") {puts(o.version)}
+    o.parse!
+end
+
+if (sync)
+    refresh()
+elsif (install)
+    fetch = Fetch.new()
+    for package in OPTIONS[:install]
+        fetch.buildQueue(package)
     end
+    fetch.fetchPackages()
+elsif (remove)
+    erase = Erase.new()
+    for package in OPTIONS[:remove]
+        erase.buildQueue(package)
+    end
+    erase.removePackages()
 end
