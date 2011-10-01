@@ -5,14 +5,14 @@
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are
 # met:
-# 
+#
 # * Redistributions of source code must retain the above copyright
 #   notice, this list of conditions and the following disclaimer.
 # * Redistributions in binary form must reproduce the above
 #   copyright notice, this list of conditions and the following disclaimer
 #   in the documentation and/or other materials provided with the
 #   distribution.
-# 
+#
 # THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
 # "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
 # LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
@@ -27,37 +27,33 @@
 
 require("rubygems")
 require("fileutils")
-require("xmlsimple")
 require("net/http")
 
 load(File.join(File.expand_path(File.dirname(__FILE__)), "tools.rb"))
 load(File.join(File.expand_path(File.dirname(__FILE__)), "query.rb"))
 
 class Erase
-    def buildQueue(package)
+    def initialize()
         unless(@queue)
             @queue = []
         end
+    end
+    def buildQueue(package)
         if Query.getInstalled(package)
-            #for dependency in Query.getReverseDependencies(package)
-            #    @queue.push(dependency)
-            #end
             @queue.push(package)
         else
             puts("No package: '" + package + "' installed.")
         end
     end
-            
     def removePackages()
         for package in @queue
             removePackage(package)
         end
     end
-        
     def removePackage(package)
         puts("Removing: " + package)
         for file in Query.getFiles(package)
-            Tools.removeFile(file.strip())
+            Tools.removeFile(file.delete("\n"))
         end
         removeScript = Query.getRemoveScript(package)
         eval(removeScript)

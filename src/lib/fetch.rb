@@ -61,13 +61,11 @@ class Fetch
     end
     def fetchPackages()
         for package in @queue
-            package = package.to_s()
             url = Query.getUrl(package)
             filename = Query.getFileName(package)
             Tools.getFile(url, filename)
             installPackage(filename)
             initialize()
-            #FileUtils.rm(filename)
         end
     end
     def installPackage(filename)
@@ -76,7 +74,8 @@ class Fetch
         FileUtils.rm(filename)
         installedFiles = Dir["**/*"].reject {|fn| File.directory?(fn) }
         installedDirectories = Dir["**/*"].reject {|fn| File.file?(fn) }
-        Query.addInstalledPackage("#{Dir.pwd()}/.packageData", "#{Dir.pwd()}/.install", "#{Dir.pwd()}/.remove", installedFiles)
+        Query.addInstalledPackage("#{Dir.pwd()}/.packageData", "#{Dir.pwd()}/.install",
+                                  "#{Dir.pwd()}/.remove", installedFiles)
         for directory in installedDirectories
            Tools.mkdir(directory)
         end
