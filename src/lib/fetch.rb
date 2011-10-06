@@ -44,15 +44,9 @@ class Fetch
         unless(@queue)
             @queue = []
         end
-        unless(@status)
-            @status = nil
-        end
     end
     def getQueue()
         @queue
-    end
-    def getStatus()
-        @status
     end
     def buildQueue(package)
         if Query.getAvailable(package)
@@ -61,12 +55,11 @@ class Fetch
                     buildQueue(dependency)
                 end
                 @queue.push(package)
-                @status = "Queue:      #{package} and dependencies identified."
             else
-                @status = "Status:     '" + package + "' is already installed and updated."
+                puts("Status:     '#{package}' already installed.")
             end
         else
-            @status = "Status:     '" + package + "' not available."
+            puts("Status:     '#{package}' not available.")
         end
     end
     def fetchQueue()
@@ -86,7 +79,7 @@ class Fetch
         end
     end
     def installPackage(filename)
-        @status = "Installed:  " + @queue.join(",")
+        puts("Status:     Installing '#{filename}'.")
         Tools.extract(filename)
         FileUtils.rm(filename)
         installedFiles = Dir["**/*"].reject {|file| File.directory?(file) }

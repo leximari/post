@@ -67,16 +67,12 @@ elsif (install)
     for package in OPTIONS[:install]
         fetch.buildQueue(package)
     end
-    puts(fetch.getStatus())
     fetch.fetchQueue()
     fetch.installQueue()
-    puts(fetch.getStatus())
 elsif (remove)
     erase = Erase.new()
     for package in OPTIONS[:remove]
         erase.buildQueue(package)
     end
-    puts(erase.getStatus())
     erase.removePackages()
-    puts(erase.getStatus())
 end

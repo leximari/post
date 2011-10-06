@@ -69,7 +69,7 @@ module Tools
                     res.read_body do |chunk|
                         f << chunk
                         size += chunk.size
-                        print "\rRetrieving: #{url} [%d%%]" % [(size * 100) / total]
+                        print("\rStatus:     Fetching #{url} [%d%%]" % [(size * 100) / total])
                     end
                 end
             end
