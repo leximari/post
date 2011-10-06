@@ -37,33 +37,24 @@ class Erase
         unless(@queue)
             @queue = []
         end
-        unless(@status)
-            @status = nil
-        end
     end
     def getQueue()
         @queue
     end
-    def getStatus()
-        @status
-    end
     def buildQueue(package)
         if Query.getInstalled(package)
             @queue.push(package)
-            @status = "Queue:      #{package} identified."
         else
-            @status = "Status:     '" + package + "' not installed."
+            puts("Status:     '#{package}' not installed.")
         end
     end
     def removePackages()
         for package in @queue
             removePackage(package)
         end
-        unless @queue == nil
-            @status = "Removing:   " + @queue.join(",")
-        end
     end
     def removePackage(package)
+        puts("Status:     Removing '#{package}'.")
         for file in Query.getFiles(package)
             Tools.removeFile(file.delete("\n"))
         end
