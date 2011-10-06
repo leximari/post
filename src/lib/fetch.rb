@@ -61,6 +61,7 @@ class Fetch
                     buildQueue(dependency)
                 end
                 @queue.push(package)
+                @status = "Queue:      #{package} and dependencies identified."
             else
                 @status = "Status:     '" + package + "' is already installed and updated."
             end
@@ -85,8 +86,8 @@ class Fetch
         end
     end
     def installPackage(filename)
+        @status = "Installed:  " + @queue.join(",")
         Tools.extract(filename)
-        puts("Installing: " + filename)
         FileUtils.rm(filename)
         installedFiles = Dir["**/*"].reject {|file| File.directory?(file) }
         installedDirectories = Dir["**/*"].reject {|file| File.file?(file) }
