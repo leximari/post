@@ -44,36 +44,52 @@ class Fetch
         unless(@queue)
             @queue = []
         end
+        unless(@status)
+            @status = nil
+        end
+    end
+    def getQueue()
+        @queue
+    end
+    def getStatus()
+        @status
     end
     def buildQueue(package)
         if Query.getAvailable(package)
-            if Query.getLatestVersion(package).to_i() > Query.getInstalledVersion(package).to_i()
+            if Query.getLatestVersion(package) > Query.getInstalledVersion(package)
                 for dependency in Query.getDependencies(package)
                     buildQueue(dependency)
                 end
                 @queue.push(package)
             else
-                puts("Latest version of #{package} installed.")
+                @status = "Status:     '" + package + "' is already installed and updated."
             end
         else
-            puts("No package: '" + package + "' available.")
+            @status = "Status:     '" + package + "' not available."
         end
     end
-    def fetchPackages()
+    def fetchQueue()
         for package in @queue
+            FileUtils.mkdir("/tmp/post/#{package}")
+            FileUtils.cd("/tmp/post/#{package}")
             url = Query.getUrl(package)
             filename = Query.getFileName(package)
             Tools.getFile(url, filename)
+        end
+    end
+    def installQueue()
+        for package in @queue
+            FileUtils.cd("/tmp/post/#{package}")
+            filename = Query.getFileName(package)
             installPackage(filename)
-            initialize()
         end
     end
     def installPackage(filename)
         Tools.extract(filename)
         puts("Installing: " + filename)
         FileUtils.rm(filename)
-        installedFiles = Dir["**/*"].reject {|fn| File.directory?(fn) }
-        installedDirectories = Dir["**/*"].reject {|fn| File.file?(fn) }
+        installedFiles = Dir["**/*"].reject {|file| File.directory?(file) }
+        installedDirectories = Dir["**/*"].reject {|file| File.file?(file) }
         Query.addInstalledPackage("#{Dir.pwd()}/.packageData", "#{Dir.pwd()}/.install",
                                   "#{Dir.pwd()}/.remove", installedFiles)
         for directory in installedDirectories
