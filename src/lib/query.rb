@@ -87,23 +87,30 @@ module Query
             end
         end
         def getLatestVersion(package)
-            if (getAvailable(package))
-                data = Tools.openYAML("var/lib/post/available/" + package)
-                return data['version']
-            else
+            unless (getAvailable(package))
                 return "0"
             end
+            data = Tools.openYAML("var/lib/post/available/" + package)
+            version = data['version']
+            if version.class == Array
+                version.sort!
+                version = version.last()
+            end
+            return version.to_s()
         end
         def getInstalledVersion(package)
-            if (getInstalled(package))
-                data = Tools.openYAML("var/lib/post/installed/" + package + "/packageData")
-                return data['version']
-            else
+            unless (getInstalled(package))
                 return "0"
             end
+            data = Tools.openYAML("var/lib/post/installed/" + package + "/packageData")
+            version = data['version']
+            if version.class() == Array
+                version.sort!
+                version = version.last()
+            end
+            return version.to_s()
         end
         def getDependencies(package)
-            dependencies = []
             if (getAvailable(package))
                 dependencies = Tools.openYAML("var/lib/post/available/#{package}")['dependencies']
                 if (dependencies == nil)
