@@ -64,20 +64,19 @@ if (sync)
     refresh()
 elsif (install)
     fetch = Fetch.new()
-    puts("Preparing:  Building Queue")
     for package in OPTIONS[:install]
         fetch.buildQueue(package)
     end
-    unless fetch.getStatus() == nil
-        puts(fetch.getStatus())
-    else
-        fetch.fetchQueue()
-        fetch.installQueue()
-    end
+    puts(fetch.getStatus())
+    fetch.fetchQueue()
+    fetch.installQueue()
+    puts(fetch.getStatus())
 elsif (remove)
     erase = Erase.new()
     for package in OPTIONS[:remove]
         erase.buildQueue(package)
     end
+    puts(erase.getStatus())
     erase.removePackages()
+    puts(erase.getStatus())
 end
