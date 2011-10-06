@@ -16,7 +16,7 @@ Post is supported running on the Rubinius(1.1+), but works well on Ruby 1.8+.
         sudo ruby1.8 build.rb # For Ruby 1.8
         sudo ruby1.9 build.rb # For Ruby 1.9
 
-## Setuping The Test Repository
+## Configuring The Test Repository
 
         sudo cp src/etc/post/channel /etc/post/channel
 
