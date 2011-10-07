@@ -30,16 +30,26 @@ require("fileutils")
 require("yaml")
 require("net/http")
 
+require(File.join(File.expand_path(File.dirname(__FILE__)), "query.rb"))
+
 module Tools
     class << self
+        def getUrl(package)
+            channel = getCurrentChannel()
+            url = "#{channel['url']}/#{getFileName(package)}"
+            return url
+        end
+        def getCurrentChannel()
+            return openYAML("etc/post/channel")
+        end
+        def getFileName(package)
+            return "#{package}-#{Query.getLatestVersion(package)}-#{Query.getPackageArch(package)}.pst"
+        end
         def getRoot()
             return "/"
         end
         def extract(filename)
             system("tar xf " + filename)
-        end
-        def run(command)
-            system(command)
         end
         def openYAML(filename)
             file = open(getRoot() + filename, 'r')
@@ -54,26 +64,35 @@ module Tools
         def removeFile(file)
             FileUtils.rm_r(getRoot() + file)
         end
+        def copyFile(file, destination)
+            FileUtils.cp_r(file, "/" + destination)
+        end
+        def printString(string, type = "normal")
+            if (type == "normal")
+                print("\r\e[0K#{string}")
+            elsif (type == "final")
+                print("\r\e[0K#{string}\n")
+            end
+        end
         def getFile(url, file)
+            http = Net::HTTP
             if ENV['http_proxy']
                 protocol, userinfo, host, port  = URI::split(ENV['http_proxy'])
                 proxy_user, proxy_pass = userinfo.split(/:/) if userinfo
                 http = Net::HTTP::Proxy(host, port, proxy_user, proxy_pass)
-            else
-                http = Net::HTTP
             end
-
             http.get_response(URI(url)) do |res|
-                size, total = 0, res.header['Content-Length'].to_i
-                File.open file, "w" do |f|
-                    res.read_body do |chunk|
+                size, total = 0, res.header['Content-Length'].to_i()
+                File.open(file, "w") do |f|
+                    res.read_body() do |chunk|
                         f << chunk
-                        size += chunk.size
-                        print("\rStatus:     Fetching #{url} [%d%%]" % [(size * 100) / total])
+                        size += chunk.size()
+                        percent = size * 100 / total
+                        Tools.printString("Status:    Fetching #{url} [#{percent}%]")
                     end
                 end
             end
-            puts("")
+
         end
     end
 end
