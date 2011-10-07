@@ -45,7 +45,7 @@ class Erase
         if Query.getInstalled(package)
             @queue.push(package)
         else
-            puts("Status:     '#{package}' not installed.")
+            Tools.printString("Status:     '#{package}' not installed.", type = "final")
         end
     end
     def removePackages()
@@ -54,12 +54,13 @@ class Erase
         end
     end
     def removePackage(package)
-        puts("Status:     Removing '#{package}'.")
+        Tools.printString("Status:     Removing '#{package}'.")
         for file in Query.getFiles(package)
             Tools.removeFile(file.delete("\n"))
         end
         removeScript = Query.getRemoveScript(package)
         eval(removeScript)
         Query.removeInstalledPackage(package)
+        Tools.printString("Status:     '#{package}' removed.", type = "final")
     end
 end

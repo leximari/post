@@ -28,85 +28,68 @@
 require("rubygems")
 require("fileutils")
 
-load(File.join(File.expand_path(File.dirname(__FILE__)), "tools.rb"))
+require(File.join(File.expand_path(File.dirname(__FILE__)), "tools.rb"))
 
 module Query
     class << self
-        def getCurrentChannel()
-            return Tools.openYAML("etc/post/channel")
-        end
-        def getUrl(package)
-            channel = getCurrentChannel()
-            url = "#{channel['url']}/#{getFileName(package)}"
-            return url
-        end
         def getFiles(package)
             files = open(Tools.getRoot() + "var/lib/post/installed/#{package}/files", 'r')
             return files.readlines()
         end
-        def getFileName(package)
-            return "#{package}-#{getLatestVersion(package)}-#{getPackageArch(package)}.pst"
-        end
         def getFileList(package)
-            File.read(Tools.getRoot() + "var/lib/post/installed/" + package + "/files")
+            File.read(Tools.getRoot() + "var/lib/post/installed/#{package}/files")
         end
         def getRemoveScript(package)
-            File.read(Tools.getRoot() + "var/lib/post/installed/" + package + "/remove.rb")
+            File.read(Tools.getRoot() + "var/lib/post/installed/#{package}/remove.rb")
         end
         def getInstallScript(package)
-            File.read(Tools.getRoot() + "var/lib/post/installed/" + package + "/install.rb")
+            File.read(Tools.getRoot() + "var/lib/post/installed/#{package}/install.rb")
         end
         def addInstalledPackage(packageData, installFile, removeFile, installedFiles)
             data = Tools.openYAML(packageData)
-            Tools.mkdir("var/lib/post/installed/" + data['name'])
-            Tools.installFile(packageData, "var/lib/post/installed/" + data['name'] + "/packageData")
-            Tools.installFile(installFile, "var/lib/post/installed/" + data['name'] + "/install.rb")
-            Tools.installFile(removeFile, "var/lib/post/installed/" + data['name'] + "/remove.rb")
-            File.open(Tools.getRoot() + "var/lib/post/installed/" + data['name'] + "/files", 'w') do
-                |file|
-                file.puts(installedFiles)
-            end
+            Tools.mkdir("var/lib/post/installed/#{data['name']}")
+            Tools.installFile(packageData, "var/lib/post/installed/#{data['name']}/packageData")
+            Tools.installFile(installFile, "var/lib/post/installed/#{data['name']}/install.rb")
+            Tools.installFile(removeFile, "var/lib/post/installed/#{data['name']}/remove.rb")
+            files = open("#{Tools.getRoot()}/var/lib/post/installed/#{data['name']}/files", 'w')
+            files.puts(installedFiles)
         end
         def removeInstalledPackage(package)
-            FileUtils.rm_r(Tools.getRoot() +"var/lib/post/installed/" + package)
+            FileUtils.rm_r("#{Tools.getRoot()}/var/lib/post/installed/#{package}")
         end
         def getAvailable(package)
-            if File.exists?(Tools.getRoot() + "var/lib/post/available/" + package)
+            if File.exists?("#{Tools.getRoot()}/var/lib/post/available/#{package}")
                 return true
             end
         end
         def getInstalled(package)
-            if File.exists?(Tools.getRoot() + "var/lib/post/installed/" + package + "/packageData")
+            if File.exists?("#{Tools.getRoot()}/var/lib/post/installed/#{package}/packageData")
                 return true
             end
         end
         def getPackageArch(package)
-            if (getAvailable(package))
-                data = Tools.openYAML("var/lib/post/available/" + package)
-                return data['architecture']
-            end
+                data = Tools.openYAML("var/lib/post/available/#{package}")
+                return data['architecture'].to_s()
         end
         def getLatestVersion(package)
-            unless (getAvailable(package))
-                return "0"
+            version = "0"
+            if (getAvailable(package))
+                data = Tools.openYAML("var/lib/post/available/#{package}")
+                version = data['version']
             end
-            data = Tools.openYAML("var/lib/post/available/" + package)
-            version = data['version']
             if version.class == Array
-                version.sort!
-                version = version.last()
+                version = version.sort().last()
             end
             return version.to_s()
         end
         def getInstalledVersion(package)
-            unless (getInstalled(package))
-                return "0"
+            version = "0"
+            if (getInstalled(package))
+                data = Tools.openYAML("var/lib/post/installed/#{package}/packageData")
+                version = data['version']
             end
-            data = Tools.openYAML("var/lib/post/installed/" + package + "/packageData")
-            version = data['version']
             if version.class() == Array
-                version.sort!
-                version = version.last()
+                version = version.sort().last()
             end
             return version.to_s()
         end
@@ -119,6 +102,7 @@ module Query
             end
             return dependencies
         end
+
     end
 end
 
