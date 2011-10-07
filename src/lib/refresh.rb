@@ -34,6 +34,7 @@ load(File.join(File.expand_path(File.dirname(__FILE__)), "tools.rb"))
 load(File.join(File.expand_path(File.dirname(__FILE__)), "query.rb"))
 
 def refresh()
+    Tools.printString("Status:     Syncing repository data.")
     if File.exists?("/tmp/post")
         Tools.removeFile("/tmp/post")
     end
@@ -47,5 +48,5 @@ def refresh()
     Tools.getFile("#{channel['url']}/info.tar", "info.tar")
     Tools.extract("info.tar")
     Tools.copyFile("info", "var/lib/post/available")
-    Tools.printString("Status:     Package information refreshed.", type = "final")
+    Tools.printString("Status:     Operation complete.", "final")
 end

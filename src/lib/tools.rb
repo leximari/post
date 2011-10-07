@@ -49,23 +49,23 @@ module Tools
             return "/"
         end
         def extract(filename)
-            system("tar xf " + filename)
+            system("tar xf #{filename}")
         end
         def openYAML(filename)
             file = open(getRoot() + filename, 'r')
             return YAML::load(file)
         end
-        def mkdir(dir)
-            FileUtils.mkdir_p("/" + dir)
+        def mkdir(directory)
+            FileUtils.mkdir_p("/#{directory}")
         end
         def installFile(file, destination)
-            FileUtils.install(file, "/" + destination)
+            FileUtils.install(file, "/#{destination}")
         end
         def removeFile(file)
             FileUtils.rm_r(getRoot() + file)
         end
         def copyFile(file, destination)
-            FileUtils.cp_r(file, "/" + destination)
+            FileUtils.cp_r(file, "/#{destination}")
         end
         def printString(string, type = "normal")
             if (type == "normal")
