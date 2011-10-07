@@ -45,9 +45,6 @@ class Fetch
             @queue = []
         end
     end
-    def getQueue()
-        @queue
-    end
     def buildQueue(package)
         if Query.getAvailable(package)
             if Query.getLatestVersion(package) > Query.getInstalledVersion(package)
@@ -56,10 +53,10 @@ class Fetch
                 end
                 @queue.push(package)
             else
-                Tools.printString("Status:     '#{package}' already installed.", type = "final")
+                Tools.printString("Status:     '#{package}' already installed.", "final")
             end
         else
-            Tools.printString("Status:     '#{package}' not available.", type = "final")
+            Tools.printString("Status:     '#{package}' not available.", "final")
         end
     end
     def fetchQueue()
@@ -75,11 +72,12 @@ class Fetch
         for package in @queue
             FileUtils.cd("/tmp/post/#{package}")
             filename = Tools.getFileName(package)
+            Tools.printString("Status:     Installing '#{filename}'.")
             installPackage(filename)
         end
+        Tools.printString("Status:     Operation complete.", "final")
     end
     def installPackage(filename)
-        Tools.printString("Status:     Installing '#{filename}'.")
         Tools.extract(filename)
         Tools.removeFile("#{Dir.pwd()}/#{filename}")
         installedFiles = Dir["**/*"].reject {|file| File.directory?(file) }
@@ -94,6 +92,5 @@ class Fetch
         end
         installScript = File.read(".install")
         eval(installScript)
-        Tools.printString("Status:     '#{filename}' installed.", type = "final")
     end
 end

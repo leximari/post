@@ -33,17 +33,17 @@ require(File.join(File.expand_path(File.dirname(__FILE__)), "tools.rb"))
 module Query
     class << self
         def getFiles(package)
-            files = open(Tools.getRoot() + "var/lib/post/installed/#{package}/files", 'r')
+            files = open("#{Tools.getRoot()}/var/lib/post/installed/#{package}/files", 'r')
             return files.readlines()
         end
         def getFileList(package)
-            File.read(Tools.getRoot() + "var/lib/post/installed/#{package}/files")
+            File.read("#{Tools.getRoot()}/var/lib/post/installed/#{package}/files")
         end
         def getRemoveScript(package)
-            File.read(Tools.getRoot() + "var/lib/post/installed/#{package}/remove.rb")
+            File.read("#{Tools.getRoot()}/var/lib/post/installed/#{package}/remove.rb")
         end
         def getInstallScript(package)
-            File.read(Tools.getRoot() + "var/lib/post/installed/#{package}/install.rb")
+            File.read("#{Tools.getRoot()}/var/lib/post/installed/#{package}/install.rb")
         end
         def addInstalledPackage(packageData, installFile, removeFile, installedFiles)
             data = Tools.openYAML(packageData)
