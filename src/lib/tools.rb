@@ -88,7 +88,7 @@ module Tools
                         f << chunk
                         size += chunk.size()
                         percent = size * 100 / total
-                        Tools.printString("Status:    Fetching #{url} [#{percent}%]")
+                        Tools.printString("Status:     #{url} [#{percent}%]")
                     end
                 end
             end
