@@ -67,8 +67,15 @@ elsif (install)
     for package in OPTIONS[:install]
         fetch.buildQueue(package)
     end
-    fetch.fetchQueue()
-    fetch.installQueue()
+    conflict = false
+    for package in fetch.getQueue()
+        if(fetch.checkConflicts(package))
+            conflict = true
+        end
+    end
+    unless (conflict)
+        fetch.doInstall()
+    end
 elsif (remove)
     erase = Erase.new()
     for package in OPTIONS[:remove]
