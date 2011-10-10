@@ -67,9 +67,17 @@ module Query
                 return true
             end
         end
+        def upgradeAvailable(package)
+            if (getAvailable(package)) and(getLatestVersion(package) > getInstalledVersion(package))
+                return true
+            else
+                return false
+                Tools.printString("Status:     '#{package}' is installed or not available.", "final")
+            end
+        end
         def getPackageArch(package)
-                data = Tools.openYAML("var/lib/post/available/#{package}")
-                return data['architecture'].to_s()
+            data = Tools.openYAML("var/lib/post/available/#{package}")
+            return data['architecture'].to_s()
         end
         def getLatestVersion(package)
             version = "0"
@@ -93,16 +101,20 @@ module Query
             end
             return version.to_s()
         end
+        def getConflicts(package)
+            conflicts = Tools.openYAML("var/lib/post/available/#{package}")['conflicts']
+            if (conflicts == nil)
+                conflicts = []
+            end
+            return conflicts
+        end
         def getDependencies(package)
-            if (getAvailable(package))
-                dependencies = Tools.openYAML("var/lib/post/available/#{package}")['dependencies']
-                if (dependencies == nil)
-                    dependencies = []
-                end
+            dependencies = Tools.openYAML("var/lib/post/available/#{package}")['dependencies']
+            if (dependencies == nil)
+                dependencies = []
             end
             return dependencies
         end
-
     end
 end
 

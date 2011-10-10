@@ -45,18 +45,32 @@ class Fetch
             @queue = []
         end
     end
+    def getQueue()
+        @queue
+    end
+    def doInstall()
+        fetchQueue()
+        installQueue()
+    end
     def buildQueue(package)
-        if Query.getAvailable(package)
-            if Query.getLatestVersion(package) > Query.getInstalledVersion(package)
-                for dependency in Query.getDependencies(package)
-                    buildQueue(dependency)
-                end
-                @queue.push(package)
-            else
-                Tools.printString("Status:     '#{package}' already installed.", "final")
+        buildDependencies(package)
+    end
+    def checkConflicts(package)
+        conflict = false
+        for conflict in Query.getConflicts(package)
+            if @queue.include?(conflict)
+                Tools.printString("Error:      '#{conflict} conflicts with '#{package}'", "final")
+                conflict = true
             end
-        else
-            Tools.printString("Status:     '#{package}' not available.", "final")
+        end
+        return conflict
+    end
+    def buildDependencies(package)
+        if (Query.upgradeAvailable(package))
+            for dependency in Query.getDependencies(package)
+                buildQueue(dependency)
+            end
+            @queue.push(package)
         end
     end
     def fetchQueue()
@@ -89,6 +103,9 @@ class Fetch
         end
         for file in installedFiles
             Tools.installFile(file, file)
+            if file.include?("/bin/")
+                system("chmod +x #{Tools.getRoot()}/#{file}")
+            end
         end
         installScript = File.read(".install")
         eval(installScript)
