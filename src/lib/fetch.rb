@@ -26,19 +26,10 @@ class Fetch
         unless(@queue)
             @queue = []
         end
+        @download = ""
     end
     def getQueue()
         @queue
-    end
-    def checkConflicts(package)
-        packageConflict = false
-        for conflictingPackage in Query.getConflicts(package)
-            if @queue.include?(conflictingPackage)
-                Tools.log("Error:      '#{conflictingPackage} conflicts with '#{package}'", "final")
-                packageConflict = true
-            end
-        end
-        return packageConflict
     end
     def buildQueue(package)
         if (Query.upgradeAvailable(package))
@@ -51,6 +42,13 @@ class Fetch
         end
     end
     def fetchPackage(package, progress = true)
+        if progress == false
+            @download += "Fetching:    #{Tools.getUrl(package)} [100.00%]\n"
+        end
+        if progress == true
+            puts @download
+            @download = ""
+        end
         FileUtils.mkdir("/tmp/post/#{package}")
         url = Tools.getUrl(package)
         filename = Tools.getFileName(package)
