@@ -69,12 +69,11 @@ if (install)
         download = Thread.new {
             thread = Thread.current()
             thread[:progress] = false
-        for package in packageQueue
+            for package in packageQueue
                 fetch.fetchPackage(package, thread[:progress])
             end
         }
-        prompt = "Queue:       #{packageQueue.join(" ")}"
-        puts prompt
+        puts "Queue:       #{packageQueue.join(" ")}"
         print "Confirm:     [y/n] "
         if gets().include?("y")
             download[:progress] = true

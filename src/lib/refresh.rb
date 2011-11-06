@@ -16,7 +16,6 @@
 require("fileutils")
 
 load(File.join(File.expand_path(File.dirname(__FILE__)), "tools.rb"))
-load(File.join(File.expand_path(File.dirname(__FILE__)), "query.rb"))
 
 def refresh()
     if File.exists?("/tmp/post")

@@ -82,7 +82,9 @@ module Tools
                 savedFile.close()
             end
             if (progress)
-                print("\r\e Fetching:    #{url} [%.2f%%]\r\e " % thread[:progress]) until thread.join(1)
+                until thread.join(1)
+                    print("\r\e Fetching:    #{url} [%.2f%%]\r\e " % thread[:progress])
+                end
                 Tools.log("Fetching:    #{url} [100.00%]")
             end
             thread.join()
