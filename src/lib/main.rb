@@ -1,39 +1,32 @@
 # Copyright (C) Thomas Chace 2011 <ithomashc@gmail.com>
 # This file is part of Post.
-# Redistribution and use in source and binary forms, with or without
-# modification, are permitted provided that the following conditions are
-# met:
-# * Redistributions of source code must retain the above copyright
-#   notice, this list of conditions and the following disclaimer.
-# * Redistributions in binary form must reproduce the above
-#   copyright notice, this list of conditions and the following disclaimer
-#   in the documentation and/or other materials provided with the
-#   distribution.
-# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
-# "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
-# LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-# A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
-# OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-# SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
-# LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-# DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
-# THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-# (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
-# OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+# Post is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Lesser General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+
+# Post is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Lesser General Public License for more details.
+
+# You should have received a copy of the GNU Lesser General Public License
+# along with Post.  If not, see <http://www.gnu.org/licenses/>.
 
 require("optparse")
 
 libraries = [
     File.join(File.expand_path(File.dirname(__FILE__)), "fetch.rb"),
     File.join(File.expand_path(File.dirname(__FILE__)), "erase.rb"),
-    File.join(File.expand_path(File.dirname(__FILE__)), "tools.rb"),
-    File.join(File.expand_path(File.dirname(__FILE__)), "query.rb"),
     File.join(File.expand_path(File.dirname(__FILE__)), "refresh.rb"),
 ]
 
 loadLibraries = Thread.new {
     for library in libraries
         load(library)
+    end
+    if (Process.uid == 0)
+        refresh()
     end
 }
 
@@ -44,7 +37,6 @@ OPTIONS = {
 
 install = nil
 remove = nil
-sync = nil
 
 ARGV.options do |o|
     o.set_summary_indent("    ")
@@ -57,19 +49,16 @@ ARGV.options do |o|
             "Install or update a package.")  { |v| OPTIONS[:install] = v; install = true}
         o.on("-r", "--erase=", Array,
             "Erase a package.") { |v| OPTIONS[:remove] = v; remove = true}
-        o.on("-s", "--refresh", "Refresh the package database") {sync = true}
     end
 
     o.on("-h", "--help", "Show this help message.") {puts(o)}
-    o.on("-v", "--version", "Show version information.") {puts(o.version)}
+    o.on("-v", "--version", "Show version information.") {puts(o.version())}
     o.parse!
 end
 
 loadLibraries.join()
 
-if (sync)
-    refresh()
-elsif (install)
+if (install)
     fetch = Fetch.new()
     for package in OPTIONS[:install]
         fetch.buildQueue(package)
@@ -80,15 +69,20 @@ elsif (install)
             conflict = true
         end
     end
-    unless (conflict)
-        packageList = "Queue:       "
-        for package in fetch.getQueue()
-            packageList += "#{package} "
-        end
-        puts packageList
+    unless (conflict) or (fetch.getQueue().empty?)
+        download = Thread.new {
+            thread = Thread.current()
+            thread[:progress] = false
+            for package in fetch.getQueue
+                fetch.fetchPackage(package, thread[:progress])
+            end
+        }
+        prompt = "Queue:       #{fetch.getQueue().join(" ")}"
+        puts prompt
         print "Confirm:     [y/n] "
         if gets().include?("y")
-            fetch.fetchQueue()
+            download[:progress] = true
+            download.join()
             fetch.installQueue()
         end
     end
