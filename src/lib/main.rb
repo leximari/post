@@ -81,8 +81,16 @@ elsif (install)
         end
     end
     unless (conflict)
-        fetch.fetchQueue()
-        fetch.installQueue()
+        packageList = "Queue:       "
+        for package in fetch.getQueue()
+            packageList += "#{package} "
+        end
+        puts packageList
+        print "Confirm:     [y/n] "
+        if gets().include?("y")
+            fetch.fetchQueue()
+            fetch.installQueue()
+        end
     end
 elsif (remove)
     erase = Erase.new()
