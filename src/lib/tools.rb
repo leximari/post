@@ -25,10 +25,9 @@
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-require("rubygems")
-require("fileutils")
 require("yaml")
 require("net/http")
+require("uri")
 
 require(File.join(File.expand_path(File.dirname(__FILE__)), "query.rb"))
 
@@ -67,32 +66,28 @@ module Tools
         def copyFile(file, destination)
             FileUtils.cp_r(file, "/#{destination}")
         end
-        def printString(string, type = "normal")
-            if (type == "normal")
-                print("\r\e[0K#{string}")
-            elsif (type == "final")
-                print("\r\e[0K#{string}\n")
-            end
+        def log(string)
+            File.open("#{Tools.getRoot()}/var/log/post.log", 'a+') {|f| f.puts(string)}
+            print("\r\e[0K#{string}\n")
         end
         def getFile(url, file)
-            http = Net::HTTP
-            if ENV['http_proxy']
-                protocol, userinfo, host, port  = URI::split(ENV['http_proxy'])
-                proxy_user, proxy_pass = userinfo.split(/:/) if userinfo
-                http = Net::HTTP::Proxy(host, port, proxy_user, proxy_pass)
-            end
-            http.get_response(URI(url)) do |res|
-                size, total = 0, res.header['Content-Length'].to_i()
-                File.open(file, "w") do |f|
-                    res.read_body() do |chunk|
-                        f << chunk
-                        size += chunk.size()
-                        percent = size * 100 / total
-                        Tools.printString("Status:     #{url} [#{percent}%]")
+            thread = Thread.new do
+                thread = Thread.current
+                url = URI.parse(url)
+                body = File.open("#{file}", 'w')
+
+                Net::HTTP.new(url.host, url.port).request_get(url.path) do |response|
+                    thread[:length] = response['Content-Length'].to_i()
+                    response.read_body do |fragment|
+                        body << fragment
+                        thread[:done] = (thread[:done] || 0) + fragment.length
+                        thread[:progress] = thread[:done].quo(thread[:length]) * 100
                     end
                 end
+                body.close()
             end
-
+            print("\r\e Fetching:    #{url} [%.2f%%]" % thread[:progress].to_f) until thread.join(1)
+            Tools.log("Fetching:    #{url} [100%]")
         end
     end
 end

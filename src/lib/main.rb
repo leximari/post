@@ -1,18 +1,14 @@
 # Copyright (C) Thomas Chace 2011 <ithomashc@gmail.com>
-#
 # This file is part of Post.
-#
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are
 # met:
-#
 # * Redistributions of source code must retain the above copyright
 #   notice, this list of conditions and the following disclaimer.
 # * Redistributions in binary form must reproduce the above
 #   copyright notice, this list of conditions and the following disclaimer
 #   in the documentation and/or other materials provided with the
 #   distribution.
-#
 # THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
 # "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
 # LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
@@ -26,11 +22,20 @@
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 require("optparse")
-load(File.join(File.expand_path(File.dirname(__FILE__)), "fetch.rb"))
-load(File.join(File.expand_path(File.dirname(__FILE__)), "erase.rb"))
-load(File.join(File.expand_path(File.dirname(__FILE__)), "tools.rb"))
-load(File.join(File.expand_path(File.dirname(__FILE__)), "query.rb"))
-load(File.join(File.expand_path(File.dirname(__FILE__)), "refresh.rb"))
+
+libraries = [
+    File.join(File.expand_path(File.dirname(__FILE__)), "fetch.rb"),
+    File.join(File.expand_path(File.dirname(__FILE__)), "erase.rb"),
+    File.join(File.expand_path(File.dirname(__FILE__)), "tools.rb"),
+    File.join(File.expand_path(File.dirname(__FILE__)), "query.rb"),
+    File.join(File.expand_path(File.dirname(__FILE__)), "refresh.rb"),
+]
+
+loadLibraries = Thread.new {
+    for library in libraries
+        load(library)
+    end
+}
 
 OPTIONS = {
     :install  => [],
@@ -44,7 +49,7 @@ sync = nil
 ARGV.options do |o|
     o.set_summary_indent("    ")
     o.banner =    "Usage: post [OPTIONS] [PACKAGES]"
-    o.version =   "Post 1.0 Pre Alpha(201109)"
+    o.version =   "Post 1.0 Pre Alpha(2011.11)"
     o.define_head "Copyright (C) Thomas Chace 2011 <ithomashc@gmail.com>"
 
     if (Process.uid == 0)
@@ -60,6 +65,8 @@ ARGV.options do |o|
     o.parse!
 end
 
+loadLibraries.join()
+
 if (sync)
     refresh()
 elsif (install)
@@ -74,7 +81,8 @@ elsif (install)
         end
     end
     unless (conflict)
-        fetch.doInstall()
+        fetch.fetchQueue()
+        fetch.installQueue()
     end
 elsif (remove)
     erase = Erase.new()

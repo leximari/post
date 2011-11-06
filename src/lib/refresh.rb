@@ -25,16 +25,13 @@
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-require("rubygems")
 require("fileutils")
-require("xmlsimple")
-require("net/http")
 
 load(File.join(File.expand_path(File.dirname(__FILE__)), "tools.rb"))
 load(File.join(File.expand_path(File.dirname(__FILE__)), "query.rb"))
 
 def refresh()
-    Tools.printString("Status:     Syncing repository data.")
+    Tools.log("Syncing:     Repository data.")
     if File.exists?("/tmp/post")
         Tools.removeFile("/tmp/post")
     end
@@ -48,5 +45,4 @@ def refresh()
     Tools.getFile("#{channel['url']}/info.tar", "info.tar")
     Tools.extract("info.tar")
     Tools.copyFile("info", "var/lib/post/available")
-    Tools.printString("Status:     Operation complete.", "final")
 end

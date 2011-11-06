@@ -25,11 +25,6 @@
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-require("rubygems")
-require("fileutils")
-require("xmlsimple")
-require("net/http")
-
 load(File.join(File.expand_path(File.dirname(__FILE__)), "tools.rb"))
 load(File.join(File.expand_path(File.dirname(__FILE__)), "query.rb"))
 
@@ -40,7 +35,6 @@ class Fetch
         end
         FileUtils.mkdir("/tmp/post")
         FileUtils.cd("/tmp/post")
-
         unless(@queue)
             @queue = []
         end
@@ -48,24 +42,17 @@ class Fetch
     def getQueue()
         @queue
     end
-    def doInstall()
-        fetchQueue()
-        installQueue()
-    end
-    def buildQueue(package)
-        buildDependencies(package)
-    end
     def checkConflicts(package)
-        conflict = false
-        for conflict in Query.getConflicts(package)
-            if @queue.include?(conflict)
-                Tools.printString("Error:      '#{conflict} conflicts with '#{package}'", "final")
-                conflict = true
+        packageConflict = false
+        for conflictingPackage in Query.getConflicts(package)
+            if @queue.include?(conflictingPackage)
+                Tools.log("Error:      '#{conflictingPackage} conflicts with '#{package}'", "final")
+                packageConflict = true
             end
         end
-        return conflict
+        return packageConflict
     end
-    def buildDependencies(package)
+    def buildQueue(package)
         if (Query.upgradeAvailable(package))
             for dependency in Query.getDependencies(package)
                 buildQueue(dependency)
@@ -76,20 +63,18 @@ class Fetch
     def fetchQueue()
         for package in @queue
             FileUtils.mkdir("/tmp/post/#{package}")
-            FileUtils.cd("/tmp/post/#{package}")
             url = Tools.getUrl(package)
             filename = Tools.getFileName(package)
-            Tools.getFile(url, filename)
+            Tools.getFile(url, "/tmp/post/#{package}/#{filename}")
         end
     end
     def installQueue()
         for package in @queue
             FileUtils.cd("/tmp/post/#{package}")
             filename = Tools.getFileName(package)
-            Tools.printString("Status:     Installing '#{filename}'.")
+            Tools.log("Installing:  '#{filename}'.")
             installPackage(filename)
         end
-        Tools.printString("Status:     Operation complete.", "final")
     end
     def installPackage(filename)
         Tools.extract(filename)
