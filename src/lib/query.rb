@@ -25,27 +25,22 @@ module Query
             File.read("#{Tools.getRoot()}/var/lib/post/installed/#{package}/files")
         end
         def getRemoveScript(package)
-            File.read("#{Tools.getRoot()}/var/lib/post/installed/#{package}/remove.rb")
+            File.read("#{Tools.getRoot()}/var/lib/post/installed/#{package}/remove")
         end
         def getInstallScript(package)
-            File.read("#{Tools.getRoot()}/var/lib/post/installed/#{package}/install.rb")
+            File.read("#{Tools.getRoot()}/var/lib/post/installed/#{package}/install")
         end
         def addInstalledPackage(packageData, installFile, removeFile, installedFiles)
             data = Tools.openYAML(packageData)
             Tools.mkdir("var/lib/post/installed/#{data['name']}")
             Tools.installFile(packageData, "var/lib/post/installed/#{data['name']}/packageData")
-            Tools.installFile(installFile, "var/lib/post/installed/#{data['name']}/install.rb")
-            Tools.installFile(removeFile, "var/lib/post/installed/#{data['name']}/remove.rb")
+            Tools.installFile(installFile, "var/lib/post/installed/#{data['name']}/install")
+            Tools.installFile(removeFile, "var/lib/post/installed/#{data['name']}/remove")
             files = open("#{Tools.getRoot()}/var/lib/post/installed/#{data['name']}/files", 'w')
             files.puts(installedFiles)
         end
         def removeInstalledPackage(package)
             FileUtils.rm_r("#{Tools.getRoot()}/var/lib/post/installed/#{package}")
-        end
-        def getAvailable(package)
-            if File.exists?("#{Tools.getRoot()}/var/lib/post/available/#{package}")
-                return true
-            end
         end
         def getInstalled(package)
             if File.exists?("#{Tools.getRoot()}/var/lib/post/installed/#{package}/packageData")
@@ -53,11 +48,9 @@ module Query
             end
         end
         def upgradeAvailable(package)
-            if (getAvailable(package)) and(getLatestVersion(package) > getInstalledVersion(package))
+            available = File.exists?("#{Tools.getRoot()}/var/lib/post/available/#{package}")
+            if (available) and (getLatestVersion(package) > getInstalledVersion(package))
                 return true
-            else
-                return false
-                Tools.printString("Status:     '#{package}' is installed or not available.", "final")
             end
         end
         def getPackageArch(package)
@@ -66,7 +59,8 @@ module Query
         end
         def getLatestVersion(package)
             version = "0"
-            if (getAvailable(package))
+            available = File.exists?("#{Tools.getRoot()}/var/lib/post/available/#{package}")
+            if (available)
                 data = Tools.openYAML("var/lib/post/available/#{package}")
                 version = data['version']
             end
