@@ -25,10 +25,6 @@
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-require("rubygems")
-require("fileutils")
-require("net/http")
-
 load(File.join(File.expand_path(File.dirname(__FILE__)), "tools.rb"))
 load(File.join(File.expand_path(File.dirname(__FILE__)), "query.rb"))
 
@@ -42,15 +38,14 @@ class Erase
         if Query.getInstalled(package)
             @queue.push(package)
         else
-            Tools.printString("Status:     '#{package}' not installed.", "final")
+            Tools.log("Error:       '#{package}' not installed.")
         end
     end
     def removePackages()
         for package in @queue
             removePackage(package)
-            Tools.printString("Status:     Removing '#{package}'.")
+            Tools.log("Removing:   '#{package}'.")
         end
-        Tools.printString("Status:     Operation Complete.", "final")
     end
     def removePackage(package)
         for file in Query.getFiles(package)
