@@ -63,21 +63,17 @@ if (install)
     for package in OPTIONS[:install]
         fetch.buildQueue(package)
     end
-    conflict = false
-    for package in fetch.getQueue()
-        if(fetch.checkConflicts(package))
-            conflict = true
-        end
-    end
-    unless (conflict) or (fetch.getQueue().empty?)
+    packageQueue = fetch.getQueue()
+
+    unless (packageQueue.empty?)
         download = Thread.new {
             thread = Thread.current()
             thread[:progress] = false
-            for package in fetch.getQueue
+        for package in packageQueue
                 fetch.fetchPackage(package, thread[:progress])
             end
         }
-        prompt = "Queue:       #{fetch.getQueue().join(" ")}"
+        prompt = "Queue:       #{packageQueue.join(" ")}"
         puts prompt
         print "Confirm:     [y/n] "
         if gets().include?("y")
