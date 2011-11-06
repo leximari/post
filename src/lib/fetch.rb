@@ -57,7 +57,9 @@ class Fetch
             for dependency in Query.getDependencies(package)
                 buildQueue(dependency)
             end
-            @queue.push(package)
+            unless @queue.include?(package)
+                @queue.push(package)
+            end
         end
     end
     def fetchQueue()
