@@ -66,9 +66,13 @@ module Tools
         def copyFile(file, destination)
             FileUtils.cp_r(file, "/#{destination}")
         end
-        def log(string)
-            File.open("#{Tools.getRoot()}/var/log/post.log", 'a+') {|f| f.puts(string)}
-            print("\r\e[0K#{string}\n")
+        def log(string, doPrint = true)
+            File.open("#{Tools.getRoot()}/var/log/post.log", 'a+') {|f|
+                f.puts("#{Time.now} #{string}")
+            }
+            if (doPrint)
+                puts("#{string}")
+            end
         end
         def getFile(url, file)
             thread = Thread.new do
@@ -86,8 +90,8 @@ module Tools
                 end
                 body.close()
             end
-            print("\r\e Fetching:    #{url} [%.2f%%]" % thread[:progress].to_f) until thread.join(1)
-            Tools.log("Fetching:    #{url} [100%]")
+            print("\r\e Fetching:    #{url} [%.2f%%]\r\e " % thread[:progress].to_f) until thread.join(1)
+            Tools.log("Fetching:    #{url} [100.00%]")
         end
     end
 end
