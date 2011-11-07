@@ -75,7 +75,8 @@ if (install)
         }
         puts "Queue:       #{packageQueue.join(" ")}"
         print "Confirm:     [y/n] "
-        if gets().include?("y")
+        confirmTransaction = gets().capitalize()
+        if confirmTransaction.include?("Y")
             download[:progress] = true
             download.join()
             fetch.installQueue()

@@ -66,28 +66,12 @@ module Tools
             end
         end
         def getFile(url, file, progress = true)
-            thread = Thread.new do
-                thread = Thread.current()
-                url = URI.parse(url)
-                savedFile = File.open("#{file}", 'w')
-
-                Net::HTTP.new(url.host, url.port).request_get(url.path) do |response|
-                    length = response['Content-Length'].to_i()
-                    response.read_body do |fragment|
-                        savedFile << fragment
-                        thread[:done] = (thread[:done] || 0) + fragment.length()
-                        thread[:progress] = thread[:done].quo(length) * 100
-                    end
-                end
-                savedFile.close()
-            end
             if (progress)
-                until thread.join(1)
-                    print("\r\e Fetching:    #{url} [%.2f%%]\r\e " % thread[:progress])
-                end
-                Tools.log("Fetching:    #{url} [100.00%]")
+                puts("Fetching:    #{url}")
+                system("wget -q #{url} -O #{file}")
+            else
+                system("wget -q #{url} -O #{file}")
             end
-            thread.join()
         end
     end
 end

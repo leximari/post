@@ -26,7 +26,6 @@ class Fetch
         unless(@queue)
             @queue = []
         end
-        @downloadProgress = ""
     end
     def getQueue()
         @queue
@@ -42,13 +41,6 @@ class Fetch
         end
     end
     def fetchPackage(package, progress = true)
-        if progress == false
-            @downloadProgress += "Fetching:    #{Tools.getUrl(package)} [100.00%]\n"
-        end
-        if progress == true
-            puts @downloadProgress
-            @downloadProgress = ""
-        end
         FileUtils.mkdir("/tmp/post/#{package}")
         url = Tools.getUrl(package)
         filename = Tools.getFileName(package)
