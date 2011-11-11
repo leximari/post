@@ -100,9 +100,15 @@ class Query
         return packageList
     end
 
+    def getInstalledPackages()
+        packageList = Dir.entries(@installDatabase)
+        packageList.delete('.')
+        packageList.delete('..')
+        return packageList
+    end
+
     def isInstalled?(package)
-        installFile = File.join(@installDatabase, package)
-        if File.exists?(installFile)
+        if getInstalledPackages.include?(package)
             return true
         end
     end
