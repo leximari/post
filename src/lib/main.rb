@@ -63,26 +63,24 @@ end
 
 def upgradePackages()
     packages = QUERY.getInstalledPackages()
-    OPTIONS[:install] = packages
-    installPackages()
+    installPackages(packages)
 end
 
-ARGV.options do |o|
-    o.set_summary_indent("    ")
-    o.banner =    "Usage: post [OPTIONS] [PACKAGES]"
-    o.version =   "Post 1.0 Beta 1(0.8)"
-    o.define_head "Copyright (C) Thomas Chace 2011 <ithomashc@gmail.com>"
+options = ARGV.options()
+options.set_summary_indent("    ")
+options.banner =    "Usage: post [OPTIONS] [PACKAGES]"
+options.version =   "Post 1.0 Beta 2(0.9)"
+options.define_head "Copyright (C) Thomas Chace 2011 <ithomashc@gmail.com>"
 
-    if (Process.uid == 0)
-        o.on("-i", "--fetch=", Array,
-            "Install or update a package.")  { |args| installPackages(args) }
-        o.on("-r", "--erase=", Array,
-             "Erase a package.") { |args| removePackages(args) }
-        o.on("-u", "--upgrade",
-             "Upgrade all packages to their latest versions") { upgradePackages() }
+if (Process.uid == 0)
+    options.on("-i", "--fetch=", Array,
+        "Install or update a package.")  { |args| installPackages(args) }
+    options.on("-r", "--erase=", Array,
+         "Erase a package.") { |args| removePackages(args) }
+    options.on("-u", "--upgrade",
+         "Upgrade all packages to their latest versions") { upgradePackages() }
     end
 
-    o.on("-h", "--help", "Show this help message.") { puts(o) }
-    o.on("-v", "--version", "Show version information.") { puts( o.version() ) }
-    o.parse!
-end
+options.on("-h", "--help", "Show this help message.") { puts(options) }
+options.on("-v", "--version", "Show version information.") { puts( options.version() ) }
+options.parse!
