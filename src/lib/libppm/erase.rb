@@ -13,15 +13,16 @@
 # You should have received a copy of the GNU Lesser General Public License
 # along with Post.  If not, see <http://www.gnu.org/licenses/>.
 
-load(File.join(File.expand_path(File.dirname(__FILE__)), "query.rb"))
+require(File.join(File.expand_path(File.dirname(__FILE__)), "query.rb"))
 
 class Erase
     def initialize()
         @queue = []
         @packageQuery = Query.new()
     end
+
     def getQueue()
-        @queue
+        return @queue
     end
 
     def buildQueue(package)
@@ -39,6 +40,5 @@ class Erase
         for file in packageFiles
             FileUtils.rm("#{@packageQuery.getRoot()}/#{file.delete("\n")}")
         end
-
     end
 end
