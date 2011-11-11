@@ -52,7 +52,7 @@ queryAvailable = nil
 ARGV.options do |o|
     o.set_summary_indent("    ")
     o.banner =    "Usage: post [OPTIONS] [PACKAGES]"
-    o.version =   "Post 1.0 Pre Alpha(2011.11)"
+    o.version =   "Post 1.0 Beta(0.8)"
     o.define_head "Copyright (C) Thomas Chace 2011 <ithomashc@gmail.com>"
 
     if (Process.uid == 0)
