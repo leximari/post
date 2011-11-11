@@ -69,11 +69,9 @@ unless (RbConfig::CONFIG["host_os"] =~ /linux/) or (RbConfig::CONFIG["host_os"] 
 end
 
 begin
-    load("src/lib/fetch.rb")
-    load("src/lib/erase.rb")
-    load("src/lib/refresh.rb")
-    load("src/lib/tools.rb")
-    load("src/lib/query.rb")
+    load("src/lib/libppm/install.rb")
+    load("src/lib/libppm/erase.rb")
+    load("src/lib/libppm/query.rb")
 rescue
     puts("Count not load libraries.")
     puts("Testing: FAILED")
