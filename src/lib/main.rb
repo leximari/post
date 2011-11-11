@@ -23,59 +23,16 @@ libraries = [
     File.join(directory, "libppm", "query.rb"),
 ]
 
-loadLibraries = Thread.new {
-    thread = Thread.current()
-    for library in libraries
-        load(library)
-    end
-    if (Process.uid == 0)
-        thread[':packageQuery'] = packageQuery = Query.new()
-        begin
-            thread[':packageQuery'].updateDatabase()
-        rescue
-            puts("Error:       Cannot update database.")
-            exit(1)
-        end
-    end
-}
-
-OPTIONS = {
-    :install  => [],
-    :remove   => [],
-}
-
-install = nil
-remove = nil
-query = nil
-queryAvailable = nil
-
-ARGV.options do |o|
-    o.set_summary_indent("    ")
-    o.banner =    "Usage: post [OPTIONS] [PACKAGES]"
-    o.version =   "Post 1.0 Beta(0.8)"
-    o.define_head "Copyright (C) Thomas Chace 2011 <ithomashc@gmail.com>"
-
-    if (Process.uid == 0)
-        o.on("-i", "--fetch=", Array,
-            "Install or update a package.")  { |v| OPTIONS[:install] = v; install = true}
-        o.on("-r", "--erase=", Array,
-             "Erase a package.") { |v| OPTIONS[:remove] = v; remove = true}
-        o.on("-q", "--info=", String,
-             "Get package information.") { |v| OPTIONS[:query] = v; query = true}
-        o.on("-qa", "--infoa=", String,
-             "Get available package information.") {queryAvailable = true}
-    end
-
-    o.on("-h", "--help", "Show this help message.") {puts(o)}
-    o.on("-v", "--version", "Show version information.") {puts(o.version())}
-    o.parse!
+for library in libraries
+    load(library)
 end
 
-loadLibraries.join()
+QUERY = Query.new()
+QUERY.updateDatabase()
 
-if (install)
+def installPackages(argumentPackages)
     fetch = Fetch.new()
-    for package in OPTIONS[:install]
+    for package in argumentPackages
         fetch.buildQueue(package)
     end
     packageQueue = fetch.getQueue()
@@ -91,22 +48,41 @@ if (install)
             fetch.installQueue()
         end
     end
-elsif (remove)
+end
+
+def removePackages(argumentPackages)
     erase = Erase.new()
-    for package in OPTIONS[:remove]
+    for package in argumentPackages
         erase.buildQueue(package)
     end
     for package in erase.getQueue()
         puts("Removing:    #{package}")
         erase.removePackage(package)
     end
-elsif (query)
-    packageQuery = loadLibraries[':packageQuery']
-    databaseLocation = packageQuery.getDatabaseLocation()
-    fileName = File.join(databaseLocation, 'available', OPTIONS[:query])
-    file = open(fileName, 'r')
-    puts(file.read())
-elsif (queryAvailable)
-    packageQuery = loadLibraries[':packageQuery']
-    puts packageQuery.getAvailablePackages()
+end
+
+def upgradePackages()
+    packages = QUERY.getInstalledPackages()
+    OPTIONS[:install] = packages
+    installPackages()
+end
+
+ARGV.options do |o|
+    o.set_summary_indent("    ")
+    o.banner =    "Usage: post [OPTIONS] [PACKAGES]"
+    o.version =   "Post 1.0 Beta 1(0.8)"
+    o.define_head "Copyright (C) Thomas Chace 2011 <ithomashc@gmail.com>"
+
+    if (Process.uid == 0)
+        o.on("-i", "--fetch=", Array,
+            "Install or update a package.")  { |args| installPackages(args) }
+        o.on("-r", "--erase=", Array,
+             "Erase a package.") { |args| removePackages(args) }
+        o.on("-u", "--upgrade",
+             "Upgrade all packages to their latest versions") { upgradePackages() }
+    end
+
+    o.on("-h", "--help", "Show this help message.") { puts(o) }
+    o.on("-v", "--version", "Show version information.") { puts( o.version() ) }
+    o.parse!
 end
