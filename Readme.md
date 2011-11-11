@@ -1,6 +1,6 @@
 ## License
 
-Post is available under the BSD license.
+Post is available under the Lesser General Public license.
 
 ## What Is Post?
 
@@ -27,3 +27,5 @@ Post is supported running on the Rubinius(1.1+), but works well on Ruby 1.8+.
         sudo post -i zile
 
 If all of these pass without error, it looks like Post is installed!
+
+If you have any questions, email me at ithomashc at gmail dot com.
