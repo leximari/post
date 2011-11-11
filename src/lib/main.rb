@@ -15,18 +15,27 @@
 
 require("optparse")
 
+directory = File.expand_path(File.dirname(__FILE__))
+
 libraries = [
-    File.join(File.expand_path(File.dirname(__FILE__)), "fetch.rb"),
-    File.join(File.expand_path(File.dirname(__FILE__)), "erase.rb"),
-    File.join(File.expand_path(File.dirname(__FILE__)), "refresh.rb"),
+    File.join(directory, "fetch.rb"),
+    File.join(directory, "libppm", "erase.rb"),
+    File.join(directory, "libppm", "query.rb"),
 ]
 
 loadLibraries = Thread.new {
+    thread = Thread.current()
     for library in libraries
         load(library)
     end
     if (Process.uid == 0)
-        refresh()
+        thread[':packageQuery'] = packageQuery = Query.new()
+        begin
+            thread[':packageQuery'].updateDatabase()
+        rescue
+            puts("Error:       Cannot update database.")
+            exit(1)
+        end
     end
 }
 
@@ -37,6 +46,8 @@ OPTIONS = {
 
 install = nil
 remove = nil
+query = nil
+queryAvailable = nil
 
 ARGV.options do |o|
     o.set_summary_indent("    ")
@@ -48,7 +59,11 @@ ARGV.options do |o|
         o.on("-i", "--fetch=", Array,
             "Install or update a package.")  { |v| OPTIONS[:install] = v; install = true}
         o.on("-r", "--erase=", Array,
-            "Erase a package.") { |v| OPTIONS[:remove] = v; remove = true}
+             "Erase a package.") { |v| OPTIONS[:remove] = v; remove = true}
+        o.on("-q", "--info=", String,
+             "Get package information.") { |v| OPTIONS[:query] = v; query = true}
+        o.on("-qa", "--infoa=", String,
+             "Get available package information.") {queryAvailable = true}
     end
 
     o.on("-h", "--help", "Show this help message.") {puts(o)}
@@ -66,19 +81,13 @@ if (install)
     packageQueue = fetch.getQueue()
 
     unless (packageQueue.empty?)
-        download = Thread.new {
-            thread = Thread.current()
-            thread[:progress] = false
-            for package in packageQueue
-                fetch.fetchPackage(package, thread[:progress])
-            end
-        }
         puts "Queue:       #{packageQueue.join(" ")}"
         print "Confirm:     [y/n] "
         confirmTransaction = gets().capitalize()
         if confirmTransaction.include?("Y")
-            download[:progress] = true
-            download.join()
+            for package in packageQueue
+                fetch.fetchPackage(package)
+            end
             fetch.installQueue()
         end
     end
@@ -87,5 +96,17 @@ elsif (remove)
     for package in OPTIONS[:remove]
         erase.buildQueue(package)
     end
-    erase.removePackages()
+    for package in erase.getQueue()
+        puts("Removing:    #{package}")
+        erase.removePackage(package)
+    end
+elsif (query)
+    packageQuery = loadLibraries[':packageQuery']
+    databaseLocation = packageQuery.getDatabaseLocation()
+    fileName = File.join(databaseLocation, 'available', OPTIONS[:query])
+    file = open(fileName, 'r')
+    puts(file.read())
+elsif (queryAvailable)
+    packageQuery = loadLibraries[':packageQuery']
+    puts packageQuery.getAvailablePackages()
 end

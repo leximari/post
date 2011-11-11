@@ -13,34 +13,32 @@
 # You should have received a copy of the GNU Lesser General Public License
 # along with Post.  If not, see <http://www.gnu.org/licenses/>.
 
-load(File.join(File.expand_path(File.dirname(__FILE__)), "tools.rb"))
 load(File.join(File.expand_path(File.dirname(__FILE__)), "query.rb"))
 
 class Erase
     def initialize()
-        unless(@queue)
-            @queue = []
-        end
+        @queue = []
+        @packageQuery = Query.new()
     end
+    def getQueue()
+        @queue
+    end
+
     def buildQueue(package)
-        if Query.getInstalled(package)
+        if @packageQuery.isInstalled?(package)
             @queue.push(package)
-        else
-            Tools.log("Error:       '#{package}' not installed.")
         end
     end
-    def removePackages()
-        for package in @queue
-            removePackage(package)
-            Tools.log("Removing:   '#{package}'.")
-        end
-    end
+
     def removePackage(package)
-        for file in Query.getFiles(package)
-            Tools.removeFile(file.delete("\n"))
+        eval(@packageQuery.getRemoveScript(package))
+
+        packageFiles = @packageQuery.getPackageFiles(package)
+        @packageQuery.removeInstalledPackage(package)
+
+        for file in packageFiles
+            FileUtils.rm("#{@packageQuery.getRoot()}/#{file.delete("\n")}")
         end
-        removeScript = Query.getRemoveScript(package)
-        eval(removeScript)
-        Query.removeInstalledPackage(package)
+
     end
 end

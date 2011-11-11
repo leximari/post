@@ -51,12 +51,14 @@ mkdir_p("#{destdir}/var/lib/post/available/")
 mkdir_p("#{destdir}/var/lib/post/installed/")
 mkdir_p("#{destdir}/#{prefix}/bin/")
 mkdir_p("#{destdir}/#{prefix}/lib/post/")
+mkdir_p("#{destdir}/#{prefix}/lib/post/libppm/")
 mkdir_p("#{destdir}/etc/post/")
 
 system("install -m 755 src/bin/post.rb #{destdir}#{prefix}/bin/post")
+
+system("install -m 644 src/lib/libppm/install.rb #{destdir}#{prefix}/lib/post/libppm/install.rb")
+system("install -m 644 src/lib/libppm/erase.rb #{destdir}#{prefix}/lib/post/libppm/erase.rb")
+system("install -m 644 src/lib/libppm/query.rb #{destdir}#{prefix}/lib/post/libppm/query.rb")
+
 system("install -m 644 src/lib/fetch.rb #{destdir}#{prefix}/lib/post/fetch.rb")
-system("install -m 644 src/lib/erase.rb #{destdir}#{prefix}/lib/post/erase.rb")
-system("install -m 644 src/lib/refresh.rb #{destdir}#{prefix}/lib/post/refresh.rb")
 system("install -m 644 src/lib/main.rb #{destdir}#{prefix}/lib/post/main.rb")
-system("install -m 644 src/lib/query.rb #{destdir}#{prefix}/lib/post/query.rb")
-system("install -m 644 src/lib/tools.rb #{destdir}#{prefix}/lib/post/tools.rb")
