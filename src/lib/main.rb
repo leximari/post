@@ -13,14 +13,14 @@
 # You should have received a copy of the GNU Lesser General Public License
 # along with Post.  If not, see <http://www.gnu.org/licenses/>.
 
-require("optparse")
+require('optparse')
 
 directory = File.expand_path(File.dirname(__FILE__))
 
 libraries = [
-    File.join(directory, "fetch.rb"),
-    File.join(directory, "libppm", "erase.rb"),
-    File.join(directory, "libppm", "query.rb"),
+    File.join(directory, 'fetch.rb'),
+    File.join(directory, 'libppm', 'erase.rb'),
+    File.join(directory, 'libppm', 'query.rb'),
 ]
 
 for library in libraries
@@ -37,11 +37,18 @@ def installPackages(argumentPackages)
     end
     packageQueue = fetch.getQueue()
 
-    unless (packageQueue.empty?)
+    conflict = false
+    for package in packageQueue
+        if(fetch.checkConflicts(package))
+            conflict = true
+        end
+    end
+
+    unless (packageQueue.empty?) or (conflict)
         puts "Queue:       #{packageQueue.join(" ")}"
-        print "Confirm:     [y/n] "
-        confirmTransaction = gets().capitalize()
-        if confirmTransaction.include?("Y")
+        print 'Confirm:     [y/n] '
+        confirmTransaction = gets()
+        if confirmTransaction.include?('y')
             for package in packageQueue
                 fetch.fetchPackage(package)
             end
@@ -67,20 +74,20 @@ def upgradePackages()
 end
 
 options = ARGV.options()
-options.set_summary_indent("    ")
+options.set_summary_indent('    ')
 options.banner =    "Usage: post [OPTIONS] [PACKAGES]"
-options.version =   "Post 1.0 Beta 2(0.9)"
+options.version =   "Post 1.0 Release Candidate 2(0.9.7)"
 options.define_head "Copyright (C) Thomas Chace 2011 <ithomashc@gmail.com>"
 
 if (Process.uid == 0)
-    options.on("-i", "--fetch=", Array,
-        "Install or update a package.")  { |args| installPackages(args) }
-    options.on("-r", "--erase=", Array,
-         "Erase a package.") { |args| removePackages(args) }
-    options.on("-u", "--upgrade",
-         "Upgrade all packages to their latest versions") { upgradePackages() }
+    options.on('-i', '--fetch=', Array,
+        'Install or update a package.')  { |args| installPackages(args) }
+    options.on('-r', '--erase=', Array,
+         'Erase a package.') { |args| removePackages(args) }
+    options.on('-u', '--upgrade',
+         'Upgrade all packages to their latest versions') { upgradePackages() }
     end
 
-options.on("-h", "--help", "Show this help message.") { puts(options) }
-options.on("-v", "--version", "Show version information.") { puts( options.version() ) }
+options.on('-h', '--help', 'Show this help message.') { puts(options) }
+options.on('-v', '--version', 'Show version information.') { puts( options.version() ) }
 options.parse!

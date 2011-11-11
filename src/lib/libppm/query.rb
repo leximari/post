@@ -19,46 +19,48 @@ require('fileutils')
 
 class Query
     def initialize()
-        setRoot('/')
-        setDatabaseLocation("#{getRoot}/var/lib/post/")
+        @root = '/'
+        @databaseLocation = "#{@root}/var/lib/post/"
         @installDatabase = File.join(@databaseLocation, "installed")
         @syncDatabase = File.join(@databaseLocation, "available")
-    end
-
-    def openYAML(fileName)
-        return YAML::load_file(fileName)
-    end
-
-    def setRoot(newRoot)
-        @root = newRoot
     end
 
     def getRoot()
         return @root
     end
 
-    def setDatabaseLocation(newDatabaseLocation)
-        @databaseLocation = newDatabaseLocation
-    end
-
-    def getDatabaseLocation()
-        return @databaseLocation
-    end
-
     def getInstalledPackageData(package)
         if isInstalled?(package)
             packageData = File.join(@installDatabase, package, 'packageData')
-            data = openYAML(packageData)
-            return data
+            data = YAML::load_file(packageData)
+            if data['conflicts'] == nil
+                data['conflicts'] = []
+            end
+            if data['dependencies'] == nil
+                data['dependencies'] = []
+            end
+        else
+            data = {}
+            data['version'] = "0"
         end
+        return data
     end
 
     def getSyncPackageData(package)
         if isAvailable?(package)
 	        packageData = File.join(@syncDatabase, package)
-	        data = openYAML(packageData)
-	        return data
+            data = YAML::load_file(packageData)
+            if data['conflicts'] == nil
+                data['conflicts'] = []
+            end
+            if data['dependencies'] == nil
+                data['dependencies'] = []
+            end
+        else
+            data = {}
+            data['version'] = "0"
 	    end
+        return data
     end
 
     def getPackageFiles(package)
@@ -73,7 +75,7 @@ class Query
     end
 
     def addPackage(packageData, removeFile, installedFiles)
-        data = openYAML(packageData)
+        data = YAML::load_file(packageData)
 
         dirName = File.join(@installDatabase, data['name'])
         fileName = File.join(dirName, 'files')
@@ -108,75 +110,35 @@ class Query
     end
 
     def isInstalled?(package)
-        if getInstalledPackages.include?(package)
-            return true
-        end
+        return true if getInstalledPackages.include?(package)
     end
 
     def isAvailable?(package)
-        if getAvailablePackages.include?(package)
-            return true
-        end
+        return true if getAvailablePackages.include?(package)
     end
+
     def upgradeAvailable?(package)
-        if (isAvailable?(package)) and (getSyncVersion(package) > getLocalVersion(package))
-            return true
+        if (isAvailable?(package)) && (getSyncPackageData(package)['version'] > getInstalledPackageData(package)['version'])
+                return true
         end
-    end
-
-    def getSyncVersion(package)
-        version = "0"
-        if (isAvailable?(package))
-            data = getSyncPackageData(package)
-            version = data['version']
-        end
-        if version.class() == Array
-            version = version.sort().last()
-        end
-        return version.to_s()
-    end
-
-    def getLocalVersion(package)
-        version = "0"
-        if (isInstalled?(package))
-            version = getInstalledPackageData(package)['version']
-        end
-        if version.class() == Array
-            version = version.sort().last()
-        end
-        return version.to_s()
-    end
-
-    def getUrl(package)
-        channel = getCurrentChannel()
-        url = "#{channel['url']}/#{getFileName(package)}"
-        return url
     end
 
     def getCurrentChannel()
-        return openYAML("/etc/post/channel")
-    end
-
-    def getFileName(package)
-        latestVersion = getSyncVersion(package)
-        packageArch = getSyncPackageData(package)['architecture']
-        return "#{package}-#{latestVersion}-#{packageArch}.pst"
+        return YAML::load_file("/etc/post/channel")
     end
 
     def updateDatabase()
-        if File.exists?("/tmp/post")
+        if File.exists?("/tmp/post") and File.exists?("/var/lib/post/available")
             FileUtils.rm_r("/tmp/post")
+            FileUtils.rm_r("/var/lib/post/available")
         end
         FileUtils.mkdir_p("/tmp/post")
         FileUtils.cd("/tmp/post")
-        if File.exists?("/var/lib/post/available")
-            FileUtils.rm_r("/var/lib/post/available")
+
+        sourceUrl = getCurrentChannel()['url'] + '/info.tar'
+        File.open('info.tar', 'w') do |file|
+            file.puts(open(sourceUrl).read())
         end
-        url = getCurrentChannel()['url']
-        sourceFile = url + '/info.tar'
-        destinationFile = open('info.tar', "wb")
-        destinationFile.write(open(sourceFile).read())
-        destinationFile.close()
         system("tar xf info.tar")
         FileUtils.cp_r("info", "/var/lib/post/available")
     end

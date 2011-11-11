@@ -13,8 +13,8 @@
 # You should have received a copy of the GNU Lesser General Public License
 # along with Post.  If not, see <http://www.gnu.org/licenses/>.
 
-load(File.join(File.expand_path(File.dirname(__FILE__)), "libppm", "install.rb"))
-load(File.join(File.expand_path(File.dirname(__FILE__)), "libppm", "query.rb"))
+require(File.join(File.expand_path(File.dirname(__FILE__)), "libppm", "install.rb"))
+require(File.join(File.expand_path(File.dirname(__FILE__)), "libppm", "query.rb"))
 
 require('net/http')
 
@@ -29,16 +29,24 @@ class Fetch
         @queue
     end
 
-    def setQueue(newQueue)
-        @queue = newQueue
+    def checkConflicts(package)
+        conflict = false
+        for conflict in @packageQuery.getSyncPackageData(package)['conflicts']
+            if @queue.include?(conflict)
+                puts("Error:      '#{conflict} conflicts with '#{package}'")
+                conflict = true
+            end
+        end
+        return conflict
     end
+
     def getFile(url, file)
         url = URI.parse(url)
         savedFile = File.open("#{file}", 'w')
 
         Net::HTTP.new(url.host, url.port).request_get(url.path) do |response|
             length = response['Content-Length'].to_i()
-            savedFileLength = 0.0
+            savedFileLength = 0
             response.read_body do |fragment|
                 savedFile << fragment
                 savedFileLength += fragment.length()
@@ -52,7 +60,7 @@ class Fetch
 
     def buildQueue(package)
         if (@packageQuery.upgradeAvailable?(package))
-            for dependency in @packageQuery.getSyncPackageData(package)['dependencies'].to_a()
+            for dependency in @packageQuery.getSyncPackageData(package)['dependencies']
                 buildQueue(dependency)
             end
             unless @queue.include?(package)
@@ -61,17 +69,23 @@ class Fetch
         end
     end
 
-    def fetchPackage(package, progress = true)
+    def fetchPackage(package)
         FileUtils.mkdir("/tmp/post/#{package}")
-        url = @packageQuery.getUrl(package)
-        filename = @packageQuery.getFileName(package)
+
+        syncData = @packageQuery.getSyncPackageData(package)
+        channel = @packageQuery.getCurrentChannel()
+
+        filename = "#{package}-#{syncData['version']}-#{syncData['architecture']}.pst"
+        url = channel['url'] + filename
+
         getFile(url, "/tmp/post/#{package}/#{filename}")
     end
 
     def installQueue()
         for package in @queue
             FileUtils.cd("/tmp/post/#{package}")
-            filename = @packageQuery.getFileName(package)
+            syncData = @packageQuery.getSyncPackageData(package)
+            filename = "#{package}-#{syncData['version']}-#{syncData['architecture']}.pst"
             puts("Installing:  #{package}")
             @installObject.installPackage(filename)
         end
