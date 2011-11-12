@@ -30,23 +30,23 @@ class Fetch
     end
 
     def checkConflicts(package)
-        conflict = false
+        conflictStatus = false
         for conflict in @packageQuery.getSyncData(package)['conflicts']
             if @queue.include?(conflict)
                 puts("Error:      '#{conflict} conflicts with '#{package}'")
-                conflict = true
+                conflictStatus = true
             end
         end
-        return conflict
+        return conflictStatus
     end
 
     def getFile(url, file)
         url = URI.parse(url)
-        savedFile = File.open("#{file}", 'w')
+        savedFile = File.open(file, 'w')
 
         Net::HTTP.new(url.host, url.port).request_get(url.path) do |response|
             length = response['Content-Length'].to_i()
-            savedFileLength = 0
+            savedFileLength = 0.0
             response.read_body do |fragment|
                 savedFile << fragment
                 savedFileLength += fragment.length()
