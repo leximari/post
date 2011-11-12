@@ -69,7 +69,7 @@ end
 options = ARGV.options()
 options.set_summary_indent('    ')
 options.banner =    "Usage: post [OPTIONS] [PACKAGES]"
-options.version =   "Post 1.0 Release Candidate 2(0.9.7)"
+options.version =   "Post 1.0 Release Candidate 2(0.9.8)"
 options.define_head "Copyright (C) Thomas Chace 2011 <ithomashc@gmail.com>"
 
 if (Process.uid == 0)
