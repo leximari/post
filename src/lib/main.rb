@@ -17,17 +17,12 @@ require('optparse')
 
 directory = File.expand_path(File.dirname(__FILE__))
 
-libraries = [
-    File.join(directory, 'fetch.rb'),
-    File.join(directory, 'libppm', 'erase.rb'),
-    File.join(directory, 'libppm', 'query.rb'),
-]
-
-for library in libraries
-    load(library)
-end
+require(File.join(directory, 'fetch.rb'))
+require(File.join(directory, 'libppm', 'erase.rb'))
+require(File.join(directory, 'libppm', 'query.rb'))
 
 QUERY = Query.new()
+puts('Loading:     Downloading package information.')
 QUERY.updateDatabase()
 
 def installPackages(argumentPackages)
@@ -39,12 +34,10 @@ def installPackages(argumentPackages)
 
     conflict = false
     for package in packageQueue
-        if(fetch.checkConflicts(package))
-            conflict = true
-        end
+        conflict = true if (fetch.checkConflicts(package))
     end
 
-    unless (packageQueue.empty?) or (conflict)
+    unless (packageQueue.empty?)# or (conflict)
         puts "Queue:       #{packageQueue.join(" ")}"
         print 'Confirm:     [y/n] '
         confirmTransaction = gets()

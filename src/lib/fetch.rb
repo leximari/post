@@ -31,7 +31,7 @@ class Fetch
 
     def checkConflicts(package)
         conflict = false
-        for conflict in @packageQuery.getSyncPackageData(package)['conflicts']
+        for conflict in @packageQuery.getSyncData(package)['conflicts']
             if @queue.include?(conflict)
                 puts("Error:      '#{conflict} conflicts with '#{package}'")
                 conflict = true
@@ -60,20 +60,18 @@ class Fetch
 
     def buildQueue(package)
         if (@packageQuery.upgradeAvailable?(package))
-            for dependency in @packageQuery.getSyncPackageData(package)['dependencies']
+            for dependency in @packageQuery.getSyncData(package)['dependencies']
                 buildQueue(dependency)
             end
-            unless @queue.include?(package)
-                @queue.push(package)
-            end
+            @queue.push(package) unless @queue.include?(package)
         end
     end
 
     def fetchPackage(package)
         FileUtils.mkdir("/tmp/post/#{package}")
 
-        syncData = @packageQuery.getSyncPackageData(package)
-        channel = @packageQuery.getCurrentChannel()
+        syncData = @packageQuery.getSyncData(package)
+        channel = @packageQuery.getChannel()
 
         filename = "#{package}-#{syncData['version']}-#{syncData['architecture']}.pst"
         url = channel['url'] + filename
@@ -84,7 +82,7 @@ class Fetch
     def installQueue()
         for package in @queue
             FileUtils.cd("/tmp/post/#{package}")
-            syncData = @packageQuery.getSyncPackageData(package)
+            syncData = @packageQuery.getSyncData(package)
             filename = "#{package}-#{syncData['version']}-#{syncData['architecture']}.pst"
             puts("Installing:  #{package}")
             @installObject.installPackage(filename)
