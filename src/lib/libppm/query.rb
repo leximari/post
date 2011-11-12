@@ -29,16 +29,13 @@ class Query
         return @root
     end
 
-    def getInstalledPackageData(package)
+    def getData(package)
         if isInstalled?(package)
             packageData = File.join(@installDatabase, package, 'packageData')
             data = YAML::load_file(packageData)
-            if data['conflicts'] == nil
-                data['conflicts'] = []
-            end
-            if data['dependencies'] == nil
-                data['dependencies'] = []
-            end
+            data['conflicts'] = [] if data['conflicts'] == nil
+            data['dependencies'] = [] if data['dependencies'] == nil
+            data['version'] = data['version'].to_s()
         else
             data = {}
             data['version'] = "0"
@@ -46,16 +43,13 @@ class Query
         return data
     end
 
-    def getSyncPackageData(package)
+    def getSyncData(package)
         if isAvailable?(package)
 	        packageData = File.join(@syncDatabase, package)
             data = YAML::load_file(packageData)
-            if data['conflicts'] == nil
-                data['conflicts'] = []
-            end
-            if data['dependencies'] == nil
-                data['dependencies'] = []
-            end
+            data['conflicts'] = [] if data['conflicts'] == nil
+            data['dependencies'] = [] if data['dependencies'] == nil
+            data['version'] = data['version'].to_s()
         else
             data = {}
             data['version'] = "0"
@@ -63,18 +57,17 @@ class Query
         return data
     end
 
-    def getPackageFiles(package)
+    def getFiles(package)
         file = File.join(@installDatabase, package, 'files')
-        fileList = open(file, 'r')
-        return fileList.readlines()
+        return IO.readlines(file)
     end
 
     def getRemoveScript(package)
         removeScript = File.join(@installDatabase, package, 'remove')
-        File.read(removeScript)
+        return File.read(removeScript)
     end
 
-    def addPackage(packageData, removeFile, installedFiles)
+    def installPackage(packageData, removeFile, installedFiles)
         data = YAML::load_file(packageData)
 
         dirName = File.join(@installDatabase, data['name'])
@@ -90,23 +83,17 @@ class Query
         file.puts(installedFiles)
     end
 
-    def removeInstalledPackage(package)
+    def removePackage(package)
         dirName = File.join(@installDatabase, package)
         FileUtils.rm_r(dirName)
     end
 
     def getAvailablePackages()
-        packageList = Dir.entries(@syncDatabase)
-        packageList.delete('.')
-        packageList.delete('..')
-        return packageList
+        return Dir["#{@syncDatabase}/*"].map() { |package| File.basename(package) }
     end
 
     def getInstalledPackages()
-        packageList = Dir.entries(@installDatabase)
-        packageList.delete('.')
-        packageList.delete('..')
-        return packageList
+        return Dir["#{@installDatabase}/*"].map() { |package| File.basename(package) }
     end
 
     def isInstalled?(package)
@@ -118,29 +105,27 @@ class Query
     end
 
     def upgradeAvailable?(package)
-        if (isAvailable?(package)) && (getSyncPackageData(package)['version'] > getInstalledPackageData(package)['version'])
-                return true
-        end
+        return true if (isAvailable?(package)) and
+                (getSyncData(package)['version'] > getData(package)['version'])
     end
 
-    def getCurrentChannel()
+    def getChannel()
         return YAML::load_file("/etc/post/channel")
     end
 
     def updateDatabase()
-        if File.exists?("/tmp/post") and File.exists?("/var/lib/post/available")
-            FileUtils.rm_r("/tmp/post")
-            FileUtils.rm_r("/var/lib/post/available")
-        end
+        FileUtils.rm_r("/tmp/post") if (File.exists?("/tmp/post"))
+        FileUtils.rm_r("/var/lib/post/available") if (File.exists?("/var/lib/post/available"))
+
         FileUtils.mkdir_p("/tmp/post")
         FileUtils.cd("/tmp/post")
 
-        sourceUrl = getCurrentChannel()['url'] + '/info.tar'
+        sourceUrl = getChannel()['url'] + '/info.tar'
         File.open('info.tar', 'w') do |file|
             file.puts(open(sourceUrl).read())
         end
         system("tar xf info.tar")
-        FileUtils.cp_r("info", "/var/lib/post/available")
+        FileUtils.cp_r('info', '/var/lib/post/available')
     end
 end
 

@@ -26,18 +26,16 @@ class Erase
     end
 
     def buildQueue(package)
-        if @packageQuery.isInstalled?(package)
-            @queue.push(package)
-        end
+        @queue.push(package) if @packageQuery.isInstalled?(package)
     end
 
     def removePackage(package)
         eval(@packageQuery.getRemoveScript(package))
 
-        packageFiles = @packageQuery.getPackageFiles(package)
-        @packageQuery.removeInstalledPackage(package)
+        packageFiles = @packageQuery.getFiles(package)
+        @packageQuery.removePackage(package)
 
-        for file in packageFiles
+        packageFiles.each() do |file|
             FileUtils.rm("#{@packageQuery.getRoot()}/#{file.delete("\n")}")
         end
     end

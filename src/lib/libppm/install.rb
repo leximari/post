@@ -18,9 +18,7 @@ require('fileutils')
 
 class Install
     def initialize()
-        if File.exists?("/tmp/post")
-            FileUtils.rm_r("/tmp/post")
-        end
+        FileUtils.rm_r("/tmp/post") if File.exists?("/tmp/post")
         FileUtils.mkdir("/tmp/post")
         FileUtils.cd("/tmp/post")
         @queue = []
@@ -32,7 +30,7 @@ class Install
         FileUtils.rm(filename)
         newFiles = Dir["**/*"].reject {|file| File.directory?(file) }
         newDirectories = Dir["**/*"].reject {|file| File.file?(file) }
-        @packageQuery.addPackage(".packageData", ".remove", newFiles)
+        @packageQuery.installPackage(".packageData", ".remove", newFiles)
         for directory in newDirectories
             FileUtils.mkdir_p("#{@packageQuery.getRoot()}/#{directory}")
         end
