@@ -25,6 +25,13 @@ QUERY = Query.new()
 puts('Loading:     Downloading package information.')
 QUERY.updateDatabase()
 
+def userConfirmation(queue)
+    puts "Queue:       #{queue.join(" ")}"
+    print 'Confirm:     [y/n] '
+    confirmTransaction = gets()
+    return true if confirmTransaction.include?('y')
+end
+
 def installPackages(argumentPackages)
     fetch = Fetch.new()
     for package in argumentPackages
@@ -32,16 +39,13 @@ def installPackages(argumentPackages)
     end
     packageQueue = fetch.getQueue()
 
-    conflict = false
+    conflict = nil
     for package in packageQueue
         conflict = true if (fetch.checkConflicts(package))
     end
 
-    unless (packageQueue.empty?)# or (conflict)
-        puts "Queue:       #{packageQueue.join(" ")}"
-        print 'Confirm:     [y/n] '
-        confirmTransaction = gets()
-        if confirmTransaction.include?('y')
+    unless (packageQueue.empty?) or (conflict)
+        if userConfirmation(packageQueue)
             for package in packageQueue
                 fetch.fetchPackage(package)
             end
@@ -55,9 +59,12 @@ def removePackages(argumentPackages)
     for package in argumentPackages
         erase.buildQueue(package)
     end
-    for package in erase.getQueue()
-        puts("Removing:    #{package}")
-        erase.removePackage(package)
+    confirmation = userConfirmation(erase.getQueue())
+    if (confirmation)
+        for package in erase.getQueue()
+            puts("Removing:    #{package}")
+            erase.removePackage(package)
+        end
     end
 end
 
@@ -69,7 +76,7 @@ end
 options = ARGV.options()
 options.set_summary_indent('    ')
 options.banner =    "Usage: post [OPTIONS] [PACKAGES]"
-options.version =   "Post 1.0 Release Candidate 2(0.9.8)"
+options.version =   "Post 1.0 Release Candidate 4(0.9.9)"
 options.define_head "Copyright (C) Thomas Chace 2011 <ithomashc@gmail.com>"
 
 if (Process.uid == 0)
