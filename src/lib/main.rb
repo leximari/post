@@ -15,6 +15,8 @@
 
 require('optparse')
 
+STDOUT.sync = true
+
 directory = File.expand_path(File.dirname(__FILE__))
 
 require(File.join(directory, 'fetch.rb'))
@@ -22,10 +24,13 @@ require(File.join(directory, 'libppm', 'erase.rb'))
 require(File.join(directory, 'libppm', 'query.rb'))
 
 QUERY = Query.new()
-puts('Loading:     Downloading package information.')
-QUERY.updateDatabase()
+puts('Loading:     Downloading package information.') if (Process.uid == 0)
+QUERY.updateDatabase() if (Process.uid == 0)
 
 def userConfirmation(queue)
+    if (queue.empty?)
+	return false
+    end
     puts "Queue:       #{queue.join(" ")}"
     print 'Confirm:     [y/n] '
     confirmTransaction = gets()
@@ -76,7 +81,7 @@ end
 options = ARGV.options()
 options.set_summary_indent('    ')
 options.banner =    "Usage: post [OPTIONS] [PACKAGES]"
-options.version =   "Post 1.0 Release Candidate 4(0.9.9)"
+options.version =   "Post 1.0 (1.0.0)"
 options.define_head "Copyright (C) Thomas Chace 2011 <ithomashc@gmail.com>"
 
 if (Process.uid == 0)
@@ -86,7 +91,7 @@ if (Process.uid == 0)
          'Erase a package.') { |args| removePackages(args) }
     options.on('-u', '--upgrade',
          'Upgrade all packages to their latest versions') { upgradePackages() }
-    end
+end
 
 options.on('-h', '--help', 'Show this help message.') { puts(options) }
 options.on('-v', '--version', 'Show version information.') { puts( options.version() ) }

@@ -42,6 +42,7 @@ class Fetch
 
     def getFile(url, file)
         url = URI.parse(url)
+	filename = File.basename(file)
         savedFile = File.open(file, 'w')
 
         Net::HTTP.new(url.host, url.port).request_get(url.path) do |response|
@@ -51,10 +52,10 @@ class Fetch
                 savedFile << fragment
                 savedFileLength += fragment.length()
                 progressData = (savedFileLength / length) * 100
-                print("\r\e Fetching:    #{url} [#{progressData.round()}%]\r\e ")
+                print("\rFetching:    #{filename} [#{progressData.round()}%]")
             end
         end
-        puts("\r\e Fetching:    #{url} [100%]")
+        puts("\rFetching:    #{filename} [100.0%]")
         savedFile.close()
     end
 
