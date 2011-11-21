@@ -62,3 +62,5 @@ system("install -m 644 src/lib/libppm/query.rb #{destdir}#{prefix}/lib/post/libp
 
 system("install -m 644 src/lib/fetch.rb #{destdir}#{prefix}/lib/post/fetch.rb")
 system("install -m 644 src/lib/main.rb #{destdir}#{prefix}/lib/post/main.rb")
+
+system("install -m 644 src/etc/post/channel #{destdir}/etc/post/channel")
