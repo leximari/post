@@ -59,8 +59,9 @@ system("install -m 755 src/bin/post.rb #{destdir}#{prefix}/bin/post")
 system("install -m 644 src/lib/libppm/install.rb #{destdir}#{prefix}/lib/post/libppm/install.rb")
 system("install -m 644 src/lib/libppm/erase.rb #{destdir}#{prefix}/lib/post/libppm/erase.rb")
 system("install -m 644 src/lib/libppm/query.rb #{destdir}#{prefix}/lib/post/libppm/query.rb")
+system("install -m 644 src/lib/libppm/network.rb #{destdir}#{prefix}/lib/post/libppm/network.rb")
 
 system("install -m 644 src/lib/fetch.rb #{destdir}#{prefix}/lib/post/fetch.rb")
 system("install -m 644 src/lib/main.rb #{destdir}#{prefix}/lib/post/main.rb")
 
-system("install -m 644 src/etc/post/channel #{destdir}/etc/post/channel")
+#system("install -m 644 src/etc/post/channel #{destdir}/etc/post/channel")

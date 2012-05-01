@@ -15,8 +15,7 @@
 
 require(File.join(File.expand_path(File.dirname(__FILE__)), "libppm", "install.rb"))
 require(File.join(File.expand_path(File.dirname(__FILE__)), "libppm", "query.rb"))
-
-require('net/http')
+require(File.join(File.expand_path(File.dirname(__FILE__)), "libppm", "network.rb"))
 
 class Fetch
     def initialize()
@@ -42,7 +41,7 @@ class Fetch
 
     def getFile(url, file)
         url = URI.parse(url)
-	filename = File.basename(file)
+	    filename = File.basename(file)
         savedFile = File.open(file, 'w')
 
         Net::HTTP.new(url.host, url.port).request_get(url.path) do |response|
@@ -77,7 +76,12 @@ class Fetch
         filename = "#{package}-#{syncData['version']}-#{syncData['architecture']}.pst"
         url = channel['url'] + filename
 
-        getFile(url, "/tmp/post/#{package}/#{filename}")
+		if fileExists(url)
+			getFile(url, "/tmp/post/#{package}/#{filename}")
+			return true
+		else
+			return false
+		end
     end
 
     def installQueue()
