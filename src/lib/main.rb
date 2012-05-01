@@ -13,26 +13,28 @@
 # You should have received a copy of the GNU Lesser General Public License
 # along with Post.  If not, see <http://www.gnu.org/licenses/>.
 
-require('optparse')
-
 STDOUT.sync = true
 
+require('optparse')
 directory = File.expand_path(File.dirname(__FILE__))
-
 require(File.join(directory, 'fetch.rb'))
 require(File.join(directory, 'libppm', 'erase.rb'))
 require(File.join(directory, 'libppm', 'query.rb'))
+require(File.join(directory, "libppm", "network.rb"))
 
 QUERY = Query.new()
-puts('Loading:     Downloading package information.') if (Process.uid == 0)
-QUERY.updateDatabase() if (Process.uid == 0)
+
+if (Process.uid == 0) and fileExists(QUERY.getChannel()['url'] + '/info.tar')
+	puts('Loading:     Downloading package information.')
+	QUERY.updateDatabase()
+end
 
 def userConfirmation(queue)
     if (queue.empty?)
-	return false
+		return false
     end
-    puts "Queue:       #{queue.join(" ")}"
-    print 'Confirm:     [y/n] '
+    puts("Queue:       #{queue.join(" ")}")
+    print('Confirm:     [y/n] ')
     confirmTransaction = gets()
     return true if confirmTransaction.include?('y')
 end
@@ -51,10 +53,12 @@ def installPackages(argumentPackages)
 
     unless (packageQueue.empty?) or (conflict)
         if userConfirmation(packageQueue)
+			error = false
             for package in packageQueue
-                fetch.fetchPackage(package)
+                error = true if not fetch.fetchPackage(package)
             end
-            fetch.installQueue()
+            fetch.installQueue() unless (error)
+            puts("Error:       All files were not fetched.") if (error)
         end
     end
 end
