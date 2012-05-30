@@ -1,2 +1,2 @@
-#!/usr/bin/ruby1.8
+#!/usr/bin/ruby
 load('/usr//lib/post/main.rb')
