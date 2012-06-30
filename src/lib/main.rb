@@ -1,4 +1,4 @@
-# Copyright (C) Thomas Chace 2011 <ithomashc@gmail.com>
+# Copyright (C) Thomas Chace 2011-2012 <ithomashc@gmail.com>
 # This file is part of Post.
 # Post is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Lesser General Public License as published by
@@ -86,7 +86,7 @@ options = ARGV.options()
 options.set_summary_indent('    ')
 options.banner =    "Usage: post [OPTIONS] [PACKAGES]"
 options.version =   "Post 1.0 (1.0.0)"
-options.define_head "Copyright (C) Thomas Chace 2011 <ithomashc@gmail.com>"
+options.define_head "Copyright (C) Thomas Chace 2011-2012 <ithomashc@gmail.com>"
 
 if (Process.uid == 0)
     options.on('-i', '--fetch=', Array,
