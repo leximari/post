@@ -18,10 +18,9 @@ require('open-uri')
 require('fileutils')
 require('rbconfig')
 
-SYSARCH = RbConfig::CONFIG['host_cpu']
-
 class Query
     def initialize()
+		@sysArch = RbConfig::CONFIG['host_cpu']
         @root = '/'
         @databaseLocation = "#{@root}/var/lib/post/"
         @installDatabase = File.join(@databaseLocation, "installed")
@@ -36,7 +35,7 @@ class Query
         if isInstalled?(package)
             packageData = File.join(@installDatabase, package, 'packageData')
             data = YAML::load_file(packageData)
-            if (data['architecture'].include?(SYSARCH))
+            if (data['architecture'].include?(@sysArch))
                 data['conflicts'] = [] if data['conflicts'] == nil
                 data['dependencies'] = [] if data['dependencies'] == nil
                 data['version'] = data['version'].to_s()
@@ -132,7 +131,7 @@ class Query
         File.open('info.tar', 'w') do |file|
             file.puts(open(sourceUrl).read())
         end
-        system("tar xf info.tar")
+        system("tar", "xf", "info.tar")
         FileUtils.cp_r('info', '/var/lib/post/available')
     end
 end

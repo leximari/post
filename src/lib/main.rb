@@ -21,7 +21,7 @@ directory = File.expand_path(File.dirname(__FILE__))
 require(File.join(directory, 'fetch.rb'))
 require(File.join(directory, 'libppm', 'erase.rb'))
 require(File.join(directory, 'libppm', 'query.rb'))
-require(File.join(directory, "libppm", "network.rb"))
+require(File.join(directory, "libppm", "tools.rb"))
 require(File.join(directory, "libppm", "packagelist.rb"))
 
 QUERY = Query.new()
