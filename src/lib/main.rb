@@ -86,7 +86,7 @@ end
 def removePackages(argumentPackages)
     packageQueue = PackageList.new()
     for package in argumentPackages
-        packageQueue.set(package)
+        packageQueue.set(package) if QUERY.isInstalled?(package)
     end
     
     erase = Erase.new(packageQueue)
