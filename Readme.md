@@ -12,12 +12,12 @@ Post is is supported by Rubinius(1.1+), but also works well on Ruby 1.9+.
 
         git clone git://github.com/thomashc/Post.git
         cd Post
-        sudo rbx build.rb # For Rubinius
-        sudo ruby1.9 build.rb # For Ruby 1.9
+        gem build post.gemspec
+	gem install post-1.3.5.gem
 
 ## Configuring The Test Repository
 
-        sudo cp src/etc/post/channel /etc/post/channel
+        sudo cp cfg/channel /etc/post/channel
 
 ## Testing The Installation
 
