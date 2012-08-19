@@ -1,4 +1,4 @@
-# Copyright (C) Thomas Chace 2011 <ithomashc@gmail.com>
+# Copyright (C) Thomas Chace 2011-2012 <ithomashc@gmail.com>
 # This file is part of Post.
 # Post is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Lesser General Public License as published by
