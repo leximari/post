@@ -15,7 +15,7 @@
 
 require(File.join(File.expand_path(File.dirname(__FILE__)), "libppm", "install.rb"))
 require(File.join(File.expand_path(File.dirname(__FILE__)), "libppm", "query.rb"))
-require(File.join(File.expand_path(File.dirname(__FILE__)), "libppm", "network.rb"))
+require(File.join(File.expand_path(File.dirname(__FILE__)), "libppm", "tools.rb"))
 
 class Fetch
     def initialize(queue)

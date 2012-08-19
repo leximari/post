@@ -14,6 +14,7 @@
 # along with Post.  If not, see <http://www.gnu.org/licenses/>.
 
 require(File.join(File.expand_path(File.dirname(__FILE__)), "query.rb"))
+require(File.join(File.expand_path(File.dirname(__FILE__)), "tools.rb"))
 require('fileutils')
 
 class Install
@@ -25,7 +26,7 @@ class Install
     end
 
     def installPackage(filename)
-        system("tar xf #{filename}")
+        extract(filename)
         FileUtils.rm(filename)
         newFiles = Dir["**/*"].reject {|file| File.directory?(file) }
         newDirectories = Dir["**/*"].reject {|file| File.file?(file) }
