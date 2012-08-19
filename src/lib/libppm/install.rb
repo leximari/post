@@ -39,7 +39,11 @@ class Install
                 system("chmod +x #{@packageQuery.getRoot()}/#{file}")
             end
         end
-        installScript = File.read(".install")
-        eval(installScript)
+        doInstall = Thread.new {
+			installScript = File.read(".install")
+			$SAFE = 4
+			eval(installScript)
+		}
+		doInstall.join()
     end
 end
