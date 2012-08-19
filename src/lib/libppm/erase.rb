@@ -16,8 +16,8 @@
 require(File.join(File.expand_path(File.dirname(__FILE__)), "query.rb"))
 
 class Erase
-    def initialize()
-        @queue = []
+    def initialize(queue)
+        @queue = queue
         @packageQuery = Query.new()
     end
 
@@ -26,7 +26,7 @@ class Erase
     end
 
     def buildQueue(package)
-        @queue.push(package) if @packageQuery.isInstalled?(package)
+        @queue.set(package) if @packageQuery.isInstalled?(package)
     end
 
     def removePackage(package)

@@ -35,6 +35,14 @@ class PackageList
     def each
         0.upto(@size - 1) { |n| yield self[n] }
     end
+	
+	def empty?()
+		if (@size > 0)
+			return false
+		else
+			return true
+		end
+	end
     
     def include?(package)
         for value in self
@@ -46,8 +54,6 @@ class PackageList
         end
         return false
     end
-    
-    private 
     
     def set(variable)
         unless (include?(variable))
@@ -68,15 +74,4 @@ class PackageList
     
 end
 
-a = PackageList.new()
-begin
-    a.push("vim")
-    a.push("vim")
-    a.push("tomahawk")
-rescue  ConflictingEntry => error
-    puts(error.message)
-end
-if (a.include?("tomahawk"))
-    puts(a.to_a)
-end
 

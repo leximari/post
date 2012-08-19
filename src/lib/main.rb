@@ -21,6 +21,7 @@ require(File.join(directory, 'fetch.rb'))
 require(File.join(directory, 'libppm', 'erase.rb'))
 require(File.join(directory, 'libppm', 'query.rb'))
 require(File.join(directory, "libppm", "network.rb"))
+require(File.join(directory, "libppm", "packagelist.rb"))
 
 QUERY = Query.new()
 
@@ -33,25 +34,25 @@ def userConfirmation(queue)
     if (queue.empty?)
 		return false
     end
-    puts("Queue:       #{queue.join(" ")}")
+    puts("Queue:       #{queue.to_a().join(" ")}")
     print('Confirm:     [y/n] ')
     confirmTransaction = gets()
     return true if confirmTransaction.include?('y')
 end
 
 def installPackages(argumentPackages)
-    fetch = Fetch.new()
+	packageQueue = PackageList.new()
     for package in argumentPackages
-        fetch.buildQueue(package)
+		begin
+        	packageQueue.push(package)
+		rescue ConflictingEntry => error
+			puts(error.message)
+		end
     end
-    packageQueue = fetch.getQueue()
+	
+    fetch = Fetch.new(packageQueue)
 
-    conflict = nil
-    for package in packageQueue
-        conflict = true if (fetch.checkConflicts(package))
-    end
-
-    unless (packageQueue.empty?) or (conflict)
+    unless (packageQueue.empty?)
         if userConfirmation(packageQueue)
 			error = false
             for package in packageQueue
@@ -64,10 +65,13 @@ def installPackages(argumentPackages)
 end
 
 def removePackages(argumentPackages)
-    erase = Erase.new()
+	packageQueue = PackageList.new()
     for package in argumentPackages
-        erase.buildQueue(package)
+        packageQueue.set(package)
     end
+	
+	erase = Erase.new(packageQueue)
+	
     confirmation = userConfirmation(erase.getQueue())
     if (confirmation)
         for package in erase.getQueue()
@@ -85,7 +89,7 @@ end
 options = ARGV.options()
 options.set_summary_indent('    ')
 options.banner =    "Usage: post [OPTIONS] [PACKAGES]"
-options.version =   "Post 1.0 (1.0.0)"
+options.version =   "Post 1.0 (1.2.0)"
 options.define_head "Copyright (C) Thomas Chace 2011-2012 <ithomashc@gmail.com>"
 
 if (Process.uid == 0)
