@@ -26,10 +26,10 @@ require(File.join(directory, "libppm", "packagelist.rb"))
 
 QUERY = Query.new()
 
-if (Process.uid == 0) and fileExists(QUERY.getChannel()['url'] + '/info.tar')
+#if (Process.uid == 0) and fileExists(QUERY.getChannel()['url'] + '/info.tar')
     puts('Loading:     Downloading package information.')
-    QUERY.updateDatabase()
-end
+    #QUERY.updateDatabase()
+#end
 
 def userConfirmation(queue)
     if (queue.empty?)

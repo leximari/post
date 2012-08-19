@@ -30,7 +30,11 @@ class Erase
     end
 
     def removePackage(package)
-        eval(@packageQuery.getRemoveScript(package))
+        doErase = Thread.new {
+			removeScript = @packageQuery.getRemoveScript(package)
+			$SAFE = 4
+			eval(removeScript)
+		}
 
         packageFiles = @packageQuery.getFiles(package)
         @packageQuery.removePackage(package)
@@ -38,5 +42,6 @@ class Erase
         packageFiles.each() do |file|
             FileUtils.rm("#{@packageQuery.getRoot()}/#{file.delete("\n")}")
         end
+        doErase.join()
     end
 end
