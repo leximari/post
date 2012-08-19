@@ -71,6 +71,7 @@ begin
     load("src/lib/libppm/install.rb")
     load("src/lib/libppm/erase.rb")
     load("src/lib/libppm/query.rb")
+    load("src/lib/libppm/packagelist.rb")
 rescue
     puts("Count not load libraries.")
     puts("Testing: FAILED")
