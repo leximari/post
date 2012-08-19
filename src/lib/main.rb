@@ -14,6 +14,7 @@
 # along with Post.  If not, see <http://www.gnu.org/licenses/>.
 
 STDOUT.sync = true
+PWD = Dir.pwd()
 
 require('optparse')
 directory = File.expand_path(File.dirname(__FILE__))
@@ -38,6 +39,24 @@ def userConfirmation(queue)
     print('Confirm:     [y/n] ')
     confirmTransaction = gets()
     return true if confirmTransaction.include?('y')
+end
+
+def installLocalPackages(argumentPackages)
+    packageQueue = PackageList.new()
+    
+    if userConfirmation(argumentPackages)
+        fullPaths = []
+        for package in argumentPackages
+            path = File.join(File.expand_path(PWD), package)
+            fullPaths.push(path)
+        end
+        
+        for package in fullPaths
+            install = Install.new()
+            FileUtils.cp(package, "/tmp/post/#{File.basename(package)}")
+            install.installPackage(File.basename(package))
+        end
+    end
 end
 
 def installPackages(argumentPackages)
@@ -89,12 +108,14 @@ end
 options = ARGV.options()
 options.set_summary_indent('    ')
 options.banner =    "Usage: post [OPTIONS] [PACKAGES]"
-options.version =   "Post 1.0 (1.2.0)"
+options.version =   "Post 1.2 (1.2.1)"
 options.define_head "Copyright (C) Thomas Chace 2011-2012 <ithomashc@gmail.com>"
 
 if (Process.uid == 0)
     options.on('-i', '--fetch=', Array,
         'Install or update a package.')  { |args| installPackages(args) }
+    options.on('-li', '--localinstall=', Array,
+        'Install or update a package locally.')  { |args| installLocalPackages(args) }
     options.on('-r', '--erase=', Array,
          'Erase a package.') { |args| removePackages(args) }
     options.on('-u', '--upgrade',

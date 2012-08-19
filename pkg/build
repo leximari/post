@@ -6,4 +6,5 @@ spec = YAML::load(file)
 
 FileUtils.cd("Post")
 ENV['DESTDIR'] = "../data/"
+system("git checkout 1.0")
 system("env ruby build.rb")

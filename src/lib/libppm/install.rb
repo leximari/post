@@ -21,7 +21,6 @@ class Install
         FileUtils.rm_r("/tmp/post") if File.exists?("/tmp/post")
         FileUtils.mkdir("/tmp/post")
         FileUtils.cd("/tmp/post")
-        @queue = []
         @packageQuery = Query.new()
     end
 
