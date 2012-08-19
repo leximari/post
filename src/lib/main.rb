@@ -108,7 +108,7 @@ end
 options = ARGV.options()
 options.set_summary_indent('    ')
 options.banner =    "Usage: post [OPTIONS] [PACKAGES]"
-options.version =   "Post 1.3 (1.3.0)"
+options.version =   "Post 1.3 (1.3.5)"
 options.define_head "Copyright (C) Thomas Chace 2011-2012 <ithomashc@gmail.com>"
 
 if (Process.uid == 0)

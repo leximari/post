@@ -55,13 +55,17 @@ class Fetch
 
         filename = "#{package}-#{syncData['version']}-#{syncData['architecture']}.pst"
         url = channel['url'] + filename
-
-        if fileExists(url)
-            getFile(url, "/tmp/post/#{package}/#{filename}")
-            return true
-        else
-            return false
-        end
+		begin
+			if fileExists(url)
+				getFile(url, "/tmp/post/#{package}/#{filename}")
+				return true
+			else
+				return false
+			end
+        rescue SocketError => error
+			return false
+		end
+			
     end
 
     def installQueue()

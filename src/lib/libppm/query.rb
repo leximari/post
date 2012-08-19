@@ -16,6 +16,9 @@
 require('yaml')
 require('open-uri')
 require('fileutils')
+require('rbconfig')
+
+SYSARCH = RbConfig::CONFIG['host_cpu']
 
 class Query
     def initialize()
@@ -33,9 +36,14 @@ class Query
         if isInstalled?(package)
             packageData = File.join(@installDatabase, package, 'packageData')
             data = YAML::load_file(packageData)
-            data['conflicts'] = [] if data['conflicts'] == nil
-            data['dependencies'] = [] if data['dependencies'] == nil
-            data['version'] = data['version'].to_s()
+            if (data['architecture'].include?(SYSARCH))
+                data['conflicts'] = [] if data['conflicts'] == nil
+                data['dependencies'] = [] if data['dependencies'] == nil
+                data['version'] = data['version'].to_s()
+            else
+                data = {}
+                data['version'] = "0"
+            end
         else
             data = {}
             data['version'] = "0"
@@ -45,7 +53,7 @@ class Query
 
     def getSyncData(package)
         if isAvailable?(package)
-	        packageData = File.join(@syncDatabase, package)
+            packageData = File.join(@syncDatabase, package)
             data = YAML::load_file(packageData)
             data['conflicts'] = [] if data['conflicts'] == nil
             data['dependencies'] = [] if data['dependencies'] == nil
@@ -53,7 +61,7 @@ class Query
         else
             data = {}
             data['version'] = "0"
-	    end
+        end
         return data
     end
 
@@ -106,7 +114,7 @@ class Query
 
     def upgradeAvailable?(package)
         return true if (isAvailable?(package)) and
-                (getSyncData(package)['version'] > getData(package)['version'])
+            (getSyncData(package)['version'] > getData(package)['version'])
     end
 
     def getChannel()
