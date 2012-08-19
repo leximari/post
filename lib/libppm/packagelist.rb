@@ -13,7 +13,7 @@
 # You should have received a copy of the GNU Lesser General Public License
 # along with Post.  If not, see <http://www.gnu.org/licenses/>.
 
-require(File.join(File.expand_path(File.dirname(__FILE__)), "query.rb"))
+require(File.join(File.expand_path(File.dirname(__FILE__)), "packagedata.rb"))
 
 class DuplicateEntry < Exception
 end
@@ -26,12 +26,12 @@ class PackageList
 
     def initialize
         @size = 0
-        @packageQuery = Query.new()
+        @packageDataBase = PackageDataBase.new()
     end
 
     def push(package)
-        if (@packageQuery.upgradeAvailable?(package))
-            for dependency in @packageQuery.getSyncData(package)['dependencies']
+        if (@packageDataBase.upgradeAvailable?(package))
+            for dependency in @packageDataBase.getSyncData(package)['dependencies']
                 push(dependency)
             end
             set(package)
@@ -78,7 +78,7 @@ class PackageList
     end
     
     def conflict?(variable)
-        for conflict in @packageQuery.getSyncData(variable)['conflicts']
+        for conflict in @packageDataBase.getSyncData(variable)['conflicts']
             if include?(conflict)
                 raise ConflictingEntry, "Error:      '#{conflict}' conflicts with '#{variable}'"
             end

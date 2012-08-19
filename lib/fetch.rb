@@ -14,14 +14,14 @@
 # along with Post.  If not, see <http://www.gnu.org/licenses/>.
 
 require(File.join(File.expand_path(File.dirname(__FILE__)), "libppm", "install.rb"))
-require(File.join(File.expand_path(File.dirname(__FILE__)), "libppm", "query.rb"))
+require(File.join(File.expand_path(File.dirname(__FILE__)), "libppm", "packagedata.rb"))
 require(File.join(File.expand_path(File.dirname(__FILE__)), "libppm", "tools.rb"))
 
 class Fetch
     def initialize(queue)
         @installObject = Install.new()
         @queue = queue
-        @packageQuery = Query.new()
+        @packageDataBase = PackageDataBase.new()
     end
 
     def getQueue()
@@ -50,8 +50,8 @@ class Fetch
     def fetchPackage(package)
         FileUtils.mkdir("/tmp/post/#{package}")
 
-        syncData = @packageQuery.getSyncData(package)
-        channel = @packageQuery.getChannel()
+        syncData = @packageDataBase.getSyncData(package)
+        channel = @packageDataBase.getChannel()
 
         filename = "#{package}-#{syncData['version']}-#{syncData['architecture']}.pst"
         url = channel['url'] + filename
@@ -71,7 +71,7 @@ class Fetch
     def installQueue()
         for package in @queue
             FileUtils.cd("/tmp/post/#{package}")
-            syncData = @packageQuery.getSyncData(package)
+            syncData = @packageDataBase.getSyncData(package)
             filename = "#{package}-#{syncData['version']}-#{syncData['architecture']}.pst"
             puts("Installing:  #{package}")
             @installObject.installPackage(filename)

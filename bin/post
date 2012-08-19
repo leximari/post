@@ -1,3 +1,4 @@
+#!/usr/bin/ruby
 # Copyright (C) Thomas Chace 2011-2012 <ithomashc@gmail.com>
 # This file is part of Post.
 # Post is free software: you can redistribute it and/or modify
@@ -16,20 +17,15 @@
 STDOUT.sync = true
 PWD = Dir.pwd()
 
+require('post')
 require('optparse')
-directory = File.expand_path(File.dirname(__FILE__))
-require(File.join(directory, 'fetch.rb'))
-require(File.join(directory, 'libppm', 'erase.rb'))
-require(File.join(directory, 'libppm', 'query.rb'))
-require(File.join(directory, "libppm", "tools.rb"))
-require(File.join(directory, "libppm", "packagelist.rb"))
 
-QUERY = Query.new()
+DATA = PackageDataBase.new()
 
-#if (Process.uid == 0) and fileExists(QUERY.getChannel()['url'] + '/info.tar')
+if (Process.uid == 0) and fileExists(DATA.getChannel()['url'] + '/info.tar')
     puts('Loading:     Downloading package information.')
-    #QUERY.updateDatabase()
-#end
+    DATA.updateDatabase()
+end
 
 def userConfirmation(queue)
     if (queue.empty?)
@@ -86,7 +82,7 @@ end
 def removePackages(argumentPackages)
     packageQueue = PackageList.new()
     for package in argumentPackages
-        packageQueue.set(package) if QUERY.isInstalled?(package)
+        packageQueue.set(package) if DATA.isInstalled?(package)
     end
     
     erase = Erase.new(packageQueue)
@@ -101,7 +97,7 @@ def removePackages(argumentPackages)
 end
 
 def upgradePackages()
-    packages = QUERY.getInstalledPackages()
+    packages = DATA.getInstalledPackages()
     installPackages(packages)
 end
 

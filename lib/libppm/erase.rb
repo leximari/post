@@ -13,12 +13,12 @@
 # You should have received a copy of the GNU Lesser General Public License
 # along with Post.  If not, see <http://www.gnu.org/licenses/>.
 
-require(File.join(File.expand_path(File.dirname(__FILE__)), "query.rb"))
+require(File.join(File.expand_path(File.dirname(__FILE__)), "packagedata.rb"))
 
 class Erase
     def initialize(queue)
         @queue = queue
-        @packageQuery = Query.new()
+        @packageDataBase = PackageDataBase.new()
     end
 
     def getQueue()
@@ -26,21 +26,21 @@ class Erase
     end
 
     def buildQueue(package)
-        @queue.set(package) if @packageQuery.isInstalled?(package)
+        @queue.set(package) if @packageDataBase.isInstalled?(package)
     end
 
     def removePackage(package)
         doErase = Thread.new {
-			removeScript = @packageQuery.getRemoveScript(package)
+			removeScript = @packageDataBase.getRemoveScript(package)
 			$SAFE = 4
 			eval(removeScript)
 		}
 
-        packageFiles = @packageQuery.getFiles(package)
-        @packageQuery.removePackage(package)
+        packageFiles = @packageDataBase.getFiles(package)
+        @packageDataBase.removePackage(package)
 
         packageFiles.each() do |file|
-            FileUtils.rm("#{@packageQuery.getRoot()}/#{file.delete("\n")}")
+            FileUtils.rm("#{@packageDataBase.getRoot()}/#{file.delete("\n")}")
         end
         doErase.join()
     end
