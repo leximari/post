@@ -26,13 +26,13 @@ require(File.join(directory, "libppm", "packagelist.rb"))
 QUERY = Query.new()
 
 if (Process.uid == 0) and fileExists(QUERY.getChannel()['url'] + '/info.tar')
-	puts('Loading:     Downloading package information.')
-	QUERY.updateDatabase()
+    puts('Loading:     Downloading package information.')
+    QUERY.updateDatabase()
 end
 
 def userConfirmation(queue)
     if (queue.empty?)
-		return false
+        return false
     end
     puts("Queue:       #{queue.to_a().join(" ")}")
     print('Confirm:     [y/n] ')
@@ -41,20 +41,20 @@ def userConfirmation(queue)
 end
 
 def installPackages(argumentPackages)
-	packageQueue = PackageList.new()
+    packageQueue = PackageList.new()
     for package in argumentPackages
-		begin
-        	packageQueue.push(package)
-		rescue ConflictingEntry => error
-			puts(error.message)
-		end
+        begin
+            packageQueue.push(package)
+        rescue ConflictingEntry => error
+            puts(error.message)
+        end
     end
-	
+    
     fetch = Fetch.new(packageQueue)
 
     unless (packageQueue.empty?)
         if userConfirmation(packageQueue)
-			error = false
+            error = false
             for package in packageQueue
                 error = true if not fetch.fetchPackage(package)
             end
@@ -65,13 +65,13 @@ def installPackages(argumentPackages)
 end
 
 def removePackages(argumentPackages)
-	packageQueue = PackageList.new()
+    packageQueue = PackageList.new()
     for package in argumentPackages
         packageQueue.set(package)
     end
-	
-	erase = Erase.new(packageQueue)
-	
+    
+    erase = Erase.new(packageQueue)
+    
     confirmation = userConfirmation(erase.getQueue())
     if (confirmation)
         for package in erase.getQueue()

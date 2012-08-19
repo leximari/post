@@ -49,14 +49,14 @@ class PackageList
     def each
         0.upto(@size - 1) { |n| yield self[n] }
     end
-	
-	def empty?()
-		if (@size > 0)
-			return false
-		else
-			return true
-		end
-	end
+    
+    def empty?()
+        if (@size > 0)
+            return false
+        else
+            return true
+        end
+    end
     
     def include?(package)
         for value in self
