@@ -114,7 +114,7 @@ options.define_head "Copyright (C) Thomas Chace 2011-2012 <ithomashc@gmail.com>"
 if (Process.uid == 0)
     options.on('-i', '--fetch=', Array,
         'Install or update a package.')  { |args| installPackages(args) }
-    options.on('-li', '--localinstall=', Array,
+    options.on('-e', '--localinstall=', Array,
         'Install or update a package locally.')  { |args| installLocalPackages(args) }
     options.on('-r', '--erase=', Array,
          'Erase a package.') { |args| removePackages(args) }
