@@ -18,25 +18,14 @@ require(File.join(File.expand_path(File.dirname(__FILE__)), "libppm", "query.rb"
 require(File.join(File.expand_path(File.dirname(__FILE__)), "libppm", "network.rb"))
 
 class Fetch
-    def initialize()
+    def initialize(queue)
         @installObject = Install.new()
-        @queue = []
+        @queue = queue
         @packageQuery = Query.new()
     end
 
     def getQueue()
         @queue
-    end
-
-    def checkConflicts(package)
-        conflictStatus = false
-        for conflict in @packageQuery.getSyncData(package)['conflicts']
-            if @queue.include?(conflict)
-                puts("Error:      '#{conflict} conflicts with '#{package}'")
-                conflictStatus = true
-            end
-        end
-        return conflictStatus
     end
 
     def getFile(url, file)
@@ -56,15 +45,6 @@ class Fetch
         end
         puts("\rFetching:    #{filename} [100.0%]")
         savedFile.close()
-    end
-
-    def buildQueue(package)
-        if (@packageQuery.upgradeAvailable?(package))
-            for dependency in @packageQuery.getSyncData(package)['dependencies']
-                buildQueue(dependency)
-            end
-            @queue.push(package) unless @queue.include?(package)
-        end
     end
 
     def fetchPackage(package)
