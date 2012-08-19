@@ -1,4 +1,4 @@
-# Copyright (C) Thomas Chace 2010-2011 <ithomashc@gmail.com>
+# Copyright (C) Thomas Chace 2010-2012 <ithomashc@gmail.com>
 # Ruby Build System
 #
 # Redistribution and use in source and binary forms, with or without
