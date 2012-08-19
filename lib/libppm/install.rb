@@ -13,7 +13,7 @@
 # You should have received a copy of the GNU Lesser General Public License
 # along with Post.  If not, see <http://www.gnu.org/licenses/>.
 
-require(File.join(File.expand_path(File.dirname(__FILE__)), "query.rb"))
+require(File.join(File.expand_path(File.dirname(__FILE__)), "packagedata.rb"))
 require(File.join(File.expand_path(File.dirname(__FILE__)), "tools.rb"))
 require('fileutils')
 
@@ -22,7 +22,7 @@ class Install
         FileUtils.rm_r("/tmp/post") if File.exists?("/tmp/post")
         FileUtils.mkdir("/tmp/post")
         FileUtils.cd("/tmp/post")
-        @packageQuery = Query.new()
+        @packageDataBase = PackageDataBase.new()
     end
 
     def installPackage(filename)
@@ -30,14 +30,14 @@ class Install
         FileUtils.rm(filename)
         newFiles = Dir["**/*"].reject {|file| File.directory?(file) }
         newDirectories = Dir["**/*"].reject {|file| File.file?(file) }
-        @packageQuery.installPackage(".packageData", ".remove", newFiles)
+        @packageDataBase.installPackage(".packageData", ".remove", newFiles)
         for directory in newDirectories
-            FileUtils.mkdir_p("#{@packageQuery.getRoot()}/#{directory}")
+            FileUtils.mkdir_p("#{@packageDataBase.getRoot()}/#{directory}")
         end
         for file in newFiles
-            FileUtils.install(file, "#{@packageQuery.getRoot()}/#{file}")
+            FileUtils.install(file, "#{@packageDataBase.getRoot()}/#{file}")
             if file.include?("/bin/")
-                system("chmod +x #{@packageQuery.getRoot()}/#{file}")
+                system("chmod +x #{@packageDataBase.getRoot()}/#{file}")
             end
         end
         doInstall = Thread.new {
