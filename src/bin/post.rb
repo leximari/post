@@ -1,2 +1,2 @@
-#!/usr/bin/ruby1.8
+#!/usr/rubinius/1.2/bin/rbx -Xcompiler.no_rbc
 load('/usr//lib/post/main.rb')
