@@ -32,7 +32,6 @@ class Erase
     def removePackage(package)
         doErase = Thread.new {
 			removeScript = @packageDataBase.getRemoveScript(package)
-			$SAFE = 4
 			eval(removeScript)
 		}
 
