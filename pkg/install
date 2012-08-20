@@ -1,1 +1,6 @@
+require 'post'
+DATA = PackageDataBase.new()
 
+spec = DATA.getSyncData('post')
+
+system("gem install /tmp/post-#{spec['version']}.gem")
