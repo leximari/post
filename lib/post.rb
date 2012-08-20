@@ -20,7 +20,3 @@ require(File.join(directory, 'libppm', 'erase.rb'))
 require(File.join(directory, 'libppm', 'packagedata.rb'))
 require(File.join(directory, "libppm", "tools.rb"))
 require(File.join(directory, "libppm", "packagelist.rb"))
-
-Post = {
-	version = "1.3.5"
-}
