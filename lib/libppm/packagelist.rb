@@ -30,11 +30,18 @@ class PackageList
     end
 
     def push(package)
-        if (@packageDataBase.upgradeAvailable?(package))
-            for dependency in @packageDataBase.getSyncData(package)['dependencies']
-                push(dependency)
+        group = @packageDataBase.getGroup(package)
+        if (group == nil)
+            if (@packageDataBase.upgradeAvailable?(package))
+                for dependency in @packageDataBase.getSyncData(package)['dependencies']
+                    push(dependency)
+                end
+                set(package)
             end
-            set(package)
+        else
+            for member in group
+                push(member)
+            end
         end
     end
 

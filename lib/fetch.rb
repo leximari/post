@@ -60,30 +60,30 @@ class Fetch
 
         filename = "#{package}-#{syncData['version']}-#{syncData['architecture']}.pst"
         url = channel['url'] + filename
-		begin
-			if fileExists(url)
-				getFile(url, "/tmp/post/#{package}/#{filename}")
-				getFile(url + ".sha256", "/tmp/post/#{package}/#{filename}.sha256")
-				return true
-			else
-				return false
-			end
+        begin
+            if fileExists(url)
+                getFile(url, "/tmp/post/#{package}/#{filename}")
+                getFile(url + ".sha256", "/tmp/post/#{package}/#{filename}.sha256")
+                return true
+            else
+                return false
+            end
         rescue SocketError => error
-			return false
-		end
-			
+            return false
+        end
+            
     end
 
     def installQueue()
         for package in @queue
-			FileUtils.cd("/tmp/post/#{package}")
-			syncData = @packageDataBase.getSyncData(package)
-			filename = "#{package}-#{syncData['version']}-#{syncData['architecture']}.pst"
-			fileHash = Digest::SHA256.hexdigest(open(filename,"r").read())
-			realHash = File.open("#{filename}.sha256").read().strip()
-			unless (fileHash == realHash)
-				raise MismatchedHash, "Error:       #{filename} is corrupt."
-			end
+            FileUtils.cd("/tmp/post/#{package}")
+            syncData = @packageDataBase.getSyncData(package)
+            filename = "#{package}-#{syncData['version']}-#{syncData['architecture']}.pst"
+            fileHash = Digest::SHA256.hexdigest(open(filename,"r").read())
+            realHash = File.open("#{filename}.sha256").read().strip()
+            unless (fileHash == realHash)
+                raise MismatchedHash, "Error:       #{filename} is corrupt."
+            end
             puts("Installing:  #{package}")
             @installObject.installPackage(filename)
         end

@@ -22,7 +22,7 @@ require('optparse')
 
 DATA = PackageDataBase.new()
 
-if (Process.uid == 0) #and fileExists(DATA.getChannel()['url'] + '/info.tar')
+if (Process.uid == 0) and fileExists(DATA.getChannel()['url'] + '/info.tar')
     puts('Loading:     Downloading package information.')
     DATA.updateDatabase()
 end
@@ -74,11 +74,11 @@ def installPackages(argumentPackages)
                 error = true if not fetch.fetchPackage(package)
             end
             begin
-				fetch.installQueue() unless (error)
-				puts("Error:       All files were not fetched.") if (error)
-			rescue MismatchedHash => error
-				puts error.message
-			end
+                fetch.installQueue() unless (error)
+                puts("Error:       All files were not fetched.") if (error)
+            rescue MismatchedHash => error
+                puts error.message
+            end
         end
     end
 end
