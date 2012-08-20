@@ -13,6 +13,11 @@
 # You should have received a copy of the GNU Lesser General Public License
 # along with Post.  If not, see <http://www.gnu.org/licenses/>.
 
+class MismatchedHash < Exception
+end
+
+require('digest')
+
 require(File.join(File.expand_path(File.dirname(__FILE__)), "libppm", "install.rb"))
 require(File.join(File.expand_path(File.dirname(__FILE__)), "libppm", "packagedata.rb"))
 require(File.join(File.expand_path(File.dirname(__FILE__)), "libppm", "tools.rb"))
@@ -58,6 +63,7 @@ class Fetch
 		begin
 			if fileExists(url)
 				getFile(url, "/tmp/post/#{package}/#{filename}")
+				getFile(url + ".sha256", "/tmp/post/#{package}/#{filename}.sha256")
 				return true
 			else
 				return false
@@ -70,9 +76,14 @@ class Fetch
 
     def installQueue()
         for package in @queue
-            FileUtils.cd("/tmp/post/#{package}")
-            syncData = @packageDataBase.getSyncData(package)
-            filename = "#{package}-#{syncData['version']}-#{syncData['architecture']}.pst"
+			FileUtils.cd("/tmp/post/#{package}")
+			syncData = @packageDataBase.getSyncData(package)
+			filename = "#{package}-#{syncData['version']}-#{syncData['architecture']}.pst"
+			fileHash = Digest::SHA256.hexdigest(open(filename,"r").read())
+			realHash = File.open("#{filename}.sha256").read().strip()
+			unless (fileHash == realHash)
+				raise MismatchedHash, "Error:       #{filename} is corrupt."
+			end
             puts("Installing:  #{package}")
             @installObject.installPackage(filename)
         end
