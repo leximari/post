@@ -20,7 +20,7 @@ require('rbconfig')
 
 class PackageDataBase
     def initialize()
-		@sysArch = RbConfig::CONFIG['host_cpu']
+        @sysArch = RbConfig::CONFIG['host_cpu']
         @root = '/'
         @databaseLocation = "#{@root}/var/lib/post/"
         @installDatabase = File.join(@databaseLocation, "installed")
@@ -96,7 +96,14 @@ class PackageDataBase
     end
 
     def getAvailablePackages()
-        return Dir["#{@syncDatabase}/*"].map() { |package| File.basename(package) }
+        list = Dir["#{@syncDatabase}/*"].map() { |package| File.basename(package) }
+        list.delete("repo.yaml")
+        return list
+    end
+
+    def getGroup(group)
+        repo = YAML::load_file("#{@syncDatabase}/repo.yaml")
+        return repo[group]
     end
 
     def getInstalledPackages()
@@ -133,6 +140,12 @@ class PackageDataBase
         end
         system("tar", "xf", "info.tar")
         FileUtils.cp_r('info', '/var/lib/post/available')
+        
+        sourceUrl = getChannel()['url'] + '/repo.yaml'
+        File.open('repo.yaml', 'w') do |file|
+            file.puts(open(sourceUrl).read())
+        end
+        FileUtils.cp_r('repo.yaml', '/var/lib/post/available/repo.yaml')
     end
 end
 
