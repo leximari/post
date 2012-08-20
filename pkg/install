@@ -1,6 +1,4 @@
-require 'post'
-DATA = PackageDataBase.new()
-
-spec = DATA.getSyncData('post')
+file = open(".packageData", 'r')
+spec = YAML::load(file)
 
 system("gem install /tmp/post-#{spec['version']}.gem")

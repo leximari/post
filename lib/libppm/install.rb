@@ -16,6 +16,7 @@
 require(File.join(File.expand_path(File.dirname(__FILE__)), "packagedata.rb"))
 require(File.join(File.expand_path(File.dirname(__FILE__)), "tools.rb"))
 require('fileutils')
+require('yaml')
 
 class Install
     def initialize()
@@ -42,7 +43,6 @@ class Install
         end
         doInstall = Thread.new {
 			installScript = File.read(".install")
-			$SAFE = 4
 			eval(installScript)
 		}
 		doInstall.join()
