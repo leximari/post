@@ -15,6 +15,9 @@
 
 require(File.join(File.expand_path(File.dirname(__FILE__)), "packagedata.rb"))
 
+class MissingFile < Exception
+end
+
 class Erase
     def initialize(queue)
         @queue = queue
@@ -29,18 +32,20 @@ class Erase
         @queue.set(package) if @packageDataBase.isInstalled?(package)
     end
 
+    def removeScript(package)
+        removeScript = @packageDataBase.getRemoveScript(package)
+        eval(removeScript)
+    end
+
     def removePackage(package)
-        doErase = Thread.new {
-			removeScript = @packageDataBase.getRemoveScript(package)
-			eval(removeScript)
-		}
 
         packageFiles = @packageDataBase.getFiles(package)
         @packageDataBase.removePackage(package)
 
         packageFiles.each() do |file|
-            FileUtils.rm("#{@packageDataBase.getRoot()}/#{file.delete("\n")}")
+            if (FileTest.exists(file))
+                FileUtils.rm("#{@packageDataBase.getRoot()}/#{file.delete("\n")}")
+            end
         end
-        doErase.join()
     end
 end
