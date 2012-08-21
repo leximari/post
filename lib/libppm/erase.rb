@@ -43,7 +43,7 @@ class Erase
         @packageDataBase.removePackage(package)
 
         packageFiles.each() do |file|
-            if (FileTest.exists(file))
+            if (FileTest.exists?(file))
                 FileUtils.rm("#{@packageDataBase.getRoot()}/#{file.delete("\n")}")
             end
         end
