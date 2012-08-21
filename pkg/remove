@@ -1,1 +1,1 @@
-system("gem uninstall post")
+system("gem uninstall post -x")

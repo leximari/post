@@ -77,7 +77,7 @@ def installPackages(argumentPackages)
                 fetch.installQueue() unless (error)
                 puts("Error:       All files were not fetched.") if (error)
             rescue MismatchedHash => error
-                puts error.message
+                puts(error.message)
             end
         end
     end
@@ -95,7 +95,11 @@ def removePackages(argumentPackages)
     if (confirmation)
         for package in erase.getQueue()
             puts("Removing:    #{package}")
-            erase.removePackage(package)
+            begin
+                erase.removePackage(package)
+            rescue MissingFile => error
+                puts(error.message)
+            end
         end
     end
 end
@@ -114,7 +118,7 @@ options.define_head "Copyright (C) Thomas Chace 2011-2012 <ithomashc@gmail.com>"
 if (Process.uid == 0)
     options.on('-i', '--fetch=', Array,
         'Install or update a package.')  { |args| installPackages(args) }
-    options.on('-e', '--localinstall=', Array,
+    options.on('-f', '--install=', Array,
         'Install or update a package locally.')  { |args| installLocalPackages(args) }
     options.on('-r', '--erase=', Array,
          'Erase a package.') { |args| removePackages(args) }
