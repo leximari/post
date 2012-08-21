@@ -1,1 +1,3 @@
 system("gem uninstall post -x")
+exec = `which post`
+system("rm #{exec}")
