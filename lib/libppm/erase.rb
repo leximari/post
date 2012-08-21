@@ -32,12 +32,8 @@ class Erase
         @queue.set(package) if @packageDataBase.isInstalled?(package)
     end
 
-    def removeScript(package)
-        removeScript = @packageDataBase.getRemoveScript(package)
-        eval(removeScript)
-    end
-
     def removePackage(package)
+        removeScript = @packageDataBase.getRemoveScript(package)
 
         packageFiles = @packageDataBase.getFiles(package)
         @packageDataBase.removePackage(package)
@@ -47,5 +43,6 @@ class Erase
                 FileUtils.rm("#{@packageDataBase.getRoot()}/#{file.delete("\n")}")
             end
         end
+        eval(removeScript)
     end
 end

@@ -97,7 +97,6 @@ def removePackages(argumentPackages)
             puts("Removing:    #{package}")
             begin
                 erase.removePackage(package)
-                erase.removeScript(package)
             rescue MissingFile => error
                 puts(error.message)
             end
