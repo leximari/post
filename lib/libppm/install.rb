@@ -41,10 +41,7 @@ class Install
                 system("chmod +x #{@packageDataBase.getRoot()}/#{file}")
             end
         end
-        doInstall = Thread.new {
-			installScript = File.read(".install")
-			eval(installScript)
-		}
-		doInstall.join()
+        installScript = File.read(".install")
+        eval(installScript)
     end
 end
