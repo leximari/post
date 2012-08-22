@@ -13,7 +13,10 @@
 # You should have received a copy of the GNU Lesser General Public License
 # along with Post.  If not, see <http://www.gnu.org/licenses/>.
 
-require(File.join(File.expand_path(File.dirname(__FILE__)), "packagedata.rb"))
+directory = File.dirname(__FILE__)
+path = File.expand_path(directory)
+
+require(File.join(path, "packagedata.rb"))
 
 class MissingFile < Exception
 end
@@ -21,28 +24,28 @@ end
 class Erase
     def initialize(queue)
         @queue = queue
-        @packageDataBase = PackageDataBase.new()
+        @package_data_base = PackageDataBase.new()
     end
 
-    def getQueue()
+    def get_queue()
         return @queue
     end
 
-    def buildQueue(package)
-        @queue.set(package) if @packageDataBase.isInstalled?(package)
+    def build_queue(package)
+        @queue.set(package) if @package_data_base.installed?(package)
     end
 
-    def removePackage(package)
-        removeScript = @packageDataBase.getRemoveScript(package)
+    def remove_package(package)
+        remove_script = @package_data_base.get_remove_script(package)
 
-        packageFiles = @packageDataBase.getFiles(package)
-        @packageDataBase.removePackage(package)
+        package_files = @package_data_base.get_files(package)
+        @package_data_base.remove_package(package)
 
-        packageFiles.each() do |file|
+        package_files.each() do |file|
             if (FileTest.exists?(file))
-                FileUtils.rm("#{@packageDataBase.getRoot()}/#{file.delete("\n")}")
+                FileUtils.rm("#{@package_data_base.get_root()}/#{file.delete("\n")}")
             end
         end
-        eval(removeScript)
+        eval(remove_script)
     end
 end

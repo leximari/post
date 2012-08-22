@@ -13,10 +13,11 @@
 # You should have received a copy of the GNU Lesser General Public License
 # along with Post.  If not, see <http://www.gnu.org/licenses/>.
 
-directory = File.expand_path(File.dirname(__FILE__))
+directory = File.dirname(__FILE__)
+path = File.expand_path(directory)
 
-require(File.join(directory, 'fetch.rb'))
-require(File.join(directory, 'libppm', 'erase.rb'))
-require(File.join(directory, 'libppm', 'packagedata.rb'))
-require(File.join(directory, "libppm", "tools.rb"))
-require(File.join(directory, "libppm", "packagelist.rb"))
+require(File.join(path, 'fetch.rb'))
+require(File.join(path, 'erase.rb'))
+require(File.join(path, 'packagedata.rb'))
+require(File.join(path, "tools.rb"))
+require(File.join(path, "packagelist.rb"))

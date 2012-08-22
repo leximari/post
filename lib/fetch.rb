@@ -13,57 +13,60 @@
 # You should have received a copy of the GNU Lesser General Public License
 # along with Post.  If not, see <http://www.gnu.org/licenses/>.
 
+directory = File.dirname(__FILE__)
+path = File.expand_path(directory)
+
 class MismatchedHash < Exception
 end
 
 require('digest')
 
-require(File.join(File.expand_path(File.dirname(__FILE__)), "libppm", "install.rb"))
-require(File.join(File.expand_path(File.dirname(__FILE__)), "libppm", "packagedata.rb"))
-require(File.join(File.expand_path(File.dirname(__FILE__)), "libppm", "tools.rb"))
+require(File.join(path, "install.rb"))
+require(File.join(path, "packagedata.rb"))
+require(File.join(path, "tools.rb"))
 
 class Fetch
     def initialize(queue)
-        @installObject = Install.new()
+        @install_object = Install.new()
         @queue = queue
-        @packageDataBase = PackageDataBase.new()
+        @package_data_base = PackageDataBase.new()
     end
 
-    def getQueue()
+    def get_queue()
         @queue
     end
 
-    def getFile(url, file)
+    def get_file(url, file)
         url = URI.parse(url)
         filename = File.basename(file)
-        savedFile = File.open(file, 'w')
+        saved_file = File.open(file, 'w')
 
         Net::HTTP.new(url.host, url.port).request_get(url.path) do |response|
             length = response['Content-Length'].to_i()
-            savedFileLength = 0.0
+            saved_file_length = 0.0
             response.read_body do |fragment|
-                savedFile << fragment
-                savedFileLength += fragment.length()
-                progressData = (savedFileLength / length) * 100
-                print("\rFetching:    #{filename} [#{progressData.round()}%]")
+                saved_file << fragment
+                saved_file_length += fragment.length()
+                progress_data = (saved_file_length / length) * 100
+                print("\rFetching:    #{filename} [#{progress_data.round()}%]")
             end
         end
         puts("\rFetching:    #{filename} [100.0%]")
-        savedFile.close()
+        saved_file.close()
     end
 
-    def fetchPackage(package)
+    def fetch_package(package)
         FileUtils.mkdir("/tmp/post/#{package}")
 
-        syncData = @packageDataBase.getSyncData(package)
-        channel = @packageDataBase.getChannel()
+        sync_data = @package_data_base.get_sync_data(package)
+        channel = @package_data_base.get_channel()
 
-        filename = "#{package}-#{syncData['version']}-#{syncData['architecture']}.pst"
+        filename = "#{package}-#{sync_data['version']}-#{sync_data['architecture']}.pst"
         url = channel['url'] + filename
         begin
-            if fileExists(url)
-                getFile(url, "/tmp/post/#{package}/#{filename}")
-                getFile(url + ".sha256", "/tmp/post/#{package}/#{filename}.sha256")
+            if file_exists(url)
+                get_file(url, "/tmp/post/#{package}/#{filename}")
+                get_file(url + ".sha256", "/tmp/post/#{package}/#{filename}.sha256")
                 return true
             else
                 return false
@@ -74,18 +77,18 @@ class Fetch
             
     end
 
-    def installQueue()
+    def install_queue()
         for package in @queue
             FileUtils.cd("/tmp/post/#{package}")
-            syncData = @packageDataBase.getSyncData(package)
-            filename = "#{package}-#{syncData['version']}-#{syncData['architecture']}.pst"
-            fileHash = Digest::SHA256.hexdigest(open(filename,"r").read())
-            realHash = File.open("#{filename}.sha256").read().strip()
-            unless (fileHash == realHash)
+            sync_data = @package_data_base.get_sync_data(package)
+            filename = "#{package}-#{sync_data['version']}-#{sync_data['architecture']}.pst"
+            file_hash = Digest::SHA256.hexdigest(open(filename,"r").read())
+            real_hash = File.open("#{filename}.sha256").read().strip()
+            unless (file_hash == real_hash)
                 raise MismatchedHash, "Error:       #{filename} is corrupt."
             end
             puts("Installing:  #{package}")
-            @installObject.installPackage(filename)
+            @install_object.install_package(filename)
         end
     end
 end

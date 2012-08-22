@@ -18,7 +18,7 @@ require('net/http')
 require('rubygems')
 require('rubygems/package')
 
-def fileExists(url)
+def file_exists(url)
 	url = URI.parse(url)
 	Net::HTTP.start(url.host, url.port) do |http|
 		return http.head(url.request_uri).code == "200"

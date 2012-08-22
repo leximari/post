@@ -13,8 +13,11 @@
 # You should have received a copy of the GNU Lesser General Public License
 # along with Post.  If not, see <http://www.gnu.org/licenses/>.
 
-require(File.join(File.expand_path(File.dirname(__FILE__)), "packagedata.rb"))
-require(File.join(File.expand_path(File.dirname(__FILE__)), "tools.rb"))
+directory = File.dirname(__FILE__)
+path = File.expand_path(directory)
+
+require(File.join(path, "packagedata.rb"))
+require(File.join(path, "tools.rb"))
 require('fileutils')
 require('yaml')
 
@@ -23,25 +26,25 @@ class Install
         FileUtils.rm_r("/tmp/post") if File.exists?("/tmp/post")
         FileUtils.mkdir("/tmp/post")
         FileUtils.cd("/tmp/post")
-        @packageDataBase = PackageDataBase.new()
+        @package_data_base = PackageDataBase.new()
     end
 
-    def installPackage(filename)
+    def install_package(filename)
         extract(filename)
         FileUtils.rm(filename)
-        newFiles = Dir["**/*"].reject {|file| File.directory?(file) }
-        newDirectories = Dir["**/*"].reject {|file| File.file?(file) }
-        @packageDataBase.installPackage(".packageData", ".remove", newFiles)
-        for directory in newDirectories
-            FileUtils.mkdir_p("#{@packageDataBase.getRoot()}/#{directory}")
+        new_files = Dir["**/*"].reject {|file| File.directory?(file) }
+        new_directories = Dir["**/*"].reject {|file| File.file?(file) }
+        @package_data_base.install_package(".packageData", ".remove", new_files)
+        for directory in new_directories
+            FileUtils.mkdir_p("#{@package_data_base.get_root()}/#{directory}")
         end
-        for file in newFiles
-            FileUtils.install(file, "#{@packageDataBase.getRoot()}/#{file}")
+        for file in new_files
+            FileUtils.install(file, "#{@package_data_base.get_root()}/#{file}")
             if file.include?("/bin/")
-                system("chmod +x #{@packageDataBase.getRoot()}/#{file}")
+                system("chmod +x #{@package_data_base.get_root()}/#{file}")
             end
         end
-        installScript = File.read(".install")
-        eval(installScript)
+        install_script = File.read(".install")
+        eval(install_script)
     end
 end
