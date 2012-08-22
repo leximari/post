@@ -138,7 +138,7 @@ class PackageDataBase
         File.open('info.tar', 'w') do |file|
             file.puts(open(source_url).read())
         end
-        system("tar", "xf", "info.tar")
+        extract("info.tar")
         FileUtils.cp_r('info', '/var/lib/post/available')
         
         source_url = get_channel()['url'] + '/repo.yaml'
