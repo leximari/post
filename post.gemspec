@@ -10,10 +10,12 @@ date = "#{time.year}-#{month}-#{time.day}"
 Gem::Specification.new do |s|
     s.name        = 'post'
     s.executables << 'post'
-    s.version     = '1.5.1'
+    s.version     = '1.6.0'
+    s.add_dependency('archive-tar-minitar')
+    s.add_dependency('ruby-xz')
     s.date        = date
     s.summary     = "Package manager in pure ruby."
-    s.description = "Small, Fast package manager in pure Ruby."
+    s.description = "Small, fast package manager in pure Ruby."
     s.authors     = ["Thomas Chace"]
     s.email       = 'tchacex@gmail.com'
     s.files       = ["lib/post.rb", "lib/fetch.rb", "lib/erase.rb",
