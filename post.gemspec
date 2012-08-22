@@ -16,9 +16,9 @@ Gem::Specification.new do |s|
     s.description = "Small, Fast package manager in pure Ruby."
     s.authors     = ["Thomas Chace"]
     s.email       = 'tchacex@gmail.com'
-    s.files       = ["lib/post.rb", "lib/fetch.rb", "lib/libppm/erase.rb",
-            "lib/libppm/install.rb", "lib/libppm/packagelist.rb", "lib/libppm/packagedata.rb",
-            "lib/libppm/tools.rb"]
+    s.files       = ["lib/post.rb", "lib/fetch.rb", "lib/erase.rb",
+            "lib/install.rb", "lib/packagelist.rb", "lib/packagedata.rb",
+            "lib/tools.rb"]
     s.homepage    =
         'http://github.com/thomashc/Post'
 end
