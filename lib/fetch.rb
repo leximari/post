@@ -21,22 +21,19 @@ end
 
 require('digest')
 
-require(File.join(File.dirname(__FILE__), "install.rb"))
 require(File.join(File.dirname(__FILE__), "packagedata.rb"))
 require(File.join(File.dirname(__FILE__), "tools.rb"))
 
 class Fetch
-    def initialize(queue)
-        @install = Install.new()
-        @queue = queue
-        @package_database = PackageDataBase.new()
+    include FileUtils
+    def initialize()
+        rm_r("/tmp/post") if File.exists?("/tmp/post")
+        mkdir("/tmp/post")
+        cd("/tmp/post")
+        @database = PackageDataBase.new()
     end
 
-    def get_queue
-        @queue
-    end
-
-    def get_file(url, file)
+    def get_file(url, file, output = true)
         url = URI.parse(url)
         filename = File.basename(file)
         saved_file = File.open(file, 'w')
@@ -48,40 +45,56 @@ class Fetch
                 saved_file << fragment
                 saved_file_length += fragment.length()
                 progress_data = (saved_file_length / length) * 100
-                print("\rFetching:    #{filename} [#{progress_data.round()}%]")
+                print("\rFetching:    #{filename} [#{progress_data.round()}%]") if output
             end
         end
-        puts("\rFetched:     #{filename} [100%]")
+        puts("\rFetched:     #{filename} [100%]") if output
         saved_file.close()
     end
 
-    def fetch_package(package)
-        FileUtils.mkdir("/tmp/post/#{package}")
+    def fetch_package(package, output = true)
+        mkdir("/tmp/post/#{package}")
 
-        sync_data = @package_database.get_sync_data(package)
-        channel = @package_database.get_channel()
+        sync_data = @database.get_sync_data(package)
+        channel = @database.get_channel()
 
         file = "#{package}-#{sync_data['version']}-#{sync_data['architecture']}.pst"
         url = channel['url'] + file
         if file_exists(url)
-            get_file(url, "/tmp/post/#{package}/#{file}")
-            get_file(url + ".sha256", "/tmp/post/#{package}/#{file}.sha256")
+            get_file(url, "/tmp/post/#{package}/#{file}", output)
+            get_file(url + ".sha256", "/tmp/post/#{package}/#{file}.sha256", output)
         else
             raise IncompleteError, "Error:      '#{url}' does not exist."
         end
             
     end
 
-    def install(package)
-        FileUtils.cd("/tmp/post/#{package}")
-        sync_data = @package_database.get_sync_data(package)
+    def do_install(filename)
+        root = @database.get_root()
+        
+        extract(filename)
+        rm(filename)
+        new_files = Dir["**/*"].reject {|file| File.directory?(file) }
+        new_directories = Dir["**/*"].reject {|file| File.file?(file) }
+        @database.install_package(".packageData", ".remove", new_files)
+        new_directories.each { |directory| mkdir_p("#{root}/#{directory}") }
+        for file in new_files
+            install(file, "#{root}/#{file}")
+            system("chmod +x #{root}/#{file}") if file.include?("/bin/")
+        end
+        install_script = File.read(".install")
+        eval(install_script)
+    end
+
+    def install_package(package)
+        cd("/tmp/post/#{package}")
+        sync_data = @database.get_sync_data(package)
         filename = "#{package}-#{sync_data['version']}-#{sync_data['architecture']}.pst"
         file_hash = Digest::SHA256.hexdigest(open(filename, "r").read())
         real_hash = File.open("#{filename}.sha256").read().strip()
         unless (file_hash == real_hash)
             raise MismatchedHash, "Error:       #{filename} is corrupt."
         end
-        puts("Installing:  #{package}")
-        @install.install_package(filename)
+        do_install(filename)
     end
 end

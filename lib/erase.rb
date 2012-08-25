@@ -18,31 +18,18 @@ require('fileutils')
 
 class Erase
     include FileUtils
-    def initialize(queue)
-        @queue = queue
+    def initialize()
         @database = PackageDataBase.new()
     end
 
-    def get_queue()
-        @queue
-    end
-
-    def build_queue(package)
-        @queue.set(package) if @database.installed?(package)
-    end
-
     def remove_package(package)
+        root = @database.get_root()
         remove_script = @database.get_remove_script(package)
-
-        package_files = @database.get_files(package)
         @database.remove_package(package)
 
-        package_files.each() do |file|
-            root = @database.get_root()
+        @database.get_files(package).each do |file|
             file = "#{root}/#{file.strip()}"
-            if (FileTest.exists?("#{file}"))
-                rm(file)
-            end
+            rm(file) if FileTest.exists?(file)
         end
         eval(remove_script)
     end

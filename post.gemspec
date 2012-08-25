@@ -19,7 +19,7 @@ Gem::Specification.new do |s|
     s.authors     = ["Thomas Chace"]
     s.email       = 'tchacex@gmail.com'
     s.files       = ["lib/post.rb", "lib/fetch.rb", "lib/erase.rb",
-            "lib/install.rb", "lib/packagelist.rb", "lib/packagedata.rb",
+            "lib/packagelist.rb", "lib/packagedata.rb",
             "lib/tools.rb"]
     s.homepage    =
         'http://github.com/thomashc/Post'
