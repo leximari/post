@@ -29,7 +29,7 @@ end
 
 def confirmation(queue)
     return false if queue.empty?
-    puts("Queue:       #{queue.to_a().join(" ")}")
+    puts("Queue:       #{queue.to_a.join(" ")}")
     print('Confirm:     [y/n] ')
     return true if gets.include?('y')
 end
@@ -53,17 +53,17 @@ def install_packages(args)
         args.each { |package| queue.push(package) }
         if confirmation(queue)
             queue.each do |package|
-                fetch.install_package(package)
-                puts("Installing:  #{package}")
                 fetch.fetch_package(package)
+                puts("Installing:  #{package}")
+                fetch.install_package(package)
             end
         end
     rescue MismatchedHash => error
         puts(error.message)
     rescue ConflictingEntry => error
         puts(error.message)
-    rescue => error
-        puts(error.message)
+    #rescue => error
+    #    puts(error.message)
     end
 end
 
