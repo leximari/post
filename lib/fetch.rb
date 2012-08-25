@@ -53,7 +53,7 @@ class Fetch
     end
 
     def fetch_package(package, output = true)
-        mkdir("/tmp/post/#{package}")
+        mkdir_p("/tmp/post/#{package}")
 
         sync_data = @database.get_sync_data(package)
         channel = @database.get_channel()
