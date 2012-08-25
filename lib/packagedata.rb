@@ -17,6 +17,7 @@ require('yaml')
 require('open-uri')
 require('fileutils')
 require('rbconfig')
+require('zlib')
 
 class PackageDataBase
     def initialize()
@@ -25,6 +26,13 @@ class PackageDataBase
         @database_location = "#{@root}/var/lib/post/"
         @install_database = File.join(@database_location, "installed")
         @sync_database = File.join(@database_location, "available")
+
+        unless File.exist?(@database_location)
+            FileUtils.mkdir_p(@database_location)
+            FileUtils.mkdir_p(@install_database)
+            FileUtils.mkdir_p(@sync_database)
+        end
+
     end
 
     def get_root()
@@ -71,7 +79,7 @@ class PackageDataBase
 
     def get_remove_script(package)
         remove_script = File.join(@install_database, package, 'remove')
-        return File.read(remove_script)
+        File.read(remove_script)
     end
 
     def install_package(package_data, remove_file, installed_files)
@@ -102,29 +110,28 @@ class PackageDataBase
     end
 
     def get_group(group)
-        repo = YAML::load_file("#{@sync_database}/repo.yaml")
-        return repo[group]
+        return YAML::load_file("#{@sync_database}/repo.yaml")[group]
     end
 
     def get_installed_packages()
-        return Dir["#{@install_database}/*"].map() { |package| File.basename(package) }
+        Dir["#{@install_database}/*"].map() { |package| File.basename(package) }
     end
 
     def installed?(package)
-        return true if get_installed_packages.include?(package)
+        true if get_installed_packages.include?(package)
     end
 
     def available?(package)
-        return true if get_available_packages.include?(package)
+        true if get_available_packages.include?(package)
     end
 
     def upgrade?(package)
-        return true if (available?(package)) and
+        true if (available?(package)) and
             (get_sync_data(package)['version'] > get_data(package)['version'])
     end
 
     def get_channel()
-        return YAML::load_file("/etc/post/channel")
+        YAML::load_file("/etc/post/channel")
     end
 
     def update_database()
@@ -138,7 +145,9 @@ class PackageDataBase
         File.open('info.tar', 'w') do |file|
             file.puts(open(source_url).read())
         end
-        extract("info.tar")
+        
+        #Minitar.unpack('info.tar', '.')
+        system("tar xf info.tar")
         FileUtils.cp_r('info', '/var/lib/post/available')
         
         source_url = get_channel()['url'] + '/repo.yaml'

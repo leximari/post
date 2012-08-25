@@ -29,14 +29,14 @@ class PackageList
 
     def initialize
         @size = 0
-        @package_data_base = PackageDataBase.new()
+        @package_database = PackageDataBase.new()
     end
 
     def push(package)
-        group = @package_data_base.get_group(package)
+        group = @package_database.get_group(package)
         if (group == nil)
-            if (@package_data_base.upgrade?(package))
-                for dependency in @package_data_base.get_sync_data(package)['dependencies']
+            if (@package_database.upgrade?(package))
+                for dependency in @package_database.get_sync_data(package)['dependencies']
                     push(dependency)
                 end
                 set(package)
@@ -88,7 +88,7 @@ class PackageList
     end
     
     def conflict?(variable)
-        for conflict in @package_data_base.get_sync_data(variable)['conflicts']
+        for conflict in @package_database.get_sync_data(variable)['conflicts']
             if include?(conflict)
                 raise ConflictingEntry, "Error:      '#{conflict}' conflicts with '#{variable}'"
             end
