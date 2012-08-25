@@ -1,4 +1,4 @@
-# Copyright (C) Thomas Chace 2011 <ithomashc@gmail.com>
+# Copyright (C) Thomas Chace 2011-2012 <tchacex@gmail.com>
 # This file is part of Post.
 # Post is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Lesser General Public License as published by
@@ -21,7 +21,6 @@ require('zlib')
 
 class PackageDataBase
     def initialize()
-        @sys_arch = RbConfig::CONFIG['host_cpu']
         @root = '/'
         @database_location = "#{@root}/var/lib/post/"
         @install_database = File.join(@database_location, "installed")
@@ -36,37 +35,33 @@ class PackageDataBase
     end
 
     def get_root()
-        return @root
+        @root
     end
 
     def get_data(package)
-        if installed?(package)
+        begin
             package_data = File.join(@install_database, package, 'packageData')
-            data = YAML::load_file(package_data)
-            if (data['architecture'].include?(@sys_arch))
-                data['conflicts'] = [] if data['conflicts'] == nil
-                data['dependencies'] = [] if data['dependencies'] == nil
-                data['version'] = data['version'].to_s()
-            else
-                data = {}
-                data['version'] = "0"
-            end
-        else
+            data = normalise(YAML::load_file(package_data))
+        rescue
             data = {}
             data['version'] = "0"
         end
         return data
     end
 
+    def normalise(data)
+        data['version'] = data['version'].to_s()
+
+        data['conflicts'] = [] if data['conflicts'] == nil
+        data['dependencies'] = [] if data['dependencies'] == nil
+        data['version'] = "0" if data['version'].empty?
+        return data
+    end
+
     def get_sync_data(package)
-        if available?(package)
-            package_data = File.join(@sync_database, package)
-            data = YAML::load_file(package_data)
-            data['conflicts'] = [] if data['conflicts'] == nil
-            data['dependencies'] = [] if data['dependencies'] == nil
-            data['version'] = data['version'].to_s()
-        else
-            data = {}
+        package_data = File.join(@sync_database, package)
+        data = normalise(YAML::load_file(package_data))
+        unless (data['architecture'].include?(RbConfig::CONFIG['host_cpu']))
             data['version'] = "0"
         end
         return data
@@ -146,7 +141,6 @@ class PackageDataBase
             file.puts(open(source_url).read())
         end
         
-        #Minitar.unpack('info.tar', '.')
         system("tar xf info.tar")
         FileUtils.cp_r('info', '/var/lib/post/available')
         
