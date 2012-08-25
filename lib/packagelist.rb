@@ -1,4 +1,4 @@
-# Copyright (C) Thomas Chace 2011-2012 <ithomashc@gmail.com>
+# Copyright (C) Thomas Chace 2011-2012 <tchacex@gmail.com>
 # This file is part of Post.
 # Post is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Lesser General Public License as published by
@@ -13,13 +13,7 @@
 # You should have received a copy of the GNU Lesser General Public License
 # along with Post.  If not, see <http://www.gnu.org/licenses/>.
 
-directory = File.dirname(__FILE__)
-path = File.expand_path(directory)
-
-require(File.join(path, "packagedata.rb"))
-
-class DuplicateEntry < Exception
-end
+require(File.join(File.dirname(__FILE__), "packagedata.rb"))
 
 class ConflictingEntry < Exception
 end
@@ -29,14 +23,14 @@ class PackageList
 
     def initialize
         @size = 0
-        @package_database = PackageDataBase.new()
+        @database = PackageDataBase.new()
     end
 
     def push(package)
-        group = @package_database.get_group(package)
+        group = @database.get_group(package)
         if (group == nil)
-            if (@package_database.upgrade?(package))
-                for dependency in @package_database.get_sync_data(package)['dependencies']
+            if (@database.upgrade?(package))
+                for dependency in @database.get_sync_data(package)['dependencies']
                     push(dependency)
                 end
                 set(package)
@@ -88,7 +82,7 @@ class PackageList
     end
     
     def conflict?(variable)
-        for conflict in @package_database.get_sync_data(variable)['conflicts']
+        for conflict in @database.get_sync_data(variable)['conflicts']
             if include?(conflict)
                 raise ConflictingEntry, "Error:      '#{conflict}' conflicts with '#{variable}'"
             end

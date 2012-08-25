@@ -1,4 +1,4 @@
-# Copyright (C) Thomas Chace 2011-2012 <ithomashc@gmail.com>
+# Copyright (C) Thomas Chace 2011-2012 <tchacex@gmail.com>
 # This file is part of Post.
 # Post is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Lesser General Public License as published by
@@ -13,40 +13,33 @@
 # You should have received a copy of the GNU Lesser General Public License
 # along with Post.  If not, see <http://www.gnu.org/licenses/>.
 
-directory = File.dirname(__FILE__)
-path = File.expand_path(directory)
-
-require(File.join(path, "packagedata.rb"))
+require(File.join(File.dirname(__FILE__), "packagedata.rb"))
 require('fileutils')
-
-class MissingFile < Exception
-end
 
 class Erase
     include FileUtils
     def initialize(queue)
         @queue = queue
-        @package_database = PackageDataBase.new()
+        @database = PackageDataBase.new()
     end
 
     def get_queue()
-        return @queue
+        @queue
     end
 
     def build_queue(package)
-        @queue.set(package) if @package_database.installed?(package)
+        @queue.set(package) if @database.installed?(package)
     end
 
     def remove_package(package)
-        remove_script = @package_database.get_remove_script(package)
+        remove_script = @database.get_remove_script(package)
 
-        package_files = @package_database.get_files(package)
-        @package_database.remove_package(package)
+        package_files = @database.get_files(package)
+        @database.remove_package(package)
 
         package_files.each() do |file|
-            file = file.strip()
-            root = @package_database.get_root()
-            file = "#{root}/#{file}"
+            root = @database.get_root()
+            file = "#{root}/#{file.strip()}"
             if (FileTest.exists?("#{file}"))
                 rm(file)
             end

@@ -1,5 +1,5 @@
 #!/usr/bin/ruby
-# Copyright (C) Thomas Chace 2011-2012 <ithomashc@gmail.com>
+# Copyright (C) Thomas Chace 2011-2012 <tchacex@gmail.com>
 # This file is part of Post.
 # Post is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Lesser General Public License as published by
@@ -15,7 +15,6 @@
 # along with Post.  If not, see <http://www.gnu.org/licenses/>.
 
 STDOUT.sync = true
-PWD = Dir.pwd()
 
 require('rubygems')
 require('post')
@@ -29,22 +28,18 @@ if (Process.uid == 0) and file_exists(DATA.get_channel()['url'] + '/info.tar')
 end
 
 def user_confirmation(queue)
-    if (queue.empty?)
-        return false
-    end
     puts("Queue:       #{queue.to_a().join(" ")}")
     print('Confirm:     [y/n] ')
     confirm_transaction = gets()
     return true if confirm_transaction.include?('y')
 end
 
-def install_local_packages(argument_packages)
-    package_queue = PackageList.new()
+def install_local_packages(args)
     
-    if user_confirmation(argument_packages)
+    if user_confirmation(args)
         full_paths = []
-        for package in argument_packages
-            path = File.join(File.expand_path(PWD), package)
+        for package in args
+            path = File.join(File.expand_path(Dir.pwd), package)
             full_paths.push(path)
         end
         
@@ -56,52 +51,47 @@ def install_local_packages(argument_packages)
     end
 end
 
-def install_packages(argument_packages)
-    package_queue = PackageList.new()
-    for package in argument_packages
+def install_packages(args)
+    queue = PackageList.new()
+    for package in args
         begin
-            package_queue.push(package)
+            queue.push(package)
         rescue ConflictingEntry => error
             puts(error.message)
         end
     end
     
-    fetch = Fetch.new(package_queue)
+    fetch = Fetch.new(queue)
 
-    unless (package_queue.empty?)
-        if user_confirmation(package_queue)
-            error = false
-            for package in package_queue
-                error = true if not fetch.fetch_package(package)
-            end
+    unless (queue.empty?)
+        if user_confirmation(queue)
             begin
-                fetch.install_queue() unless (error)
-                puts("Error:       All files were not fetched.") if (error)
+                for package in queue
+                    fetch.fetch_package(package)
+                    fetch.install(package)
+                end
             rescue MismatchedHash => error
                 puts(error.message)
+            rescue Error => error
+                puts("Error:       All files were not fetched.")
             end
         end
     end
 end
 
-def remove_packages(argument_packages)
-    package_queue = PackageList.new()
-    for package in argument_packages
-        package_queue.set(package) if DATA.installed?(package)
+def remove_packages(args)
+    queue = PackageList.new()
+    for package in args
+        queue.set(package) if DATA.installed?(package)
     end
     
-    erase = Erase.new(package_queue)
+    erase = Erase.new(queue)
     
     confirmation = user_confirmation(erase.get_queue())
     if (confirmation)
         for package in erase.get_queue()
             puts("Removing:    #{package}")
-            begin
-                puts "remov"
-                erase.remove_package(package)
-            rescue MissingFile => error
-                puts(error.message)
-            end
+            erase.remove_package(package)
         end
     end
 end
@@ -115,7 +105,7 @@ options = ARGV.options()
 options.set_summary_indent('    ')
 options.banner =    "Usage: post [OPTIONS] [PACKAGES]"
 options.version =   "Post 1.6 (1.6.0)"
-options.define_head "Copyright (C) Thomas Chace 2011-2012 <ithomashc@gmail.com>"
+options.define_head "Copyright (C) Thomas Chace 2011-2012 <tchacex@gmail.com>"
 
 if (Process.uid == 0)
     options.on('-i', '--fetch=', Array,

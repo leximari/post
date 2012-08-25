@@ -1,4 +1,4 @@
-# Copyright (C) Thomas Chace 2011 <ithomashc@gmail.com>
+# Copyright (C) Thomas Chace 2011-2012 <tchacex@gmail.com>
 # This file is part of Post.
 # Post is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Lesser General Public License as published by
@@ -13,26 +13,26 @@
 # You should have received a copy of the GNU Lesser General Public License
 # along with Post.  If not, see <http://www.gnu.org/licenses/>.
 
-directory = File.dirname(__FILE__)
-path = File.expand_path(directory)
-
 class MismatchedHash < Exception
+end
+
+class IncompleteError < Exception
 end
 
 require('digest')
 
-require(File.join(path, "install.rb"))
-require(File.join(path, "packagedata.rb"))
-require(File.join(path, "tools.rb"))
+require(File.join(File.dirname(__FILE__), "install.rb"))
+require(File.join(File.dirname(__FILE__), "packagedata.rb"))
+require(File.join(File.dirname(__FILE__), "tools.rb"))
 
 class Fetch
     def initialize(queue)
-        @install_object = Install.new()
+        @install = Install.new()
         @queue = queue
-        @package_data_base = PackageDataBase.new()
+        @package_database = PackageDataBase.new()
     end
 
-    def get_queue()
+    def get_queue
         @queue
     end
 
@@ -51,44 +51,37 @@ class Fetch
                 print("\rFetching:    #{filename} [#{progress_data.round()}%]")
             end
         end
-        puts("\rFetching:    #{filename} [100.0%]")
+        puts("\rFetched:     #{filename} [100%]")
         saved_file.close()
     end
 
     def fetch_package(package)
         FileUtils.mkdir("/tmp/post/#{package}")
 
-        sync_data = @package_data_base.get_sync_data(package)
-        channel = @package_data_base.get_channel()
+        sync_data = @package_database.get_sync_data(package)
+        channel = @package_database.get_channel()
 
-        filename = "#{package}-#{sync_data['version']}-#{sync_data['architecture']}.pst"
-        url = channel['url'] + filename
-        begin
-            if file_exists(url)
-                get_file(url, "/tmp/post/#{package}/#{filename}")
-                get_file(url + ".sha256", "/tmp/post/#{package}/#{filename}.sha256")
-                return true
-            else
-                return false
-            end
-        rescue SocketError => error
-            return false
+        file = "#{package}-#{sync_data['version']}-#{sync_data['architecture']}.pst"
+        url = channel['url'] + file
+        if file_exists(url)
+            get_file(url, "/tmp/post/#{package}/#{file}")
+            get_file(url + ".sha256", "/tmp/post/#{package}/#{file}.sha256")
+        else
+            raise IncompleteError, "Error:      '#{url}' does not exist."
         end
             
     end
 
-    def install_queue()
-        for package in @queue
-            FileUtils.cd("/tmp/post/#{package}")
-            sync_data = @package_data_base.get_sync_data(package)
-            filename = "#{package}-#{sync_data['version']}-#{sync_data['architecture']}.pst"
-            file_hash = Digest::SHA256.hexdigest(open(filename,"r").read())
-            real_hash = File.open("#{filename}.sha256").read().strip()
-            unless (file_hash == real_hash)
-                raise MismatchedHash, "Error:       #{filename} is corrupt."
-            end
-            puts("Installing:  #{package}")
-            @install_object.install_package(filename)
+    def install(package)
+        FileUtils.cd("/tmp/post/#{package}")
+        sync_data = @package_database.get_sync_data(package)
+        filename = "#{package}-#{sync_data['version']}-#{sync_data['architecture']}.pst"
+        file_hash = Digest::SHA256.hexdigest(open(filename, "r").read())
+        real_hash = File.open("#{filename}.sha256").read().strip()
+        unless (file_hash == real_hash)
+            raise MismatchedHash, "Error:       #{filename} is corrupt."
         end
+        puts("Installing:  #{package}")
+        @install.install_package(filename)
     end
 end

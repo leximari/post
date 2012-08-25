@@ -1,4 +1,4 @@
-# Copyright (C) Thomas Chace 2011-2012 <ithomashc@gmail.com>
+# Copyright (C) Thomas Chace 2011-2012 <tchacex@gmail.com>
 # This file is part of Post.
 # Post is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Lesser General Public License as published by
@@ -16,11 +16,6 @@
 require('open-uri')
 require('net/http')
 require('rubygems')
-#require('xz')
-#require('archive/tar/minitar')
-#require('zlib')
-
-#include Archive::Tar
 
 def file_exists(url)
 	url = URI.parse(url)
@@ -31,7 +26,4 @@ end
 
 def extract(filename)
     system("tar xf #{filename}")
-    #XZ.decompress_file(filename, 'decomp.tar')
-    #Minitar.unpack("decomp.tar", '.')
-    #FileUtils.rm('decomp.tar')
 end

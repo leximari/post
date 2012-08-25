@@ -1,4 +1,4 @@
-# Copyright (C) Thomas Chace 2011 <ithomashc@gmail.com>
+# Copyright (C) Thomas Chace 2011-2012 <tchacex@gmail.com>
 # This file is part of Post.
 # Post is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Lesser General Public License as published by
@@ -13,20 +13,16 @@
 # You should have received a copy of the GNU Lesser General Public License
 # along with Post.  If not, see <http://www.gnu.org/licenses/>.
 
-directory = File.dirname(__FILE__)
-path = File.expand_path(directory)
-
-require(File.join(path, "packagedata.rb"))
-require(File.join(path, "tools.rb"))
+require(File.join(File.dirname(__FILE__), "packagedata.rb"))
+require(File.join(File.dirname(__FILE__), "tools.rb"))
 require('fileutils')
-require('yaml')
 
 class Install
     def initialize()
         FileUtils.rm_r("/tmp/post") if File.exists?("/tmp/post")
         FileUtils.mkdir("/tmp/post")
         FileUtils.cd("/tmp/post")
-        @package_data_base = PackageDataBase.new()
+        @database = PackageDataBase.new()
     end
 
     def install_package(filename)
@@ -34,15 +30,13 @@ class Install
         FileUtils.rm(filename)
         new_files = Dir["**/*"].reject {|file| File.directory?(file) }
         new_directories = Dir["**/*"].reject {|file| File.file?(file) }
-        @package_data_base.install_package(".packageData", ".remove", new_files)
+        @database.install_package(".packageData", ".remove", new_files)
         for directory in new_directories
-            FileUtils.mkdir_p("#{@package_data_base.get_root()}/#{directory}")
+            FileUtils.mkdir_p("#{@database.get_root()}/#{directory}")
         end
         for file in new_files
-            FileUtils.install(file, "#{@package_data_base.get_root()}/#{file}")
-            if file.include?("/bin/")
-                system("chmod +x #{@package_data_base.get_root()}/#{file}")
-            end
+            FileUtils.install(file, "#{@database.get_root()}/#{file}")
+            system("chmod +x #{@database.get_root()}/#{file}") if file.include?("/bin/")
         end
         install_script = File.read(".install")
         eval(install_script)
