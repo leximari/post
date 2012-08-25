@@ -97,6 +97,7 @@ def remove_packages(argument_packages)
         for package in erase.get_queue()
             puts("Removing:    #{package}")
             begin
+                puts "remov"
                 erase.remove_package(package)
             rescue MissingFile => error
                 puts(error.message)

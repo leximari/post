@@ -16,10 +16,11 @@
 require('open-uri')
 require('net/http')
 require('rubygems')
-require('xz')
-require('archive/tar/minitar')
+#require('xz')
+#require('archive/tar/minitar')
+#require('zlib')
 
-include Archive::Tar
+#include Archive::Tar
 
 def file_exists(url)
 	url = URI.parse(url)
@@ -29,14 +30,8 @@ def file_exists(url)
 end
 
 def extract(filename)
-    file = File.open(filename)
-    fileLines = file.readlines()
-    if fileLines[0].include?('XZ')
-        XZ.decompress_file(filename, 'decomp.tar')
-        Minitar.unpack("decomp.tar", '.')
-        FileUtils.rm('decomp.tar')
-    else
-        Minitar.unpack(filename, '.')
-    end
-
+    system("tar xf #{filename}")
+    #XZ.decompress_file(filename, 'decomp.tar')
+    #Minitar.unpack("decomp.tar", '.')
+    #FileUtils.rm('decomp.tar')
 end
