@@ -82,7 +82,7 @@ end
 options = ARGV.options()
 options.set_summary_indent('    ')
 options.banner =    "Usage: post [OPTIONS] [PACKAGES]"
-options.version =   "Post 1.6 (1.6.0)"
+options.version =   "Post 1.7 (1.7.0)"
 options.define_head "Copyright (C) Thomas Chace 2011-2012 <tchacex@gmail.com>"
 
 options.on('-i', '--fetch=', Array,
