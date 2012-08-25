@@ -25,12 +25,12 @@ class Erase
     def remove_package(package)
         root = @database.get_root()
         remove_script = @database.get_remove_script(package)
-        @database.remove_package(package)
 
         @database.get_files(package).each do |file|
             file = "#{root}/#{file.strip()}"
             rm(file) if FileTest.exists?(file)
         end
         eval(remove_script)
+        @database.remove_package(package)
     end
 end

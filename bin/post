@@ -56,14 +56,13 @@ def install_packages(args)
                 fetch.fetch_package(package)
                 puts("Installing:  #{package}")
                 fetch.install_package(package)
+                puts("Installed:   #{package}")
             end
         end
     rescue MismatchedHash => error
         puts(error.message)
     rescue ConflictingEntry => error
         puts(error.message)
-    #rescue => error
-    #    puts(error.message)
     end
 end
 
