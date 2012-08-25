@@ -27,18 +27,13 @@ class PackageList
     end
 
     def push(package)
-        group = @database.get_group(package)
-        if (group == nil)
-            if (@database.upgrade?(package))
-                for dependency in @database.get_sync_data(package)['dependencies']
-                    push(dependency)
-                end
-                set(package)
-            end
+        group = @database.get_repodata[package].to_a
+        if (group.empty?) and (@database.upgrade?(package))
+            deps = @database.get_sync_data(package)['dependencies']
+            deps.each { |dependency| push(dependency) }
+            set(package)
         else
-            for member in group
-                push(member)
-            end
+            group.each { |member| push(member) }
         end
     end
 
@@ -64,11 +59,7 @@ class PackageList
     
     def include?(package)
         for value in self
-            
-            if (value == package)
-                return true
-            end
-            
+            return true if (value == package)
         end
         return false
     end
@@ -83,9 +74,8 @@ class PackageList
     
     def conflict?(variable)
         for conflict in @database.get_sync_data(variable)['conflicts']
-            if include?(conflict)
-                raise ConflictingEntry, "Error:      '#{conflict}' conflicts with '#{variable}'"
-            end
+            raise ConflictingEntry,
+                "Error:      '#{conflict}' conflicts with '#{variable}'" if include?(conflict)
         end
     end
     
