@@ -18,10 +18,14 @@ require('net/http')
 require('rubygems')
 
 def file_exists(url)
-	url = URI.parse(url)
-	Net::HTTP.start(url.host, url.port) do |http|
-		return http.head(url.request_uri).code == "200"
-	end
+    begin
+        url = URI.parse(url)
+        Net::HTTP.start(url.host, url.port) do |http|
+            return http.head(url.request_uri).code == "200"
+        end
+    rescue
+        return false
+    end
 end
 
 def extract(filename)

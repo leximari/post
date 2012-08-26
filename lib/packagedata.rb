@@ -197,16 +197,27 @@ class PackageDataBase
         for repo in get_repos
 
             source_url = get_url(repo) + '/info.tar'
-            File.open('info.tar', 'w') do |file|
-                file.puts(open(source_url).read)
+            if source_url.include?("file://")
+                source_url.sub!("file://", '')
+                cp(source_url, 'info.tar')
+            else
+                File.open('info.tar', 'w') do |file|
+                    file.puts(open(source_url).read)
+                end
             end
+
         
             system("tar xf info.tar")
             cp_r('info', "/var/lib/post/available/#{repo}")
         
             source_url = get_url(repo) + '/repo.yaml'
-            File.open('repo.yaml', 'w') do |file|
-                file.puts(open(source_url).read)
+            if source_url.include?("file://")
+                source_url.sub!("file://", '')
+                cp(source_url, 'repo.yaml')
+            else
+                File.open('repo.yaml', 'w') do |file|
+                    file.puts(open(source_url).read)
+                end
             end
             cp_r('repo.yaml', "/var/lib/post/available/#{repo}/repo.yaml")
             rm('repo.yaml')
