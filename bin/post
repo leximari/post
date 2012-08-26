@@ -24,10 +24,10 @@ require('fileutils')
 
 DATA = PackageDataBase.new()
 
-if file_exists(DATA.get_channel['url'] + '/info.tar')
+
     puts('Loading:     Downloading package information.')
     DATA.update_database()
-end
+#end
 
 def confirmation(queue)
     return false if queue.empty?
