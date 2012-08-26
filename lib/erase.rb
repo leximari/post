@@ -18,8 +18,8 @@ require('fileutils')
 
 class Erase
     include FileUtils
-    def initialize()
-        @database = PackageDataBase.new()
+    def initialize(root = '/')
+        @database = PackageDataBase.new(root)
     end
 
     def remove_package(package)

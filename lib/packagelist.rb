@@ -50,11 +50,7 @@ class PackageList
     end
     
     def empty?()
-        if (@size > 0)
-            return false
-        else
-            return true
-        end
+        return true unless (@size > 0)
     end
     
     def include?(package)

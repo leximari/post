@@ -26,11 +26,11 @@ require(File.join(File.dirname(__FILE__), "tools.rb"))
 
 class Fetch
     include FileUtils
-    def initialize()
+    def initialize(root = '/')
         rm_r("/tmp/post") if File.exists?("/tmp/post")
         mkdir("/tmp/post")
         cd("/tmp/post")
-        @database = PackageDataBase.new()
+        @database = PackageDataBase.new(root)
     end
 
     def get_file(url, file, output = true)
@@ -39,13 +39,13 @@ class Fetch
         saved_file = File.open(file, 'w')
 
         Net::HTTP.new(url.host, url.port).request_get(url.path) do |response|
-            length = response['Content-Length'].to_i()
+            length = response['Content-Length'].to_i
             saved_file_length = 0.0
             response.read_body do |fragment|
                 saved_file << fragment
-                saved_file_length += fragment.length()
-                progress_data = (saved_file_length / length) * 100
-                print("\rFetching:    #{filename} [#{progress_data.round()}%]") if output
+                saved_file_length += fragment.length
+                progress = (saved_file_length / length) * 100
+                print("\rFetching:    #{filename} [#{progress.round}%]") if output
             end
         end
         puts("\rFetched:     #{filename} [100%]") if output

@@ -15,10 +15,12 @@
 # along with Post.  If not, see <http://www.gnu.org/licenses/>.
 
 STDOUT.sync = true
+PWD = Dir.pwd()
 
 require('rubygems')
 require('post')
 require('optparse')
+require('fileutils')
 
 DATA = PackageDataBase.new()
 
@@ -36,11 +38,15 @@ end
 
 def install_local_packages(args)
     install = Fetch.new()
+    #FileUtils.rm_r("/tmp/post") if (File.exists?("/tmp/post"))
+    #FileUtils.mkdir_p('/tmp/post')
     args.each do |package|
-        path = File.join(File.expand_path(Dir.pwd), package)
+        path = File.join(File.expand_path(PWD), package)
+        puts path
         FileUtils.cp(path, "/tmp/post/#{File.basename(path)}")
     end
     if confirmation(args)
+        
         args.each { |package| install.do_install(File.basename(package)) }
     end
 end
@@ -56,7 +62,6 @@ def install_packages(args)
                 fetch.fetch_package(package)
                 puts("Installing:  #{package}")
                 fetch.install_package(package)
-                puts("Installed:   #{package}")
             end
         end
     rescue MismatchedHash => error
@@ -86,8 +91,8 @@ options.define_head "Copyright (C) Thomas Chace 2011-2012 <tchacex@gmail.com>"
 
 options.on('-i', '--fetch=', Array,
     'Install a package.')  { |args| install_packages(args) }
-options.on('-f', '--install=', Array,
-    'Install a localpackage.')  { |args| install_local_packages(args) }
+options.on('-l', '--install=', Array,
+    'Install a local package.')  { |args| install_local_packages(args) }
 options.on('-r', '--erase=', Array,
     'Erase a package.') { |args| remove_packages(args) }
 options.on('-u', '--upgrade',

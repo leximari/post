@@ -21,8 +21,8 @@ require('zlib')
 
 class PackageDataBase
     include FileUtils
-    def initialize()
-        @root = '/'
+    def initialize(root = '/')
+        @root = root
         @database_location = "#{@root}/var/lib/post/"
         @install_database = File.join(@database_location, "installed")
         @sync_database = File.join(@database_location, "available")
@@ -149,6 +149,9 @@ class PackageDataBase
             file.puts(open(source_url).read)
         end
         cp_r('repo.yaml', '/var/lib/post/available/repo.yaml')
+        rm('repo.yaml')
+        rm('info.tar')
+        rm_r('info')
     end
 end
 
