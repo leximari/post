@@ -24,10 +24,8 @@ require('fileutils')
 
 DATA = PackageDataBase.new()
 
-
-    puts('Loading:     Downloading package information.')
-    DATA.update_database()
-#end
+puts('Loading:     Downloading package information.')
+DATA.update_database()
 
 def confirmation(queue)
     return false if queue.empty?
@@ -38,8 +36,6 @@ end
 
 def install_local_packages(args)
     install = Fetch.new()
-    #FileUtils.rm_r("/tmp/post") if (File.exists?("/tmp/post"))
-    #FileUtils.mkdir_p('/tmp/post')
     args.each do |package|
         path = File.join(File.expand_path(PWD), package)
         puts path
@@ -86,7 +82,7 @@ end
 options = ARGV.options()
 options.set_summary_indent('    ')
 options.banner =    "Usage: post [OPTIONS] [PACKAGES]"
-options.version =   "Post 1.7 (1.7.0)"
+options.version =   "Post 1.9 (1.9.0)"
 options.define_head "Copyright (C) Thomas Chace 2011-2012 <tchacex@gmail.com>"
 
 options.on('-i', '--fetch=', Array,

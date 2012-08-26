@@ -11,7 +11,7 @@ Gem::Specification.new do |s|
     s.name        = 'post'
     s.executables << 'post'
     s.executables << 'postdb'
-    s.version     = '1.7.0'
+    s.version     = '1.9.0'
     s.date        = date
     s.summary     = "Package manager in pure ruby."
     s.description = "Small, fast package manager in pure Ruby."
