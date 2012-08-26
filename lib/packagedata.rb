@@ -69,7 +69,11 @@ class PackageDataBase
 
     def get_files(package)
         file = File.join(@install_database, package, 'files')
-        return IO.readlines(file)
+        file_list = []
+        IO.readlines(file).each do |entry|
+            file_list.push(@root + entry)
+        end
+        return file_list
     end
 
     def get_remove_script(package)

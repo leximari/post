@@ -10,6 +10,7 @@ date = "#{time.year}-#{month}-#{time.day}"
 Gem::Specification.new do |s|
     s.name        = 'post'
     s.executables << 'post'
+    s.executables << 'postdb'
     s.version     = '1.7.0'
     s.date        = date
     s.summary     = "Package manager in pure ruby."
