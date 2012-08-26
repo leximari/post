@@ -60,12 +60,18 @@ class Fetch
 
         file = "#{package}-#{sync_data['version']}-#{sync_data['architecture']}.pst"
         url = ("#{repo_url}/#{file}")
-        #if file_exists(url)
-            get_file(url, "/tmp/post/#{package}/#{file}", output)
-            get_file(url + ".sha256", "/tmp/post/#{package}/#{file}.sha256", output)
-        #else
-        #    raise IncompleteError, "Error:      '#{url}' does not exist."
-        #end
+        begin
+            if url.include?('file://')
+                url.sub!("file://", '')
+                cp(url, "/tmp/post/#{package}/#{file}")
+                cp(url + ".sha256", "/tmp/post/#{package}/#{file}.sha256")
+            else
+                get_file(url, "/tmp/post/#{package}/#{file}", output)
+                get_file(url + ".sha256", "/tmp/post/#{package}/#{file}.sha256", output)
+            end
+        rescue
+            raise IncompleteError, "Error:      '#{url}' does not exist."
+        end
             
     end
 

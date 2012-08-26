@@ -27,7 +27,7 @@ class Erase
         remove_script = @database.get_remove_script(package)
 
         @database.get_files(package).each do |file|
-            file = "#{root}/#{file.strip()}"
+            file = "#{root}/#{file.strip}"
             rm(file) if FileTest.exists?(file)
         end
         eval(remove_script)
