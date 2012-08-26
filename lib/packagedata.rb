@@ -22,6 +22,7 @@ require('zlib')
 class PackageDataBase
     include FileUtils
     def initialize(root = '/')
+        @repos = []
         @root = root
         @database_location = "#{@root}/var/lib/post/"
         @install_database = File.join(@database_location, "installed")
@@ -58,8 +59,42 @@ class PackageDataBase
         return data
     end
 
+    def get_repos()
+        list = Dir.entries("/etc/post/repos.d")
+        list.delete('.')
+        list.delete('..')
+        return list
+    end
+    
+    def get_repo(package)
+    
+        package_repo = ""
+        version = "0"
+
+        get_repos.each do |repo|
+            data = Dir["#{@sync_database}/#{repo}/*"].map { |pack| File.basename(pack) }
+            data.each do |member|
+                if member == package
+                    package_repo = repo
+                    package_data = File.join(@sync_database + "/" + repo, package)
+                    data = normalise(YAML::load_file(package_data))
+                    unless (data['architecture'].include?(RbConfig::CONFIG['host_cpu']))
+                        data['version'] = "0"
+                    end
+                    if version >= data['version']
+                        version = data['version']
+                        package_repo = repo
+                    end
+                
+                end
+            end
+        end
+        return package_repo
+    end
+
     def get_sync_data(package)
-        package_data = File.join(@sync_database, package)
+        repo = File.join(@sync_database, get_repo(package))
+        package_data = File.join(repo, package)
         data = normalise(YAML::load_file(package_data))
         unless (data['architecture'].include?(RbConfig::CONFIG['host_cpu']))
             data['version'] = "0"
@@ -103,13 +138,31 @@ class PackageDataBase
     end
 
     def get_available_packages()
-        list = Dir["#{@sync_database}/*"].map() { |package| File.basename(package) }
-        list.delete("repo.yaml")
+        list = []
+        for repo in get_repos
+            list += Dir["#{@sync_database}/#{repo}/*"].map() { |package| File.basename(package) }
+            list.delete("repo.yaml")
+        end
         return list
     end
-
-    def get_repodata
-        return YAML::load_file("#{@sync_database}/repo.yaml")
+    
+    def get_group_repo(group)
+        group_repo = nil
+        for repo in get_repos
+            data = YAML::load_file("#{@sync_database}/#{repo}/repo.yaml")
+            unless data[group] == nil
+                group_repo = repo
+            end
+        end
+        return group_repo
+    end
+    
+    def get_repodata(repo)
+        if get_repos.include?(repo)
+            return YAML::load_file("#{@sync_database}/#{repo}/repo.yaml")
+        else
+            return {}
+        end
     end
 
     def get_installed_packages()
@@ -125,12 +178,12 @@ class PackageDataBase
     end
 
     def upgrade?(package)
-        true if (available?(package)) and
-            (get_sync_data(package)['version'] > get_data(package)['version'])
+        true if (available?(package)) and (get_sync_data(package)['version'] > get_data(package)['version'])
     end
 
-    def get_channel()
-        YAML::load_file("/etc/post/channel")
+    def get_url(repo)
+        data = YAML::load_file("/etc/post/repos.d/#{repo}")
+        return data['url']
     end
 
     def update_database()
@@ -139,23 +192,27 @@ class PackageDataBase
 
         mkdir_p("/tmp/post")
         cd("/tmp/post")
+        mkdir_p("/var/lib/post/available")
 
-        source_url = get_channel()['url'] + '/info.tar'
-        File.open('info.tar', 'w') do |file|
-            file.puts(open(source_url).read)
-        end
+        for repo in get_repos
+
+            source_url = get_url(repo) + '/info.tar'
+            File.open('info.tar', 'w') do |file|
+                file.puts(open(source_url).read)
+            end
         
-        system("tar xf info.tar")
-        cp_r('info', '/var/lib/post/available')
+            system("tar xf info.tar")
+            cp_r('info', "/var/lib/post/available/#{repo}")
         
-        source_url = get_channel()['url'] + '/repo.yaml'
-        File.open('repo.yaml', 'w') do |file|
-            file.puts(open(source_url).read)
+            source_url = get_url(repo) + '/repo.yaml'
+            File.open('repo.yaml', 'w') do |file|
+                file.puts(open(source_url).read)
+            end
+            cp_r('repo.yaml', "/var/lib/post/available/#{repo}/repo.yaml")
+            rm('repo.yaml')
+            rm('info.tar')
+            rm_r('info')
         end
-        cp_r('repo.yaml', '/var/lib/post/available/repo.yaml')
-        rm('repo.yaml')
-        rm('info.tar')
-        rm_r('info')
     end
 end
 

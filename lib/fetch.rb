@@ -56,16 +56,16 @@ class Fetch
         mkdir_p("/tmp/post/#{package}")
 
         sync_data = @database.get_sync_data(package)
-        channel = @database.get_channel()
+        repo_url = @database.get_url(@database.get_repo(package))
 
         file = "#{package}-#{sync_data['version']}-#{sync_data['architecture']}.pst"
-        url = channel['url'] + file
-        if file_exists(url)
+        url = ("#{repo_url}/#{file}")
+        #if file_exists(url)
             get_file(url, "/tmp/post/#{package}/#{file}", output)
             get_file(url + ".sha256", "/tmp/post/#{package}/#{file}.sha256", output)
-        else
-            raise IncompleteError, "Error:      '#{url}' does not exist."
-        end
+        #else
+        #    raise IncompleteError, "Error:      '#{url}' does not exist."
+        #end
             
     end
 

@@ -27,8 +27,10 @@ class PackageList
     end
 
     def push(package)
-        group = @database.get_repodata[package].to_a
-        if (group.empty?) and (@database.upgrade?(package))
+        group = []
+        repo = @database.get_group_repo(package).to_s
+        group = @database.get_repodata(repo)[package].to_a
+        if (group.to_a.empty?) and (@database.upgrade?(package))
             deps = @database.get_sync_data(package)['dependencies']
             deps.each { |dependency| push(dependency) }
             set(package)
