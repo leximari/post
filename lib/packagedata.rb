@@ -23,22 +23,24 @@ class PackageDataBase
     include FileUtils
     def initialize(root = '/')
         @repos = []
-        @root = root
-        @database_location = "#{@root}/var/lib/post/"
-        @install_database = File.join(@database_location, "installed")
-        @sync_database = File.join(@database_location, "available")
-
-        unless File.exist?(@database_location)
-            mkdir_p(@install_database)
-            mkdir_p(@sync_database)
-        end
-
+        set_root(root)
     end
 
     def get_root()
         @root
     end
-
+    
+    def set_root(root)
+        @root = root
+        @database_location = "#{@root}/var/lib/post/"
+        @install_database = File.join(@database_location, "installed")
+        @sync_database = File.join(@database_location, "available")
+        unless File.exist?(@database_location)
+            mkdir_p(@install_database)
+            mkdir_p(@sync_database)
+        end
+    end
+    
     def get_data(package)
         begin
             package_data = File.join(@install_database, package, 'packageData')
@@ -106,7 +108,7 @@ class PackageDataBase
         file = File.join(@install_database, package, 'files')
         file_list = []
         IO.readlines(file).each do |entry|
-            file_list.push(@root + entry)
+            file_list.push(entry)
         end
         return file_list
     end
@@ -188,11 +190,11 @@ class PackageDataBase
 
     def update_database()
         rm_r("/tmp/post") if (File.exists?("/tmp/post"))
-        rm_r("/var/lib/post/available") if (File.exists?("/var/lib/post/available"))
+        rm_r(@sync_database) if (File.exists?(@sync_database))
 
         mkdir_p("/tmp/post")
         cd("/tmp/post")
-        mkdir_p("/var/lib/post/available")
+        mkdir_p(@sync_database)
 
         for repo in get_repos
 
@@ -206,9 +208,8 @@ class PackageDataBase
                 end
             end
 
-        
             system("tar xf info.tar")
-            cp_r('info', "/var/lib/post/available/#{repo}")
+            cp_r('info', "#{@sync_database}/#{repo}")
         
             source_url = get_url(repo) + '/repo.yaml'
             if source_url.include?("file://")
@@ -219,7 +220,7 @@ class PackageDataBase
                     file.puts(open(source_url).read)
                 end
             end
-            cp_r('repo.yaml', "/var/lib/post/available/#{repo}/repo.yaml")
+            cp_r('repo.yaml', "#{@sync_database}/#{repo}/repo.yaml")
             rm('repo.yaml')
             rm('info.tar')
             rm_r('info')

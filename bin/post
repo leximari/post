@@ -24,6 +24,9 @@ require('fileutils')
 
 DATA = PackageDataBase.new()
 
+OPTIONS = {}
+OPTIONS[:root] = '/'
+
 puts('Loading:     Downloading package information.')
 DATA.update_database()
 
@@ -48,8 +51,8 @@ def install_local_packages(args)
 end
 
 def install_packages(args)
-    queue = PackageList.new()    
-    fetch = Fetch.new()
+    queue = PackageList.new(OPTIONS[:root])    
+    fetch = Fetch.new(OPTIONS[:root])
 
     begin
         args.each { |package| queue.push(package) }
@@ -68,11 +71,11 @@ def install_packages(args)
 end
 
 def remove_packages(args)
-    queue = PackageList.new()
+    queue = PackageList.new(OPTIONS[:root])
     args.each do |package|
         queue.set(package) if DATA.installed?(package)
     end
-    erase = Erase.new()
+    erase = Erase.new(OPTIONS[:root])
     if confirmation(queue)
         queue.each { |package| puts("Removing:    #{package}") }
         queue.each { |package| erase.remove_package(package) }
@@ -85,17 +88,22 @@ options.banner =    "Usage: post [OPTIONS] [PACKAGES]"
 options.version =   "Post 1.9 (1.9.0)"
 options.define_head "Copyright (C) Thomas Chace 2011-2012 <tchacex@gmail.com>"
 
-options.on('-i', '--fetch=', Array,
+options.on( '--root=OPT', String, "Change the root filesystem." ) do |arg|
+        OPTIONS[:root] = arg
+        DATA.set_root(OPTIONS[:root])
+        DATA.update_database()
+    end
+options.on('-i', '--fetch PACKAGES', Array,
     'Install a package.')  { |args| install_packages(args) }
-options.on('-l', '--install=', Array,
+options.on('-l', '--install PACKAGES', Array,
     'Install a local package.')  { |args| install_local_packages(args) }
-options.on('-r', '--erase=', Array,
+options.on('-r', '--erase PACKAGES', Array,
     'Erase a package.') { |args| remove_packages(args) }
 options.on('-u', '--upgrade',
-    'Upgrade packages to latest versions') {
+    'Upgrade packages to latest versions') do
         packages = DATA.get_installed_packages()
         install_packages(packages)
-    }
+    end
 
 options.on('-h', '--help', 'Show this help message.') { puts(options) }
 options.on('-v', '--version', 'Show version information.') { puts( options.version() ) }

@@ -19,15 +19,15 @@ require('fileutils')
 class Erase
     include FileUtils
     def initialize(root = '/')
-        @database = PackageDataBase.new(root)
+        @root = root
+        @database = PackageDataBase.new(@root)
     end
 
     def remove_package(package)
-        root = @database.get_root()
         remove_script = @database.get_remove_script(package)
 
         @database.get_files(package).each do |file|
-            file = "#{root}/#{file.strip}"
+            file = "#{@root}/#{file.strip}"
             rm(file) if FileTest.exists?(file)
         end
         eval(remove_script)
