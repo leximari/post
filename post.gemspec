@@ -10,7 +10,7 @@ date = "#{time.year}-#{month}-#{time.day}"
 Gem::Specification.new do |s|
     s.name        = 'post'
     s.executables << 'post'
-    s.version     = '1.6.0'
+    s.version     = '1.5.0'
 #    s.add_dependency('archive-tar-minitar')
 #    s.add_dependency('ruby-xz')
     s.date        = date
