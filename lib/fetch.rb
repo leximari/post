@@ -27,10 +27,11 @@ require(File.join(File.dirname(__FILE__), "tools.rb"))
 class Fetch
     include FileUtils
     def initialize(root = '/')
+        @root = root
         rm_r("/tmp/post") if File.exists?("/tmp/post")
         mkdir("/tmp/post")
         cd("/tmp/post")
-        @database = PackageDataBase.new(root)
+        @database = PackageDataBase.new(@root)
     end
 
     def get_file(url, file, output = true)
@@ -76,17 +77,16 @@ class Fetch
     end
 
     def do_install(filename)
-        root = @database.get_root()
         
         extract(filename)
         rm(filename)
         new_files = Dir["**/*"].reject {|file| File.directory?(file) }
         new_directories = Dir["**/*"].reject {|file| File.file?(file) }
         @database.install_package(".packageData", ".remove", new_files)
-        new_directories.each { |directory| mkdir_p("#{root}/#{directory}") }
+        new_directories.each { |directory| mkdir_p("#{@root}/#{directory}") }
         for file in new_files
-            install(file, "#{root}/#{file}")
-            system("chmod +x #{root}/#{file}") if file.include?("/bin/")
+            install(file, "#{@root}/#{file}")
+            system("chmod +x #{@root}/#{file}") if file.include?("/bin/")
         end
         install_script = File.read(".install")
         eval(install_script)
@@ -101,6 +101,7 @@ class Fetch
         unless (file_hash == real_hash)
             raise MismatchedHash, "Error:       #{filename} is corrupt."
         end
+        rm("#{filename}.sha256")
         do_install(filename)
     end
 end
