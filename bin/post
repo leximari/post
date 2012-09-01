@@ -85,7 +85,7 @@ end
 options = ARGV.options()
 options.set_summary_indent('    ')
 options.banner =    "Usage: post [OPTIONS] [PACKAGES]"
-options.version =   "Post 1.9 (1.9.0)"
+options.version =   "Post 2.0 (2.0.0)"
 options.define_head "Copyright (C) Thomas Chace 2011-2012 <tchacex@gmail.com>"
 
 options.on( '--root=OPT', String, "Change the root filesystem." ) do |arg|
