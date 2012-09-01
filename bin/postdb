@@ -23,7 +23,7 @@ DATA = PackageDataBase.new()
 options = ARGV.options()
 options.set_summary_indent('    ')
 options.banner =    "Usage: postdb [OPTIONS] [PACKAGES]"
-options.version =   "Post Database 1.9 (1.9.0)"
+options.version =   "Post Database 2.0 (2.0.0)"
 options.define_head "Copyright (C) Thomas Chace 2011-2012 <tchacex@gmail.com>"
 
 options.on('--getdeps PACKAGE', String,

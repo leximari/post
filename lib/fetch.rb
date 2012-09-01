@@ -20,6 +20,7 @@ class IncompleteError < Exception
 end
 
 require('digest')
+require('net/http')
 
 require(File.join(File.dirname(__FILE__), "packagedata.rb"))
 require(File.join(File.dirname(__FILE__), "tools.rb"))
