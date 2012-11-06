@@ -2,10 +2,16 @@ load('src/lib/post.rb')
 
 time = Time.new
 month = time.month
+day = time.day
 if (time.month < 10)
     month = "0#{month}"
 end
-date = "#{time.year}-#{month}-#{time.day}"
+
+if (day < 10)
+    day = "0#{day}"
+end
+
+date = "#{time.year}-#{month}-#{day}"
 
 Gem::Specification.new do |s|
     s.name        = 'post'
