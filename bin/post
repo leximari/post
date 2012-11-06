@@ -49,8 +49,8 @@ class PostFetch < Fetch
             end
         end
         saved_file.close()
-        #print('\r')
-        puts("\rFetched:     #{file_name} [100%]\n")
+        print("\r")
+        puts("Fetched:     #{file_name} [100%]\n")
     end
 end
 
