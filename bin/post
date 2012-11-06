@@ -22,18 +22,50 @@ require('post')
 require('optparse')
 require('fileutils')
 
+LOGFILE = File.open("/var/log/post.log", "a")
+
+def puts(x, stdout = true)
+    message = "#{Time.now}: #{x}"
+    LOGFILE.puts(message)
+    if (stdout)
+        print("#{x}")
+    end
+end
+
+class PostFetch < Fetch
+    def get_file(url, file)
+        url = URI.parse(url)
+        file_name = File.basename(file)
+        saved_file = File.open(file, 'w')
+
+        Net::HTTP.new(url.host, url.port).request_get(url.path) do |response|
+            length = response['Content-Length'].to_i
+            saved_file_length = 0.0
+            response.read_body do |fragment|
+                saved_file << fragment
+                saved_file_length += fragment.length
+                progress = (saved_file_length / length) * 100
+                print("\rFetching:    #{file_name} [#{progress.round}%]")
+            end
+        end
+        saved_file.close()
+        #print('\r')
+        puts("\rFetched:     #{file_name} [100%]\n")
+    end
+end
+
 DATA = PackageDataBase.new()
 
 OPTIONS = {}
 OPTIONS[:root] = '/'
 
-puts('Loading:     Downloading package information.')
+puts('Loading:     Downloading package information.', stdout = false)
 DATA.update_database()
 
 def confirmation(queue)
     return false if queue.empty?
-    puts("Queue:       #{queue.to_a.join(" ")}")
-    print('Confirm:     [y/n] ')
+    puts("Queue:       #{queue.to_a.join(" ")}\n")
+    puts('Confirm:     [y/n] ')
     return true if gets.include?('y')
 end
 
@@ -45,21 +77,20 @@ def install_local_packages(args)
         FileUtils.cp(path, "/tmp/post/#{File.basename(path)}")
     end
     if confirmation(args)
-        
         args.each { |package| install.do_install(File.basename(package)) }
     end
 end
 
 def install_packages(args)
     queue = PackageList.new(OPTIONS[:root])    
-    fetch = Fetch.new(OPTIONS[:root])
+    fetch = PostFetch.new(OPTIONS[:root])
 
     begin
         args.each { |package| queue.push(package) }
         if confirmation(queue)
             queue.each do |package|
                 fetch.fetch_package(package)
-                puts("Installing:  #{package}")
+                puts("Installing:  #{package}\n")
                 fetch.install_package(package)
             end
         end
@@ -77,7 +108,7 @@ def remove_packages(args)
     end
     erase = Erase.new(OPTIONS[:root])
     if confirmation(queue)
-        queue.each { |package| puts("Removing:    #{package}") }
+        queue.each { |package| puts("Removing:    #{package}\n") }
         queue.each { |package| erase.remove_package(package) }
     end
 end

@@ -35,7 +35,7 @@ class Fetch
         @database = PackageDataBase.new(@root)
     end
 
-    def get_file(url, file, output = true)
+    def get_file(url, file)
         url = URI.parse(url)
         filename = File.basename(file)
         saved_file = File.open(file, 'w')
@@ -47,10 +47,8 @@ class Fetch
                 saved_file << fragment
                 saved_file_length += fragment.length
                 progress = (saved_file_length / length) * 100
-                print("\rFetching:    #{filename} [#{progress.round}%]") if output
             end
         end
-        puts("\rFetched:     #{filename} [100%]") if output
         saved_file.close()
     end
 
@@ -68,8 +66,8 @@ class Fetch
                 cp(url, "/tmp/post/#{package}/#{file}")
                 cp(url + ".sha256", "/tmp/post/#{package}/#{file}.sha256")
             else
-                get_file(url, "/tmp/post/#{package}/#{file}", output)
-                get_file(url + ".sha256", "/tmp/post/#{package}/#{file}.sha256", output)
+                get_file(url, "/tmp/post/#{package}/#{file}")
+                get_file(url + ".sha256", "/tmp/post/#{package}/#{file}.sha256")
             end
         rescue
             raise IncompleteError, "Error:      '#{url}' does not exist."
