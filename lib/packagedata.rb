@@ -98,7 +98,12 @@ class PackageDataBase
         repo = File.join(@sync_database, get_repo(package))
         package_data = File.join(repo, package)
         data = normalise(YAML::load_file(package_data))
-        unless (data['architecture'].include?(RbConfig::CONFIG['host_cpu']))
+        platform = RbConfig::CONFIG['host_cpu']
+        thirty_two = ["i386", "i486", "i686"]
+	    if thirty_two.include?(platform)
+            platform = "i686"
+        end
+        unless (data['architecture'].include?(platform))
             data['version'] = "0"
         end
         return data

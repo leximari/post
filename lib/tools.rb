@@ -14,5 +14,7 @@
 # along with Post.  If not, see <http://www.gnu.org/licenses/>.
 
 def extract(filename)
+    system("mv #{filename} #{filename}.xz")
+    system("unxz #{filename}.xz")
     system("tar xf #{filename}")
 end
