@@ -26,23 +26,23 @@ options.banner =    "Usage: postdb [OPTIONS] [PACKAGES]"
 options.version =   "Post Database 2.0 (2.0.0)"
 options.define_head "Copyright (C) Thomas Chace 2011-2012 <tchacex@gmail.com>"
 
-options.on('--getdeps PACKAGE', String,
+options.on('--depends PACKAGE', String,
     'Get dependencies.')  do |arg|
         puts DATA.get_sync_data(arg)['dependencies'] if DATA.available?(arg)
     end
-options.on('--getversion PACKAGE', String,
+options.on('--version PACKAGE', String,
     'Get latest version.') do |arg|
         puts DATA.get_sync_data(arg)['version'] if DATA.available?(arg)
     end
-options.on('--getconflicts PACKAGE', String,
+options.on('--conflicts PACKAGE', String,
     'Get conflicts.')  do |arg|
         puts DATA.get_sync_data(arg)['conflicts'] if DATA.available?(arg)
     end
-options.on('--getdescription PACKAGE', String,
+options.on('--description PACKAGE', String,
     'Get conflicts.')  do |arg|
         puts DATA.get_sync_data(arg)['description'] if DATA.available?(arg)
     end
-options.on('--getfiles PACKAGE', String,
+options.on('--files PACKAGE', String,
     'Get installed files.')  do |arg|
         puts DATA.get_files(arg) if DATA.available?(arg)
     end
@@ -50,7 +50,7 @@ options.on('--getfiles PACKAGE', String,
 
 options.on('--availablepackages',
     'Get available packages.')  { puts DATA.get_available_packages }
-options.on('--installedpackages',
+options.on('--packages',
     'Get installed packages.')  { puts DATA.get_installed_packages }
 
 options.on('-h', '--help', 'Show this help message.') { puts(options) }

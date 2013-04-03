@@ -19,6 +19,25 @@ require('fileutils')
 require('rbconfig')
 require('zlib')
 
+def runs_on_this?(arch)
+    platform = RbConfig::CONFIG['host_cpu']
+    if platform == 'x86_64'
+        complist = ['i386', 'i486', 'i686', 'x86_64']
+    elsif platform == 'i686'
+        complist = ['i386', 'i486', 'i686']
+    elsif platform == 'i486'
+        complist = ['i386', 'i486', 'i686']
+    else
+        complist = platform
+    end
+    
+    if complist.include?(arch)
+        return true
+    else
+        return false
+    end
+end
+
 class PackageDataBase
     include FileUtils
     def initialize(root = '/')
@@ -80,7 +99,7 @@ class PackageDataBase
                     package_repo = repo
                     package_data = File.join(@sync_database + "/" + repo, package)
                     data = normalise(YAML::load_file(package_data))
-                    unless (data['architecture'].include?(RbConfig::CONFIG['host_cpu']))
+                    unless (runs_on_this?(data['architecture'].to_s))
                         data['version'] = "0"
                     end
                     if version >= data['version']
@@ -98,12 +117,8 @@ class PackageDataBase
         repo = File.join(@sync_database, get_repo(package))
         package_data = File.join(repo, package)
         data = normalise(YAML::load_file(package_data))
-        platform = RbConfig::CONFIG['host_cpu']
-        thirty_two = ["i386", "i486", "i686"]
-	    if thirty_two.include?(platform)
-            platform = "i686"
-        end
-        unless (data['architecture'].include?(platform))
+        
+        unless (runs_on_this?(data['architecture'].to_s))
             data['version'] = "0"
         end
         return data
