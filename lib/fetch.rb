@@ -76,7 +76,6 @@ class Fetch
     end
 
     def do_install(filename)
-        
         extract(filename)
         rm(filename)
         new_files = Dir["**/*"].reject {|file| File.directory?(file) }
