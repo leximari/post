@@ -1,0 +1,72 @@
+#!/usr/bin/ruby
+# Copyright (C) Thomas Chace 2011-2013 <tchacex@gmail.com>
+# This file is part of Post.
+# Post is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Lesser General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+
+# Post is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Lesser General Public License for more details.
+
+# You should have received a copy of the GNU Lesser General Public License
+# along with Post.  If not, see <http://www.gnu.org/licenses/>.
+
+require 'Qt'
+
+
+class QtApp < Qt::Widget
+
+    def initialize
+        super
+        
+        setWindowTitle("Post Software Centre")
+        
+        init_ui
+        
+        resize(350, 300)
+        move(300, 300)
+
+        show
+    end
+    
+    def init_ui
+        vbox = Qt::VBoxLayout.new(self)
+
+        vbox1 = Qt::VBoxLayout.new
+        hbox1 = Qt::HBoxLayout.new
+        hbox2 = Qt::HBoxLayout.new
+
+        window_label = Qt::Label.new("Packages", self)
+        edit = Qt::TextEdit.new(self)
+        edit.setEnabled(false)
+
+        activate = Qt::PushButton.new("Install", self)
+        close = Qt::PushButton.new("Remove", self)
+        help = Qt::PushButton.new("Help", self)
+        ok = Qt::PushButton.new("Exit", self)
+
+        vbox.addWidget(window_label)
+
+        vbox1.addWidget(activate)
+        vbox1.addWidget(close, 0, Qt::AlignTop)
+        hbox1.addWidget(edit)
+        hbox1.addLayout(vbox1)
+
+        vbox.addLayout(hbox1)
+
+        hbox2.addWidget(help)
+        hbox2.addStretch(1)
+        hbox2.addWidget(ok)
+        
+        vbox.addLayout(hbox2, 1)
+        setLayout(vbox)
+
+    end    
+end
+
+app = Qt::Application.new(ARGV)
+QtApp.new
+app.exec
