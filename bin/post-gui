@@ -42,6 +42,7 @@ class QtApp < Qt::Widget
 
         window_label = Qt::Label.new("Packages", self)
         package_list = Qt::ListView.new(self)
+        package_list.addItem("lol")
 
         activate = Qt::PushButton.new("Install", self)
         close = Qt::PushButton.new("Remove", self)
