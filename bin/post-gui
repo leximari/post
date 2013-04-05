@@ -16,45 +16,49 @@
 
 require('rubygems')
 require ('Qt')
+require('post')
 
+DATA = PackageDataBase.new()
 
 class QtApp < Qt::Widget
 
-    def initialize
+    def initialize()
         super
         
         setWindowTitle("Post Software Centre")
         
-        init_ui
+        init_ui()
         
         resize(350, 300)
         move(300, 300)
 
-        show
+        show()
     end
     
-    def init_ui
+    def init_ui()
         vbox = Qt::VBoxLayout.new(self)
 
-        vbox1 = Qt::VBoxLayout.new
-        hbox1 = Qt::HBoxLayout.new
-        hbox2 = Qt::HBoxLayout.new
+        vbox1 = Qt::VBoxLayout.new()
+        hbox1 = Qt::HBoxLayout.new()
+        hbox2 = Qt::HBoxLayout.new()
 
-        window_label = Qt::Label.new("Packages", self)
-        package_list = Qt::ListView.new(self)
-        #pack1 = Qt::ListViewItem.new("test")
-        package_list.add(pack1)
+        windowLabel = Qt::Label.new("Packages", self)
+        list = Qt::ListWidget.new(self)
+
+        for package in DATA.get_available_packages()
+            list.addItem(package)
+        end
 
         activate = Qt::PushButton.new("Install", self)
         close = Qt::PushButton.new("Remove", self)
         help = Qt::PushButton.new("Help", self)
         ok = Qt::PushButton.new("Exit", self)
 
-        vbox.addWidget(window_label)
+        vbox.addWidget(windowLabel)
 
         vbox1.addWidget(activate)
         vbox1.addWidget(close, 0, Qt::AlignTop)
-        hbox1.addWidget(package_list)
+        hbox1.addWidget(list)
         hbox1.addLayout(vbox1)
 
         vbox.addLayout(hbox1)
@@ -70,5 +74,5 @@ class QtApp < Qt::Widget
 end
 
 app = Qt::Application.new(ARGV)
-QtApp.new
-app.exec
+QtApp.new()
+app.exec()
