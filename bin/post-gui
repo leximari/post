@@ -19,8 +19,10 @@ require ('Qt')
 require('post')
 
 DATA = PackageDataBase.new()
+APP = Qt::Application.new(ARGV)
 
 class QtApp < Qt::Widget
+    slots :install
 
     def initialize()
         super
@@ -43,22 +45,27 @@ class QtApp < Qt::Widget
         hbox2 = Qt::HBoxLayout.new()
 
         windowLabel = Qt::Label.new("Packages", self)
-        list = Qt::ListWidget.new(self)
+        @list = Qt::ListWidget.new(self)
 
         for package in DATA.get_available_packages()
-            list.addItem(package)
+            @list.addItem(package)
         end
+        @list.addItem("test")
 
         activate = Qt::PushButton.new("Install", self)
         close = Qt::PushButton.new("Remove", self)
         help = Qt::PushButton.new("Help", self)
         ok = Qt::PushButton.new("Exit", self)
+        
+        #Qt::Object.connect( ok, SIGNAL( :clicked ), APP, SLOT( :quit ) )
+        #Qt::Object.connect(activate, SIGNAL( :clicked ), APP, install())
+        
 
         vbox.addWidget(windowLabel)
 
         vbox1.addWidget(activate)
         vbox1.addWidget(close, 0, Qt::AlignTop)
-        hbox1.addWidget(list)
+        hbox1.addWidget(@list)
         hbox1.addLayout(vbox1)
 
         vbox.addLayout(hbox1)
@@ -69,10 +76,13 @@ class QtApp < Qt::Widget
         
         vbox.addLayout(hbox2, 1)
         setLayout(vbox)
-
-    end    
+    end
+    
+    def install
+        #puts @list.currentItem.text
+        puts "lol"
+    end
 end
 
-app = Qt::Application.new(ARGV)
 QtApp.new()
-app.exec()
+APP.exec()
