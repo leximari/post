@@ -23,7 +23,7 @@ DATA = PackageDataBase.new()
 options = ARGV.options()
 options.set_summary_indent('    ')
 options.banner =    "Usage: postdb [OPTIONS] [PACKAGES]"
-options.version =   "Post Database 2.0 (2.0.0)"
+options.version =   "Post Database 2.5 (2.4.5)"
 options.define_head "Copyright (C) Thomas Chace 2011-2012 <tchacex@gmail.com>"
 
 options.on('--depends PACKAGE', String,
@@ -54,4 +54,5 @@ options.on('--packages',
     'Get installed packages.')  { puts DATA.get_installed_packages }
 
 options.on('-h', '--help', 'Show this help message.') { puts(options) }
+options.on('-v', '--version', 'Show version information.') { puts("#{options.version()}\n") }
 options.parse!
