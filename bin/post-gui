@@ -50,7 +50,6 @@ class QtApp < Qt::Widget
         for package in DATA.get_available_packages()
             @list.addItem(package)
         end
-        @list.addItem("test")
 
         activate = Qt::PushButton.new("Install", self)
         close = Qt::PushButton.new("Remove", self)
@@ -80,7 +79,7 @@ class QtApp < Qt::Widget
     
     def install
         #puts @list.currentItem.text
-        puts "lol"
+        puts "test"
     end
 end
 
