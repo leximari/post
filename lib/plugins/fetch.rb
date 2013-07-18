@@ -13,31 +13,31 @@
 # You should have received a copy of the GNU Lesser General Public License
 # along with Post.  If not, see <http://www.gnu.org/licenses/>.
 
+require('net/http')
+require('fileutils')
+
 class MismatchedHash < Exception
 end
 
 class IncompleteError < Exception
 end
 
-require('digest')
-require('net/http')
-
-require(File.join(File.dirname(__FILE__), "packagedata.rb"))
-require(File.join(File.dirname(__FILE__), "tools.rb"))
-
-class Fetch
+class CommandLineFetch < Plugin
     include FileUtils
-    def initialize(root = '/')
+    def initialize(root = '/', database)
         @root = root
+        @database = database
+    end
+
+    def cleanup
         rm_r("/tmp/post") if File.exists?("/tmp/post")
         mkdir("/tmp/post")
         cd("/tmp/post")
-        @database = PackageDataBase.new(@root)
     end
 
     def get_file(url, file)
         url = URI.parse(url)
-        filename = File.basename(file)
+        file_name = File.basename(file)
         saved_file = File.open(file, 'w')
 
         Net::HTTP.new(url.host, url.port).request_get(url.path) do |response|
@@ -47,12 +47,15 @@ class Fetch
                 saved_file << fragment
                 saved_file_length += fragment.length
                 progress = (saved_file_length / length) * 100
+                print("\rFetching:    #{file_name} [#{progress.round}%]")
             end
         end
         saved_file.close()
+        print("\r")
+        puts("Fetched:     #{file_name} [100%]\n")
     end
 
-    def fetch_package(package, output = true)
+    def fetch_package(package)
         mkdir_p("/tmp/post/#{package}")
 
         sync_data = @database.get_sync_data(package)
@@ -64,42 +67,15 @@ class Fetch
             if url.include?('file://')
                 url.sub!("file://", '')
                 cp(url, "/tmp/post/#{package}/#{file}")
-                cp(url + ".sha256", "/tmp/post/#{package}/#{file}.sha256")
             else
                 get_file(url, "/tmp/post/#{package}/#{file}")
-                get_file(url + ".sha256", "/tmp/post/#{package}/#{file}.sha256")
             end
         rescue
             raise IncompleteError, "Error:      '#{url}' does not exist."
         end
             
     end
-
-    def do_install(filename)
-        extract(filename)
-        rm(filename)
-        new_files = Dir["**/*"].reject {|file| File.directory?(file) }
-        new_directories = Dir["**/*"].reject {|file| File.file?(file) }
-        @database.install_package(".packageData", ".remove", new_files)
-        new_directories.each { |directory| mkdir_p("#{@root}/#{directory}") }
-        for file in new_files
-            install(file, "#{@root}/#{file}")
-            system("chmod +x #{@root}/#{file}") if file.include?("/bin/")
-        end
-        install_script = File.read(".install")
-        eval(install_script)
-    end
-
-    def install_package(package)
-        cd("/tmp/post/#{package}")
-        sync_data = @database.get_sync_data(package)
-        filename = "#{package}-#{sync_data['version']}-#{sync_data['architecture']}.pst"
-        file_hash = Digest::SHA256.hexdigest(open(filename, "r").read())
-        real_hash = File.open("#{filename}.sha256").read().strip()
-        unless (file_hash == real_hash)
-            raise MismatchedHash, "Error:       #{filename} is corrupt."
-        end
-        rm("#{filename}.sha256")
-        do_install(filename)
-    end
 end
+
+
+

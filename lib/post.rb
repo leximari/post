@@ -16,8 +16,6 @@
 directory = File.dirname(__FILE__)
 path = File.expand_path(directory)
 
-require(File.join(path, 'fetch.rb'))
-require(File.join(path, 'erase.rb'))
+require(File.join(path, 'plugin.rb'))
 require(File.join(path, 'packagedata.rb'))
-require(File.join(path, "tools.rb"))
 require(File.join(path, "packagelist.rb"))

@@ -13,8 +13,17 @@
 # You should have received a copy of the GNU Lesser General Public License
 # along with Post.  If not, see <http://www.gnu.org/licenses/>.
 
-def extract(filename)
-    system("mv #{filename} #{filename}.xz")
-    system("unxz #{filename}.xz")
-    system("tar xf #{filename}")
+require 'set'
+
+class Plugin
+    def self.plugins
+        @plugins ||= []
+        end
+
+    def self.inherited(klass)
+        @plugins ||= []
+        @plugins << klass
+    end
 end
+
+Dir["./lib/plugins/*.rb"].each { |f| require f }

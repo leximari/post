@@ -15,17 +15,18 @@ date = "#{time.year}-#{month}-#{day}"
 
 Gem::Specification.new do |s|
     s.name        = 'post'
+    s.license     = 'GPL'
     s.executables << 'post'
     s.executables << 'postdb'
-    s.version     = '2.0'
+    s.version     = '2.4.5'
     s.date        = date
     s.summary     = "Package manager in pure ruby."
     s.description = "Small, fast package manager in pure Ruby."
     s.authors     = ["Thomas Chace"]
     s.email       = 'tchacex@gmail.com'
-    s.files       = ["lib/post.rb", "lib/fetch.rb", "lib/erase.rb",
-            "lib/packagelist.rb", "lib/packagedata.rb",
-            "lib/tools.rb"]
+    s.files       = ["lib/post.rb", "lib/plugins", "lib/plugins/fetch.rb",
+            "lib/plugins/install.rb", "lib/plugins/sha256.rb", "lib/plugins/remove.rb",
+            "lib/packagelist.rb", "lib/packagedata.rb", "lib/plugin.rb"]
     s.homepage    =
         'http://github.com/thomashc/Post'
 end
