@@ -13,14 +13,13 @@
 # You should have received a copy of the GNU Lesser General Public License
 # along with Post.  If not, see <http://www.gnu.org/licenses/>.
 
-require(File.join(File.dirname(__FILE__), "packagedata.rb"))
 require('fileutils')
 
-class Erase
+class RemovePackage < Plugin
     include FileUtils
-    def initialize(root = '/')
+    def initialize(root = '/', database)
         @root = root
-        @database = PackageDataBase.new(@root)
+        @database = database
     end
 
     def remove_package(package)

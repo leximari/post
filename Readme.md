@@ -8,15 +8,12 @@ Post is package manager for unix systems that focuses on clean design, efficienc
 
 Post is is supported by Rubinius(1.1+), but also works well on Ruby 1.9+.
 
-## Dependencies:
-	lzma(liblzma-dev on Ubuntu/Debian)
-
 ## Installing Post
 
         git clone git://github.com/thomashc/Post.git
         cd Post
         gem build post.gemspec
-        gem install post-1.5.0.gem
+        gem install post-2.5.4.gem
 
 ## Configuring The Test Repository
 
@@ -25,7 +22,6 @@ Post is is supported by Rubinius(1.1+), but also works well on Ruby 1.9+.
 ## Testing The Installation
 
         sudo post -h
-        sudo post -s
         sudo post -i zile
 
 If you have questions, email me at <tchacex@gmail.com>.

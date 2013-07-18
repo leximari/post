@@ -32,28 +32,6 @@ def puts(x, stdout = true)
     end
 end
 
-class PostFetch < Fetch
-    def get_file(url, file)
-        url = URI.parse(url)
-        file_name = File.basename(file)
-        saved_file = File.open(file, 'w')
-
-        Net::HTTP.new(url.host, url.port).request_get(url.path) do |response|
-            length = response['Content-Length'].to_i
-            saved_file_length = 0.0
-            response.read_body do |fragment|
-                saved_file << fragment
-                saved_file_length += fragment.length
-                progress = (saved_file_length / length) * 100
-                print("\rFetching:    #{file_name} [#{progress.round}%]")
-            end
-        end
-        saved_file.close()
-        print("\r")
-        puts("Fetched:     #{file_name} [100%]\n")
-    end
-end
-
 DATA = PackageDataBase.new()
 
 OPTIONS = {}
@@ -61,6 +39,15 @@ OPTIONS[:root] = '/'
 
 puts('Loading:     Downloading package information.', stdout = false)
 DATA.update_database()
+
+def get_plugin(function)
+    Plugin.plugins.each do |plugin|
+        plugin = plugin.new(OPTIONS[:root], DATA)
+        if plugin.respond_to?(function)
+            return plugin
+        end
+    end
+end
 
 def confirmation(queue)
     return false if queue.empty?
@@ -70,28 +57,28 @@ def confirmation(queue)
 end
 
 def install_local_packages(args)
-    install = Fetch.new()
     args.each do |package|
         path = File.join(File.expand_path(PWD), package)
         puts path
         FileUtils.cp(path, "/tmp/post/#{File.basename(path)}")
     end
     if confirmation(args)
-        args.each { |package| install.do_install(File.basename(package)) }
+        args.each { |package| get_plugin(:install_package).do_install(File.basename(package)) }
     end
 end
 
 def install_packages(args)
-    queue = PackageList.new(OPTIONS[:root])    
-    fetch = PostFetch.new(OPTIONS[:root])
+    queue = PackageList.new(OPTIONS[:root])
 
     begin
         args.each { |package| queue.push(package) }
         if confirmation(queue)
             queue.each do |package|
-                fetch.fetch_package(package)
+                get_plugin(:fetch_package).fetch_package(package)
+                puts("Verifying:   #{package}\n")
+                get_plugin(:verify_package).verify_package(package)
                 puts("Installing:  #{package}\n")
-                fetch.install_package(package)
+                get_plugin(:install_package).install_package(package)
             end
         end
     rescue MismatchedHash => error
@@ -106,17 +93,16 @@ def remove_packages(args)
     args.each do |package|
         queue.set(package) if DATA.installed?(package)
     end
-    erase = Erase.new(OPTIONS[:root])
     if confirmation(queue)
         queue.each { |package| puts("Removing:    #{package}\n") }
-        queue.each { |package| erase.remove_package(package) }
+        queue.each { |package| get_plugin(:remove_package).remove_package(package) }
     end
 end
 
 options = ARGV.options()
 options.set_summary_indent('    ')
 options.banner =    "Usage: post [OPTIONS] [PACKAGES]"
-options.version =   "Post 2.0 (2.0.3)"
+options.version =   "Post 2.5 (2.4.5)"
 options.define_head "Copyright (C) Thomas Chace 2011-2013 <tchacex@gmail.com>"
 
 options.on( '--root=OPT', String, "Change the root filesystem." ) do |arg|
@@ -128,8 +114,8 @@ options.on('-i', '--fetch PACKAGES', Array,
     'Install a package.')  { |args| install_packages(args) }
 options.on('-l', '--install PACKAGES', Array,
     'Install a local package.')  { |args| install_local_packages(args) }
-options.on('-r', '--erase PACKAGES', Array,
-    'Erase a package.') { |args| remove_packages(args) }
+options.on('-r', '--remove PACKAGES', Array,
+    'Remove a package.') { |args| remove_packages(args) }
 options.on('-u', '--upgrade',
     'Upgrade packages to latest versions') do
         packages = DATA.get_installed_packages()
@@ -137,5 +123,5 @@ options.on('-u', '--upgrade',
     end
 
 options.on('-h', '--help', 'Show this help message.') { puts(options) }
-options.on('-v', '--version', 'Show version information.') { puts( options.version() ) }
+options.on('-v', '--version', 'Show version information.') { puts("#{options.version()}\n") }
 options.parse!
