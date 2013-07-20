@@ -208,7 +208,7 @@ options.on('--description PACKAGE', String,
 options.on('--files PACKAGE', String,
     'Get installed files.')  do |arg|
         if DATA.available?(arg)
-            print("#{array_to_string(DATA.get_filesa(arg)}\n")
+            print(array_to_string(DATA.get_files(arg)))
         end
     end
 
