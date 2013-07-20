@@ -15,8 +15,8 @@
 
 directory = File.dirname(__FILE__)
 path = File.expand_path(directory)
+plugin_directory = File.join(path, "plugins")
 
-require(File.join(path, 'plugin.rb'))
 require('set')
 require("fileutils")
 
@@ -43,10 +43,6 @@ class Plugin
     end
 end
 
-#Dir["./lib/plugins/*.rb"].each { |f| require f }
-
-
-plugin_directory = File.join(path, "plugins")
 require(File.join(plugin_directory, "http_fetch_binary.rb"))
 require(File.join(plugin_directory, "install_binary.rb"))
 require(File.join(plugin_directory, "remove_binary.rb"))
