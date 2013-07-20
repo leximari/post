@@ -54,7 +54,6 @@ class Sha256Check < Plugin
         rescue
             raise IncompleteError, "Error:      '#{url + ".sha256"}' does not exist."
         end
-        `ls`
         file_hash = Digest::SHA256.hexdigest(open(filename, "r").read())
         real_hash = File.open("#{filename}.sha256").read().strip()
         unless (file_hash == real_hash)
