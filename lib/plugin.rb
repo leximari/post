@@ -13,12 +13,29 @@
 # You should have received a copy of the GNU Lesser General Public License
 # along with Post.  If not, see <http://www.gnu.org/licenses/>.
 
-require 'set'
+directory = File.dirname(__FILE__)
+path = File.expand_path(directory)
+
+require(File.join(path, 'plugin.rb'))
+require('set')
+require("fileutils")
 
 class Plugin
+	include FileUtils
+	def initialize(root = '/', database)
+        @root = root
+        @database = database
+    end
+
+    def cleanup
+        rm_r("/tmp/post") if File.exists?("/tmp/post")
+        mkdir("/tmp/post")
+        cd("/tmp/post")
+    end
+
     def self.plugins
         @plugins ||= []
-        end
+    end
 
     def self.inherited(klass)
         @plugins ||= []
@@ -26,4 +43,12 @@ class Plugin
     end
 end
 
-Dir["./lib/plugins/*.rb"].each { |f| require f }
+#Dir["./lib/plugins/*.rb"].each { |f| require f }
+
+
+plugin_directory = File.join(path, "plugins")
+require(File.join(plugin_directory, "http_fetch_binary.rb"))
+require(File.join(plugin_directory, "install_binary.rb"))
+require(File.join(plugin_directory, "remove_binary.rb"))
+require(File.join(plugin_directory, "verify_sha256.rb"))
+require(File.join(plugin_directory, "fetch_source.rb"))

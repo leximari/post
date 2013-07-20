@@ -1,7 +1,7 @@
 ---
 maintainer: Thomas Chace <ithomashc@gmail.com>
 name: post
-version: 1.5.0
+version: 2.0
 release: 1
 license: GPL
 architecture: i686
