@@ -177,31 +177,28 @@ options.separator("")
     
 #### Database options.
 
+def array_to_string(array)
+    list_string = ""
+    array.each { |item| list_string += item.to_s }
+    return list_string
+end
+
 options.on('--depends PACKAGE', String,
     'Get dependencies.')  do |arg|
         if DATA.available?(arg)
-            list = DATA.get_sync_data(arg)['dependencies']
-            list_string = ""
-            list.each { |item| list_string += item.to_s }
-            print("#{list_string}\n")
+            print("#{array_to_string(DATA.get_sync_data(arg)['dependencies'])}\n")
         end
     end
 options.on('--version PACKAGE', String,
     'Get latest version.') do |arg|
         if DATA.available?(arg)
-            list = DATA.get_sync_data(arg)['version']
-            list_string = ""
-            list.each { |item| list_string += item.to_s }
-            print("#{list_string}\n")
+            print("#{array_to_string(DATA.get_sync_data(arg)['version'])}\n")
         end
     end
 options.on('--conflicts PACKAGE', String,
     'Get conflicting packages.')  do |arg|
         if DATA.available?(arg)
-            list = DATA.get_sync_data(arg)['conflicts']
-            list_string = ""
-            list.each { |item| list_string += item.to_s }
-            print("#{list_string}\n")
+            print("#{array_to_string(DATA.get_sync_data(arg)['conflicts'])}\n")
         end
     end
 options.on('--description PACKAGE', String,
@@ -211,10 +208,7 @@ options.on('--description PACKAGE', String,
 options.on('--files PACKAGE', String,
     'Get installed files.')  do |arg|
         if DATA.available?(arg)
-            list = DATA.get_files(arg)
-            list_string = ""
-            list.each { |item| list_string += item.to_s }
-            print(list_string)
+            print("#{array_to_string(DATA.get_filesa(arg)}\n")
         end
     end
 
