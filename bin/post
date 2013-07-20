@@ -179,23 +179,43 @@ options.separator("")
 
 options.on('--depends PACKAGE', String,
     'Get dependencies.')  do |arg|
-        puts DATA.get_sync_data(arg)['dependencies'] if DATA.available?(arg)
+        if DATA.available?(arg)
+            list = DATA.get_sync_data(arg)['dependencies']
+            list_string = ""
+            list.each { |item| list_string += item.to_s }
+            print("#{list_string}\n")
+        end
     end
 options.on('--version PACKAGE', String,
     'Get latest version.') do |arg|
-        puts DATA.get_sync_data(arg)['version'] if DATA.available?(arg)
+        if DATA.available?(arg)
+            list = DATA.get_sync_data(arg)['version']
+            list_string = ""
+            list.each { |item| list_string += item.to_s }
+            print("#{list_string}\n")
+        end
     end
 options.on('--conflicts PACKAGE', String,
-    'Get conflicts.')  do |arg|
-        puts DATA.get_sync_data(arg)['conflicts'] if DATA.available?(arg)
+    'Get conflicting packages.')  do |arg|
+        if DATA.available?(arg)
+            list = DATA.get_sync_data(arg)['conflicts']
+            list_string = ""
+            list.each { |item| list_string += item.to_s }
+            print("#{list_string}\n")
+        end
     end
 options.on('--description PACKAGE', String,
-    'Get a package description.')  do |arg|
-        puts DATA.get_sync_data(arg)['description'] if DATA.available?(arg)
+    'Get package description.')  do |arg|
+        print("#{DATA.get_sync_data(arg)['description']}\n") if DATA.available?(arg)
     end
 options.on('--files PACKAGE', String,
     'Get installed files.')  do |arg|
-        puts DATA.get_files(arg) if DATA.available?(arg)
+        if DATA.available?(arg)
+            list = DATA.get_files(arg)
+            list_string = ""
+            list.each { |item| list_string += item.to_s }
+            print(list_string)
+        end
     end
 
 options.on('--availablepackages',
