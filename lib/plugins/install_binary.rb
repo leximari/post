@@ -21,13 +21,7 @@ def extract(filename)
     system("tar xf #{filename}")
 end
 
-
 class InstallPackage < Plugin
-    include FileUtils
-    def initialize(root = '/', database)
-        @root = root
-        @database = database
-    end
     def do_install(filename)
         extract(filename)
         rm(filename)

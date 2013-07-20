@@ -23,13 +23,7 @@ end
 class IncompleteError < Exception
 end
 
-class Sha256Check < Plugin
-    include FileUtils
-    def initialize(root = '/', database)
-        @root = root
-        @database = database
-    end
-    
+class Sha256Check < Plugin  
     def get_file(url, file)
         url = URI.parse(url)
         file_name = File.basename(file)

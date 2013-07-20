@@ -16,25 +16,10 @@
 require('net/http')
 require('fileutils')
 
-class MismatchedHash < Exception
-end
-
 class IncompleteError < Exception
 end
 
 class CommandLineFetch < Plugin
-    include FileUtils
-    def initialize(root = '/', database)
-        @root = root
-        @database = database
-    end
-
-    def cleanup
-        rm_r("/tmp/post") if File.exists?("/tmp/post")
-        mkdir("/tmp/post")
-        cd("/tmp/post")
-    end
-
     def get_file(url, file)
         url = URI.parse(url)
         file_name = File.basename(file)

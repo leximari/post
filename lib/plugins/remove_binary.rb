@@ -16,12 +16,6 @@
 require('fileutils')
 
 class RemovePackage < Plugin
-    include FileUtils
-    def initialize(root = '/', database)
-        @root = root
-        @database = database
-    end
-
     def remove_package(package)
         remove_script = @database.get_remove_script(package)
 

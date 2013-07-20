@@ -25,6 +25,7 @@ require('fileutils')
 LOGFILE = File.open("/var/log/post.log", "a")
 
 def puts(x, stdout = true)
+    ## Lets us write to logs and to stdout if we choose.
     message = "#{Time.now}: #{x}"
     LOGFILE.puts(message)
     if (stdout)
@@ -37,19 +38,23 @@ DATA = PackageDataBase.new()
 OPTIONS = {}
 OPTIONS[:root] = '/'
 
+
+## Updating the package database
 puts('Loading:     Downloading package information.', stdout = false)
 DATA.update_database()
 
-def get_plugin(function)
+def get_plugin(symbol)
+    ## Loads a plugin providing a certain method.
     Plugin.plugins.each do |plugin|
         plugin = plugin.new(OPTIONS[:root], DATA)
-        if plugin.respond_to?(function)
+        if plugin.respond_to?(symbol)
             return plugin
         end
     end
 end
 
 def confirmation(queue)
+    ## Simple function to confirm an operation on a given queue with the user.
     return false if queue.empty?
     puts("Queue:       #{queue.to_a.join(" ")}\n")
     puts('Confirm:     [y/n] ')
@@ -57,6 +62,7 @@ def confirmation(queue)
 end
 
 def install_local_packages(args)
+    ## Copies files over to a working directory and installs them.
     args.each do |package|
         path = File.join(File.expand_path(PWD), package)
         puts path
@@ -67,19 +73,60 @@ def install_local_packages(args)
     end
 end
 
-def install_packages(args)
+def install_source_packages(args)
+    ## Fetches from a remote location(partition, server, or otherwise) and 
+    ## installs a list of packages and their dependencies.
     queue = PackageList.new(OPTIONS[:root])
 
     begin
         args.each { |package| queue.push(package) }
         if confirmation(queue)
             queue.each do |package|
-                get_plugin(:fetch_package).fetch_package(package)
-                puts("Verifying:   #{package}\n")
-                get_plugin(:verify_package).verify_package(package)
+                ## Fetches a package.
+                puts("Building:    Fetching pstbuild file.\n")
+                get_plugin(:fetch_build).fetch_build(package)
+            end
+            queue.each do |package|
+                ## Separated just to insure sanity and avoid partial upgrades.
+                ## Installs a package.
+                puts("Building:    Getting source code.\n")
+                get_plugin(:build_package).get_source(package)
+                puts("Building:    Making package.\n")
+                get_plugin(:build_package).build_package(package)
                 puts("Installing:  #{package}\n")
                 get_plugin(:install_package).install_package(package)
             end
+
+        end
+    rescue MismatchedHash => error
+        puts(error.message)
+    rescue ConflictingEntry => error
+        puts(error.message)
+    end
+end
+
+def install_packages(args)
+    ## Fetches from a remote location(partition, server, or otherwise) and 
+    ## installs a list of packages and their dependencies.
+    queue = PackageList.new(OPTIONS[:root])
+
+    begin
+        args.each { |package| queue.push(package) }
+        if confirmation(queue)
+            queue.each do |package|
+                ## Fetches a package.
+                get_plugin(:fetch_package).fetch_package(package)
+                ## Verifies that all packages have been acquired without corruption
+                puts("Verifying:   #{package}\n")
+                get_plugin(:verify_package).verify_package(package)
+            end
+            queue.each do |package|
+                ## Separated just to insure sanity and avoid partial upgrades.
+                ## Installs a package.
+                puts("Installing:  #{package}\n")
+                get_plugin(:install_package).install_package(package)
+            end
+
         end
     rescue MismatchedHash => error
         puts(error.message)
@@ -112,6 +159,8 @@ options.on( '--root=OPT', String, "Change the root filesystem." ) do |arg|
     end
 options.on('-i', '--fetch PACKAGES', Array,
     'Install a package.')  { |args| install_packages(args) }
+options.on('-s', '--source PACKAGES', Array,
+    'Install a source package.')  { |args| install_source_packages(args) }
 options.on('-l', '--install PACKAGES', Array,
     'Install a local package.')  { |args| install_local_packages(args) }
 options.on('-r', '--remove PACKAGES', Array,
