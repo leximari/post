@@ -14,15 +14,17 @@
 # You should have received a copy of the GNU Lesser General Public License
 # along with Post.  If not, see <http://www.gnu.org/licenses/>.
 
-STDOUT.sync = true
-PWD = Dir.pwd()
-
 require('rubygems')
 require('post')
 require('optparse')
 require('fileutils')
 
+STDOUT.sync = true
+PWD = Dir.pwd()
 LOGFILE = File.open("/var/log/post.log", "a")
+OPTIONS = {}
+OPTIONS[:root] = '/'
+DATA = PackageDataBase.new()
 
 def puts(x, stdout = true)
     ## Lets us write to logs and to stdout if we choose.
@@ -33,14 +35,8 @@ def puts(x, stdout = true)
     end
 end
 
-DATA = PackageDataBase.new()
-
-OPTIONS = {}
-OPTIONS[:root] = '/'
-
-
 ## Updating the package database
-puts('Loading:     Downloading package information.', stdout = false)
+puts("Loading:     Downloading package information.\n")
 DATA.update_database()
 
 def get_plugin(symbol)
@@ -99,9 +95,9 @@ def install_source_packages(args)
 
         end
     rescue MismatchedHash => error
-        puts(error.message)
+        puts("#{error.message}\n")
     rescue ConflictingEntry => error
-        puts(error.message)
+        puts("#{error.message}\n")
     end
 end
 
