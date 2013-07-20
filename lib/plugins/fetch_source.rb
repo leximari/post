@@ -56,7 +56,7 @@ class FetchSource < Plugin
         repo_url = @database.get_url(@database.get_repo(package))
 
         file = "#{package}-#{sync_data['version']}-#{sync_data['architecture']}.pstbuild"
-        url = ("#{repo_url}/#{file}")
+        url = ("#{repo_url}/pstbuilds/#{file}")
         begin
             if url.include?('file://')
                 url.sub!("file://", '')
@@ -101,6 +101,16 @@ class BuildPackage < Plugin
             end
         end
     end
+    
+    def cleanup(package, package_filename)
+        wd = "/tmp/post/#{package}"
+        rm_r("#{wd}/#{package}-build")
+        rm("#{wd}/packageData")
+        rm("#{wd}/install")
+        rm("#{wd}/remove")
+        rm("#{wd}/build")
+        rm("#{wd}/#{package_filename}build")
+    end
 
     def build_package(package)
         cd("/tmp/post/#{package}")
@@ -110,7 +120,7 @@ class BuildPackage < Plugin
 
         build = File.read("#{wd}/build")
         
-        cd("#{wd}/#{spec['name']}-build")
+        cd("#{wd}/#{package}-build")
         eval(build)
         packageFiles = Dir["**/*"].reject {|file| File.directory?(file) }
         for file in packageFiles
@@ -118,17 +128,12 @@ class BuildPackage < Plugin
                 system("strip #{file}")
             end
         end
-        cd("#{wd}/#{spec['name']}-build/data")
-        packageName = "#{spec['name']}-#{spec['version']}-#{RbConfig::CONFIG["build_cpu"]}.pst"
-        system("tar cf #{packageName} * .packageData .install .remove")
-        system("xz #{packageName}")
-        cp(packageName + ".xz", "#{wd}/#{packageName}")
-        rm("#{packageName}.xz")
-        rm_r("#{wd}/#{spec['name']}-build")
-        rm("#{wd}/packageData")
-        rm("#{wd}/install")
-        rm("#{wd}/remove")
-        rm("#{wd}/build")
-        rm("#{wd}/#{packageName}build")
+        cd("#{wd}/#{package}-build/data")
+        package_name = "#{spec['name']}-#{spec['version']}-#{RbConfig::CONFIG["build_cpu"]}.pst"
+        system("tar cf #{package_name} * .packageData .install .remove")
+        system("xz #{package_name}")
+        cp(package_name + ".xz", "#{wd}/#{package_name}")
+        rm("#{package_name}.xz")
+        cleanup(package, package_name)
     end
 end
