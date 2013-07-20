@@ -152,6 +152,8 @@ options.banner =    "Usage: post [OPTIONS] [PACKAGES]"
 options.version =   "Post 2.5 (2.4.5)"
 options.define_head "Copyright (C) Thomas Chace 2011-2013 <tchacex@gmail.com>"
 
+#### Package management options.
+
 options.on( '--root=OPT', String, "Change the root filesystem." ) do |arg|
         OPTIONS[:root] = arg
         DATA.set_root(OPTIONS[:root])
@@ -170,6 +172,36 @@ options.on('-u', '--upgrade',
         packages = DATA.get_installed_packages()
         install_packages(packages)
     end
+
+options.separator("")
+    
+#### Database options.
+
+options.on('--depends PACKAGE', String,
+    'Get dependencies.')  do |arg|
+        puts DATA.get_sync_data(arg)['dependencies'] if DATA.available?(arg)
+    end
+options.on('--version PACKAGE', String,
+    'Get latest version.') do |arg|
+        puts DATA.get_sync_data(arg)['version'] if DATA.available?(arg)
+    end
+options.on('--conflicts PACKAGE', String,
+    'Get conflicts.')  do |arg|
+        puts DATA.get_sync_data(arg)['conflicts'] if DATA.available?(arg)
+    end
+options.on('--description PACKAGE', String,
+    'Get a package description.')  do |arg|
+        puts DATA.get_sync_data(arg)['description'] if DATA.available?(arg)
+    end
+options.on('--files PACKAGE', String,
+    'Get installed files.')  do |arg|
+        puts DATA.get_files(arg) if DATA.available?(arg)
+    end
+
+options.on('--availablepackages',
+    'Get available packages.')  { puts DATA.get_available_packages }
+options.on('--packages',
+    'Get installed packages.')  { puts DATA.get_installed_packages }
 
 options.on('-h', '--help', 'Show this help message.') { puts(options) }
 options.on('-v', '--version', 'Show version information.') { puts("#{options.version()}\n") }

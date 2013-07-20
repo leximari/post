@@ -18,4 +18,4 @@ path = File.expand_path(directory)
 
 require(File.join(path, 'plugin.rb'))
 require(File.join(path, 'packagedata.rb'))
-require(File.join(path, "packagelist.rb"))
+require(File.join(path, 'packagelist.rb'))

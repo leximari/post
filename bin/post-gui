@@ -76,11 +76,6 @@ class QtApp < Qt::Widget
         vbox.addLayout(hbox2, 1)
         setLayout(vbox)
     end
-    
-    def install
-        #puts @list.currentItem.text
-        puts "test"
-    end
 end
 
 QtApp.new()
