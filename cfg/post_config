@@ -3,3 +3,4 @@ flags: ~
 root: /
 verbose: yes
 confirmation: yes
+editor: /usr/bin/vi
