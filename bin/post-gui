@@ -50,13 +50,14 @@ class QtApp < Qt::Widget
         for package in DATA.get_available_packages()
             @list.addItem(package)
         end
+        #@list.findItem("zile")
 
         activate = Qt::PushButton.new("Install", self)
         close = Qt::PushButton.new("Remove", self)
         help = Qt::PushButton.new("Help", self)
         ok = Qt::PushButton.new("Exit", self)
         
-        #Qt::Object.connect( ok, SIGNAL( :clicked ), APP, SLOT( :quit ) )
+        Qt::Object.connect( ok, SIGNAL( :clicked ), APP, SLOT( :quit ) )
         #Qt::Object.connect(activate, SIGNAL( :clicked ), APP, install())
         
 

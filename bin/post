@@ -51,7 +51,7 @@ def log_puts(x, stdout = true)
     message = "#{Time.now}: #{x}"
     LOGFILE.puts(message)
     if (stdout)
-        puts("#{x}")
+        puts(x)
     end
 end
 
@@ -126,7 +126,6 @@ def install_source_packages(args)
                 log_puts("Installing:  #{package}\n")
                 get_plugin(:install_package).install_package(package)
             end
-
         end
     rescue MismatchedHash => error
         log_puts("#{error.message}")
@@ -137,12 +136,16 @@ end
 
 def install_packages(args)
     UPDATE.join
+    dep_resolver = get_plugin(:build_tree)
     ## Fetches from a remote location(partition, server, or otherwise) and 
     ## installs a list of packages and their dependencies.
-    queue = PackageList.new(DATA)
+    queue = []
 
     begin
-        args.each { |package| queue.push(package) }
+        args.each do |package|
+            dep_resolver.build_tree(package)
+            queue = dep_resolver.get_queue
+        end
         if confirmation(queue)
             threads = []
             threads << Thread.new {
@@ -178,7 +181,7 @@ def remove_packages(args)
     args.each do |package|
         queue.push(package) if DATA.installed?(package) and not queue.include?(package)
         for pkg in DATA.get_installed_packages()
-            if DATA.get_installed_data(pkg)['dependencies'].include?(package) and not queue.include?(package)
+            if DATA.get_installed_data(pkg)['dependencies'].include?(package) and not queue.include?(pkg)
                 queue.push(pkg)
             end
         end
@@ -199,14 +202,19 @@ options.banner =    "Usage: post [OPTIONS] [PACKAGES]"
 options.version =   "Post #{VERSION}"
 options.define_head "Copyright (C) Thomas Chace 2011-2013 <tchacex@gmail.com>"
 
-#### Package management options.
+#### Settings
 
-options.on( '--root=OPT', String, "Change the root filesystem." ) do |arg|
+options.on('--root=OPT', String, "Change the root filesystem." ) do |arg|
         OPTIONS[:root] = arg
         DATA.set_root(OPTIONS[:root])
         DATA.update_database()
     end
-options.on( '--noconfirmation', "Do not ask for user confirmation." ) { OPTIONS[:confirmation] = false }
+options.on('--noconfirmation', "Do not ask for user confirmation." ) { OPTIONS[:confirmation] = false }
+
+options.separator("")
+
+#### Package management options.
+
 options.on('-i', '--fetch PACKAGES', Array,
     'Install a package.')  { |args| install_packages(args) }
 options.on('-s', '--source PACKAGES', Array,
@@ -216,7 +224,7 @@ options.on('-l', '--install PACKAGES', Array,
 options.on('-r', '--remove PACKAGES', Array,
     'Remove a package.') { |args| remove_packages(args) }
 options.on('-u', '--upgrade',
-    'Upgrade packages to latest versions') do
+    'Upgrade packages to latest versions.') do
         packages = DATA.get_installed_packages()
         install_packages(packages)
     end
@@ -228,24 +236,24 @@ options.separator("")
 options.on('--depends PACKAGE', String,
     'Get dependencies.')  do |arg|
         if DATA.available?(arg)
-            puts("#{array_to_string(DATA.get_sync_data(arg)['dependencies'])}")
+            puts(array_to_string(DATA.get_sync_data(arg)['dependencies']))
         end
     end
 options.on('--version PACKAGE', String,
     'Get latest version.') do |arg|
         if DATA.available?(arg)
-            puts("#{array_to_string(DATA.get_sync_data(arg)['version'])}")
+            puts(array_to_string(DATA.get_sync_data(arg)['version']))
         end
     end
 options.on('--conflicts PACKAGE', String,
     'Get conflicting packages.')  do |arg|
         if DATA.available?(arg)
-            puts("#{array_to_string(DATA.get_sync_data(arg)['conflicts'])}")
+            puts(array_to_string(DATA.get_sync_data(arg)['conflicts']))
         end
     end
 options.on('--description PACKAGE', String,
     'Get package description.')  do |arg|
-        puts("#{DATA.get_sync_data(arg)['description']}") if DATA.available?(arg)
+        puts(DATA.get_sync_data(arg)['description']) if DATA.available?(arg)
     end
 options.on('--files PACKAGE', String,
     'Get installed files.')  do |arg|
@@ -253,16 +261,20 @@ options.on('--files PACKAGE', String,
             print(array_to_string(DATA.get_files(arg)))
         end
     end
-
 options.on('--availablepackages',
     'Get available packages.')  do
-        puts("#{array_to_string(DATA.get_available_packages)}")
+        puts(array_to_string(DATA.get_available_packages))
     end
 options.on('--packages',
     'Get installed packages.')  do
-        puts("#{array_to_string(DATA.get_installed_packages)}")
+        puts(array_to_string(DATA.get_installed_packages))
     end
+
+options.separator("")
+
+#### Help and Version
 
 options.on('-h', '--help', 'Show this help message.') { puts(options) }
 options.on('-v', '--version', 'Show version information.') { puts(options.version) }
+
 options.parse!
