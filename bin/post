@@ -20,14 +20,25 @@ require('optparse')
 require('fileutils')
 require('yaml')
 
+
+###############################################################################
+#### Configuration Options
+###############################################################################
+
 STDOUT.sync = true
+VERSION = "2.5.6"
 PWD = Dir.pwd()
 CONFIG = YAML::load_file("/etc/post/config")
 LOGFILE = File.open("/var/log/post.log", "a")
 OPTIONS = {}
+OPTIONS[:confirmation] = true
 OPTIONS[:root] = CONFIG["root"]
 DATA = PackageDataBase.new()
 DATA.set_root(OPTIONS[:root])
+
+###############################################################################
+#### Tools
+###############################################################################
 
 def array_to_string(array)
     list_string = ""
@@ -35,23 +46,14 @@ def array_to_string(array)
     return list_string
 end
 
-def puts(x, stdout = true)
+def log_puts(x, stdout = true)
     ## Lets us write to logs and to stdout if we choose.
     message = "#{Time.now}: #{x}"
     LOGFILE.puts(message)
     if (stdout)
-        print("#{x}")
+        puts("#{x}")
     end
 end
-
-## Updating the package database
-#puts("Loading:     Downloading package information.\n")
-UPDATE = Thread.new() {
-    begin
-        DATA.update_database()
-    rescue
-    end
-}
 
 def get_plugin(symbol)
     ## Loads a plugin providing a certain method.
@@ -65,11 +67,27 @@ end
 
 def confirmation(queue)
     ## Simple function to confirm an operation on a given queue with the user.
+    return true if not OPTIONS[:confirmation]
     return false if queue.empty?
-    puts("Queue:       #{queue.to_a.join(" ")}\n")
-    puts('Confirm:     [y/n] ')
+    puts("Queue:       #{queue.to_a.join(" ")}")
+    print('Confirm:     [y/n] ')
     return true if gets.include?('y')
 end
+
+###############################################################################
+#### Database Updating
+###############################################################################
+
+#puts("Loading:     Downloading package information.\n")
+UPDATE = Thread.new() {
+    begin
+        DATA.update_database()
+    rescue
+    end
+}
+###############################################################################
+#### Package Installation Functions
+###############################################################################
 
 def install_local_packages(args)
     UPDATE.join
@@ -95,7 +113,7 @@ def install_source_packages(args)
             queue.each do |package|
 
                 ## Fetches a package.
-                puts("Building:    Fetching pstbuild file.\n")
+                puts("Building:    Fetching pstbuild file.")
                 get_plugin(:fetch_build).fetch_build(package)
             end
             queue.each do |package|
@@ -105,15 +123,15 @@ def install_source_packages(args)
                 get_plugin(:build_package).get_source(package)
                 puts("Building:    Making package.\n")
                 get_plugin(:build_package).build_package(package)
-                puts("Installing:  #{package}\n")
+                log_puts("Installing:  #{package}\n")
                 get_plugin(:install_package).install_package(package)
             end
 
         end
     rescue MismatchedHash => error
-        puts("#{error.message}\n")
+        log_puts("#{error.message}")
     rescue ConflictingEntry => error
-        puts("#{error.message}\n")
+        log_puts("#{error.message}")
     end
 end
 
@@ -126,48 +144,59 @@ def install_packages(args)
     begin
         args.each { |package| queue.push(package) }
         if confirmation(queue)
-            queue.each do |package|
-                ## Fetches a package.
-                get_plugin(:fetch_package).fetch_package(package)
-                ## Verifies that all packages have been acquired without corruption
-                puts("Verifying:   #{package}\n")
-                get_plugin(:verify_package).verify_package(package)
-            end
+            threads = []
+            threads << Thread.new {
+                queue.each do |package|
+                    ## Fetches a package.
+                    get_plugin(:fetch_package).fetch_package(package)
+                    ## Verifies that all packages have been acquired without corruption
+                    log_puts("Verifying:   #{package}")
+                    get_plugin(:verify_package).verify_package(package)
+                end }
+            threads.each { |thread| thread.join }
             queue.each do |package|
                 ## Separated just to insure sanity and avoid partial upgrades.
                 ## Installs a package.
-                puts("Installing:  #{package}\n")
+                log_puts("Installing:  #{package}")
                 get_plugin(:install_package).install_package(package)
             end
 
         end
     rescue MismatchedHash => error
-        puts(error.message)
+        log_puts(error.message)
     rescue ConflictingEntry => error
-        puts(error.message)
+        log_puts(error.message)
     end
 end
+
+###############################################################################
+#### Package Removing Functions
+###############################################################################
 
 def remove_packages(args)
     queue = []
     args.each do |package|
-        queue.push(package) if DATA.installed?(package)
+        queue.push(package) if DATA.installed?(package) and not queue.include?(package)
         for pkg in DATA.get_installed_packages()
-            if DATA.get_installed_data(pkg)['dependencies'].include?(package)
+            if DATA.get_installed_data(pkg)['dependencies'].include?(package) and not queue.include?(package)
                 queue.push(pkg)
             end
         end
     end
     if confirmation(queue)
-        queue.each { |package| puts("Removing:    #{package}\n") }
+        queue.each { |package| log_puts("Removing:    #{package}") }
         queue.each { |package| get_plugin(:remove_package).remove_package(package) }
     end
 end
 
+###############################################################################
+#### Argument Handling
+###############################################################################
+
 options = ARGV.options()
 options.set_summary_indent('    ')
 options.banner =    "Usage: post [OPTIONS] [PACKAGES]"
-options.version =   "Post 2.5 (2.4.6)"
+options.version =   "Post #{VERSION}"
 options.define_head "Copyright (C) Thomas Chace 2011-2013 <tchacex@gmail.com>"
 
 #### Package management options.
@@ -177,6 +206,7 @@ options.on( '--root=OPT', String, "Change the root filesystem." ) do |arg|
         DATA.set_root(OPTIONS[:root])
         DATA.update_database()
     end
+options.on( '--noconfirmation', "Do not ask for user confirmation." ) { OPTIONS[:confirmation] = false }
 options.on('-i', '--fetch PACKAGES', Array,
     'Install a package.')  { |args| install_packages(args) }
 options.on('-s', '--source PACKAGES', Array,
@@ -198,24 +228,24 @@ options.separator("")
 options.on('--depends PACKAGE', String,
     'Get dependencies.')  do |arg|
         if DATA.available?(arg)
-            print("#{array_to_string(DATA.get_sync_data(arg)['dependencies'])}\n")
+            puts("#{array_to_string(DATA.get_sync_data(arg)['dependencies'])}")
         end
     end
 options.on('--version PACKAGE', String,
     'Get latest version.') do |arg|
         if DATA.available?(arg)
-            print("#{array_to_string(DATA.get_sync_data(arg)['version'])}\n")
+            puts("#{array_to_string(DATA.get_sync_data(arg)['version'])}")
         end
     end
 options.on('--conflicts PACKAGE', String,
     'Get conflicting packages.')  do |arg|
         if DATA.available?(arg)
-            print("#{array_to_string(DATA.get_sync_data(arg)['conflicts'])}\n")
+            puts("#{array_to_string(DATA.get_sync_data(arg)['conflicts'])}")
         end
     end
 options.on('--description PACKAGE', String,
     'Get package description.')  do |arg|
-        print("#{DATA.get_sync_data(arg)['description']}\n") if DATA.available?(arg)
+        puts("#{DATA.get_sync_data(arg)['description']}") if DATA.available?(arg)
     end
 options.on('--files PACKAGE', String,
     'Get installed files.')  do |arg|
@@ -226,13 +256,13 @@ options.on('--files PACKAGE', String,
 
 options.on('--availablepackages',
     'Get available packages.')  do
-        print("#{array_to_string(DATA.get_available_packages)}\n")
+        puts("#{array_to_string(DATA.get_available_packages)}")
     end
 options.on('--packages',
     'Get installed packages.')  do
-        print("#{array_to_string(DATA.get_installed_packages)}\n")
+        puts("#{array_to_string(DATA.get_installed_packages)}")
     end
 
 options.on('-h', '--help', 'Show this help message.') { puts(options) }
-options.on('-v', '--version', 'Show version information.') { puts("#{options.version()}\n") }
+options.on('-v', '--version', 'Show version information.') { puts(options.version) }
 options.parse!
