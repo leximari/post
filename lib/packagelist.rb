@@ -21,9 +21,9 @@ end
 class PackageList
     include Enumerable
 
-    def initialize(root = '/')
+    def initialize(database)
         @size = 0
-        @database = PackageDataBase.new(root)
+        @database = database
     end
 
     def push(package)

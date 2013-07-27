@@ -1,0 +1,4 @@
+---
+flags:
+- --prefix=/usr
+root: /
