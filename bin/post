@@ -34,12 +34,12 @@ LOGFILE = File.open("/var/log/post.log", "a")
 
 #### Loading config file.
 begin
-CONFIG = YAML::load_file("/etc/post/config")
-OPTIONS[:confirmation] = CONFIG["confirmation"]
-OPTIONS[:root] = CONFIG["root"]
+    CONFIG = YAML::load_file("/etc/post/config")
+    OPTIONS[:confirmation] = CONFIG["confirmation"]
+    OPTIONS[:root] = CONFIG["root"]
 rescue
-OPTIONS[:confirmation] = true
-OPTIONS[:root] = "/"
+    OPTIONS[:confirmation] = true
+    OPTIONS[:root] = "/"
 end
 
 ## Starting database.
@@ -112,27 +112,37 @@ def install_local_packages(args)
 end
 
 def install_source_packages(args)
+    dep_resolver = get_plugin(:build_tree)
     ## Fetches from a remote location(partition, server, or otherwise) and 
     ## installs a list of packages and their dependencies.
-    queue = PackageList.new()
+    queue = []
 
     begin
-        args.each { |package| queue.push(package) }
+        args.each do |package|
+            dep_resolver.build_tree(package)
+            queue = dep_resolver.get_queue
+        end
         if confirmation(queue)
             queue.each do |package|
-
                 ## Fetches a package.
                 puts("Building:    Fetching pstbuild file.")
                 get_plugin(:fetch_build).fetch_build(package)
+                print("Edit pstbuild? [y/n] ")
+                if gets.include?('y')
+                    system("vi /tmp/post/#{package}/packageData")
+                    system("vi /tmp/post/#{package}/build")
+                    system("vi /tmp/post/#{package}/install")
+                    system("vi /tmp/post/#{package}/remove")
+                end
             end
             queue.each do |package|
                 ## Separated just to insure sanity and avoid partial upgrades.
                 ## Installs a package.
-                puts("Building:    Getting source code.\n")
+                puts("Building:    Getting source code.")
                 get_plugin(:build_package).get_source(package)
-                puts("Building:    Making package.\n")
+                puts("Building:    Making package.")
                 get_plugin(:build_package).build_package(package)
-                log_puts("Installing:  #{package}\n")
+                log_puts("Installing:  #{package}")
                 get_plugin(:install_package).install_package(package)
             end
         end
