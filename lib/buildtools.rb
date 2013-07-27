@@ -17,11 +17,11 @@ require('fileutils')
 require('yaml')
 
 module BuildTools
-	def get_flags()
+	def get_flags
 		config = YAML::load_file("/etc/post/config")
 		return config['flags']
 	end
-	def configure()
+	def configure
 		system("./configure #{get_flags}")
 	end
 	def make

@@ -121,7 +121,8 @@ class BuildPackage < Plugin
         build = File.read("#{wd}/build")
         
         cd("#{wd}/#{package}-build")
-        eval(build)
+        build_thread = Thread.new { eval(build) }
+        build_thread.join
         packageFiles = Dir["**/*"].reject {|file| File.directory?(file) }
         for file in packageFiles
             if file.include?("/bin/") or file.include?("/lib/")
