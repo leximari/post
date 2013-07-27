@@ -14,22 +14,19 @@
 # along with Post.  If not, see <http://www.gnu.org/licenses/>.
 
 class DepResolver < Plugin
-
     def initialize(root, database)
         super(root, database)
         @queue = []
     end
-    def conflict?(variable)
-        for conflict in @database.get_sync_data(variable)['conflicts']
+    def conflict?(package)
+        for conflict in @database.get_sync_data(package)['conflicts']
             raise ConflictingEntry,
-                "Error:      '#{conflict}' conflicts with '#{variable}'" if @queue.include?(conflict)
+                "Error:      '#{conflict}' conflicts with '#{package}'" if @queue.include?(conflict)
         end
     end
-
-    def get_queue()
+    def get_queue
         @queue
     end
-
     def build_tree(package)
         group = []
         repo = @database.get_group_repo(package).to_s
