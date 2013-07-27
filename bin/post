@@ -37,9 +37,11 @@ begin
     CONFIG = YAML::load_file("/etc/post/config")
     OPTIONS[:confirmation] = CONFIG["confirmation"]
     OPTIONS[:root] = CONFIG["root"]
+    OPTIONS[:editor] = CONFIG["editor"]
 rescue
     OPTIONS[:confirmation] = true
     OPTIONS[:root] = "/"
+    OPTIONS[:editor] = "/usr/bin/vi"
 end
 
 ## Starting database.
@@ -129,10 +131,10 @@ def install_source_packages(args)
                 get_plugin(:fetch_build).fetch_build(package)
                 print("Edit pstbuild? [y/n] ")
                 if gets.include?('y')
-                    system("vi /tmp/post/#{package}/packageData")
-                    system("vi /tmp/post/#{package}/build")
-                    system("vi /tmp/post/#{package}/install")
-                    system("vi /tmp/post/#{package}/remove")
+                    system("#{OPTIONS['editor'} /tmp/post/#{package}/packageData")
+                    system("#{OPTIONS['editor'} /tmp/post/#{package}/build")
+                    system("#{OPTIONS['editor'} /tmp/post/#{package}/install")
+                    system("#{OPTIONS['editor'} /tmp/post/#{package}/remove")
                 end
             end
             queue.each do |package|
