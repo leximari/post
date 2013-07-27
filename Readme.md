@@ -11,6 +11,7 @@ Post is is supported by Rubinius(1.1+), but also works well on Ruby 1.9+.
 ## Installing Post
 
         git clone git://github.com/thomashc/Post.git
+        git checkout 1.0
         cd Post
         gem build post.gemspec
         gem install post-2.5.6.gem
