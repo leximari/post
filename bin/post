@@ -17,9 +17,7 @@
 require('rubygems')
 require('post')
 require('optparse')
-require('fileutils')
 require('yaml')
-
 
 ###############################################################################
 #### Configuration Options
@@ -28,11 +26,24 @@ require('yaml')
 STDOUT.sync = true
 VERSION = "2.5.6"
 PWD = Dir.pwd()
-CONFIG = YAML::load_file("/etc/post/config")
-LOGFILE = File.open("/var/log/post.log", "a")
 OPTIONS = {}
-OPTIONS[:confirmation] = true
+
+#### Setting up log file.
+
+LOGFILE = File.open("/var/log/post.log", "a")
+
+#### Loading config file.
+begin
+CONFIG = YAML::load_file("/etc/post/config")
+OPTIONS[:confirmation] = CONFIG["confirmation"]
 OPTIONS[:root] = CONFIG["root"]
+rescue
+OPTIONS[:confirmation] = true
+OPTIONS[:root] = "/"
+end
+
+## Starting database.
+
 DATA = PackageDataBase.new()
 DATA.set_root(OPTIONS[:root])
 
@@ -79,18 +90,17 @@ end
 ###############################################################################
 
 #puts("Loading:     Downloading package information.\n")
-UPDATE = Thread.new() {
-    begin
-        DATA.update_database()
-    rescue
-    end
-}
+
+begin
+    DATA.update_database()
+rescue
+end
+
 ###############################################################################
 #### Package Installation Functions
 ###############################################################################
 
 def install_local_packages(args)
-    UPDATE.join
     ## Copies files over to a working directory and installs them.
     args.each do |package|
         path = File.join(File.expand_path(PWD), package)
@@ -102,7 +112,6 @@ def install_local_packages(args)
 end
 
 def install_source_packages(args)
-    UPDATE.join
     ## Fetches from a remote location(partition, server, or otherwise) and 
     ## installs a list of packages and their dependencies.
     queue = PackageList.new()
@@ -135,7 +144,6 @@ def install_source_packages(args)
 end
 
 def install_packages(args)
-    UPDATE.join
     dep_resolver = get_plugin(:build_tree)
     ## Fetches from a remote location(partition, server, or otherwise) and 
     ## installs a list of packages and their dependencies.

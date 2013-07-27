@@ -1,3 +1,5 @@
 ---
-flags: --prefix=/usr
+flags: ~
 root: /
+verbose: yes
+confirmation: yes
