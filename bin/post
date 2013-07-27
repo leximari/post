@@ -18,13 +18,22 @@ require('rubygems')
 require('post')
 require('optparse')
 require('fileutils')
+require('yaml')
 
 STDOUT.sync = true
 PWD = Dir.pwd()
+CONFIG = YAML::load_file("/etc/post/config")
 LOGFILE = File.open("/var/log/post.log", "a")
 OPTIONS = {}
-OPTIONS[:root] = '/'
+OPTIONS[:root] = CONFIG["root"]
 DATA = PackageDataBase.new()
+DATA.set_root(OPTIONS[:root])
+
+def array_to_string(array)
+    list_string = ""
+    array.each { |item| list_string += "#{item.to_s} " }
+    return list_string
+end
 
 def puts(x, stdout = true)
     ## Lets us write to logs and to stdout if we choose.
@@ -36,8 +45,13 @@ def puts(x, stdout = true)
 end
 
 ## Updating the package database
-puts("Loading:     Downloading package information.\n")
-DATA.update_database()
+#puts("Loading:     Downloading package information.\n")
+UPDATE = Thread.new() {
+    begin
+        DATA.update_database()
+    rescue
+    end
+}
 
 def get_plugin(symbol)
     ## Loads a plugin providing a certain method.
@@ -58,10 +72,10 @@ def confirmation(queue)
 end
 
 def install_local_packages(args)
+    UPDATE.join
     ## Copies files over to a working directory and installs them.
     args.each do |package|
         path = File.join(File.expand_path(PWD), package)
-        puts path
         FileUtils.cp(path, "/tmp/post/#{File.basename(path)}")
     end
     if confirmation(args)
@@ -70,14 +84,16 @@ def install_local_packages(args)
 end
 
 def install_source_packages(args)
+    UPDATE.join
     ## Fetches from a remote location(partition, server, or otherwise) and 
     ## installs a list of packages and their dependencies.
-    queue = PackageList.new(OPTIONS[:root])
+    queue = PackageList.new()
 
     begin
         args.each { |package| queue.push(package) }
         if confirmation(queue)
             queue.each do |package|
+
                 ## Fetches a package.
                 puts("Building:    Fetching pstbuild file.\n")
                 get_plugin(:fetch_build).fetch_build(package)
@@ -102,9 +118,10 @@ def install_source_packages(args)
 end
 
 def install_packages(args)
+    UPDATE.join
     ## Fetches from a remote location(partition, server, or otherwise) and 
     ## installs a list of packages and their dependencies.
-    queue = PackageList.new(OPTIONS[:root])
+    queue = PackageList.new(DATA)
 
     begin
         args.each { |package| queue.push(package) }
@@ -132,9 +149,14 @@ def install_packages(args)
 end
 
 def remove_packages(args)
-    queue = PackageList.new(OPTIONS[:root])
+    queue = []
     args.each do |package|
-        queue.set(package) if DATA.installed?(package)
+        queue.push(package) if DATA.installed?(package)
+        for pkg in DATA.get_installed_packages()
+            if DATA.get_installed_data(pkg)['dependencies'].include?(package)
+                queue.push(pkg)
+            end
+        end
     end
     if confirmation(queue)
         queue.each { |package| puts("Removing:    #{package}\n") }
@@ -145,7 +167,7 @@ end
 options = ARGV.options()
 options.set_summary_indent('    ')
 options.banner =    "Usage: post [OPTIONS] [PACKAGES]"
-options.version =   "Post 2.5 (2.4.5)"
+options.version =   "Post 2.5 (2.4.6)"
 options.define_head "Copyright (C) Thomas Chace 2011-2013 <tchacex@gmail.com>"
 
 #### Package management options.
@@ -172,12 +194,6 @@ options.on('-u', '--upgrade',
 options.separator("")
     
 #### Database options.
-
-def array_to_string(array)
-    list_string = ""
-    array.each { |item| list_string += item.to_s }
-    return list_string
-end
 
 options.on('--depends PACKAGE', String,
     'Get dependencies.')  do |arg|
@@ -209,9 +225,13 @@ options.on('--files PACKAGE', String,
     end
 
 options.on('--availablepackages',
-    'Get available packages.')  { puts DATA.get_available_packages }
+    'Get available packages.')  do
+        print("#{array_to_string(DATA.get_available_packages)}\n")
+    end
 options.on('--packages',
-    'Get installed packages.')  { puts DATA.get_installed_packages }
+    'Get installed packages.')  do
+        print("#{array_to_string(DATA.get_installed_packages)}\n")
+    end
 
 options.on('-h', '--help', 'Show this help message.') { puts(options) }
 options.on('-v', '--version', 'Show version information.') { puts("#{options.version()}\n") }

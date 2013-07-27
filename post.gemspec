@@ -23,7 +23,7 @@ Gem::Specification.new do |s|
     s.email       = 'tchacex@gmail.com'
     s.files       = ["lib/post.rb", "lib/plugins", "lib/plugins/http_fetch_binary.rb",
             "lib/plugins/install_binary.rb", "lib/plugins/verify_sha256.rb", "lib/plugins/remove_binary.rb",
-            "lib/packagelist.rb", "lib/packagedata.rb", "lib/plugins/fetch_source.rb", "lib/plugin.rb"]
+            "lib/packagelist.rb", "lib/packagedata.rb", "lib/buildtools.rb", "lib/plugins/fetch_source.rb", "lib/plugin.rb"]
     s.homepage    =
         'http://github.com/thomashc/Post'
 end

@@ -18,7 +18,7 @@ require('fileutils')
 require('yaml')
 require('rbconfig')
 
-def extract(filename)
+def extract_xz(filename)
     system("mv #{filename} #{filename}.xz")
     system("unxz #{filename}.xz")
     system("tar xf #{filename}")
@@ -68,7 +68,7 @@ class FetchSource < Plugin
             raise IncompleteError, "Error:      '#{url}' does not exist."
         end
 
-        extract(file)
+        extract_xz(file)
             
     end
 end

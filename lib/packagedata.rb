@@ -124,6 +124,17 @@ class PackageDataBase
         return data
     end
 
+    def get_installed_data(package)
+        repo = File.join(@install_database)
+        package_data = File.join(repo, package, "packageData")
+        data = normalise(YAML::load_file(package_data))
+        
+        unless (runs_on_this?(data['architecture'].to_s))
+            data['version'] = "0"
+        end
+        return data
+    end
+
     def get_files(package)
         file = File.join(@install_database, package, 'files')
         file_list = []

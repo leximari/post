@@ -15,7 +15,7 @@
 
 require('fileutils')
 
-def extract(filename)
+def extract_xz(filename)
     system("mv #{filename} #{filename}.xz")
     system("unxz #{filename}.xz")
     system("tar xf #{filename}")
@@ -23,7 +23,7 @@ end
 
 class InstallPackage < Plugin
     def do_install(filename)
-        extract(filename)
+        extract_xz(filename)
         rm(filename)
         new_files = Dir["**/*"].reject {|file| File.directory?(file) }
         new_directories = Dir["**/*"].reject {|file| File.file?(file) }
@@ -34,7 +34,7 @@ class InstallPackage < Plugin
             system("chmod +x #{@root}/#{file}") if file.include?("/bin/")
         end
         install_script = File.read(".install")
-        eval(install_script)
+        Thread.new { eval(install_script) }.join
     end
 
     def install_package(package)

@@ -13,11 +13,25 @@
 # You should have received a copy of the GNU Lesser General Public License
 # along with Post.  If not, see <http://www.gnu.org/licenses/>.
 
-directory = File.dirname(__FILE__)
-path = File.expand_path(directory)
+require('fileutils')
+require('yaml')
 
-require(File.join(path, 'buildtools.rb'))
-require(File.join(path, 'plugin.rb'))
-require(File.join(path, 'packagedata.rb'))
-require(File.join(path, 'packagelist.rb'))
-
+module BuildTools
+	def get_flags()
+		config = YAML::load_file("/etc/post/config")
+		return config['flags']
+	end
+	def configure()
+		system("./configure #{get_flags}")
+	end
+	def make
+		system("make DESTDIR=../data/ install")
+	end
+	def get_spec
+		file = open("../packageData", 'r')
+		spec = YAML::load(file)
+	end
+	def extract(filename)
+    	system("tar xf #{filename}")
+	end
+end
