@@ -13,6 +13,10 @@
 # You should have received a copy of the GNU Lesser General Public License
 # along with Post.  If not, see <http://www.gnu.org/licenses/>.
 
+
+class ConflictingEntry < Exception
+end
+
 class DepResolver < Plugin
     def initialize(root, database)
         super(root, database)
@@ -21,7 +25,7 @@ class DepResolver < Plugin
     def conflict?(package)
         for conflict in @database.get_sync_data(package)['conflicts']
             raise ConflictingEntry,
-                "Error:      '#{conflict}' conflicts with '#{package}'" if @queue.include?(conflict)
+                "Error: '#{conflict}' conflicts with '#{package}'" if @queue.include?(conflict)
         end
     end
     def get_queue

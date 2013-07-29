@@ -30,7 +30,6 @@ def runs_on_this?(arch)
     else
         complist = platform
     end
-    
     if complist.include?(arch)
         return true
     else
@@ -118,7 +117,7 @@ class PackageDataBase
         package_data = File.join(repo, package)
         data = normalise(YAML::load_file(package_data))
         
-        unless (runs_on_this?(data['architecture'].to_s))
+        unless runs_on_this?(data['architecture'].to_s)
             data['version'] = "0"
         end
         return data
@@ -129,7 +128,7 @@ class PackageDataBase
         package_data = File.join(repo, package, "packageData")
         data = normalise(YAML::load_file(package_data))
         
-        unless (runs_on_this?(data['architecture'].to_s))
+        unless runs_on_this?(data['architecture'].to_s)
             data['version'] = "0"
         end
         return data
@@ -215,8 +214,7 @@ class PackageDataBase
     end
 
     def get_url(repo)
-        data = YAML::load_file("/etc/post/repos.d/#{repo}")
-        return data['url']
+        return YAML::load_file("/etc/post/repos.d/#{repo}")['url']
     end
 
     def update_database()

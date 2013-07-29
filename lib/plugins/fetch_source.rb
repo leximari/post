@@ -18,36 +18,7 @@ require('fileutils')
 require('yaml')
 require('rbconfig')
 
-def extract_xz(filename)
-    system("mv #{filename} #{filename}.xz")
-    system("unxz #{filename}.xz")
-    system("tar xf #{filename}")
-end
-
-class IncompleteError < Exception
-end
-
 class FetchSource < Plugin
-    def get_file(url, file)
-        url = URI.parse(url)
-        file_name = File.basename(file)
-        saved_file = File.open(file, 'w')
-
-        Net::HTTP.new(url.host, url.port).request_get(url.path) do |response|
-            length = response['Content-Length'].to_i
-            saved_file_length = 0.0
-            response.read_body do |fragment|
-                saved_file << fragment
-                saved_file_length += fragment.length
-                progress = (saved_file_length / length) * 100
-                print("\rFetching:    #{file_name} [#{progress.round}%]")
-            end
-        end
-        saved_file.close()
-        print("\r")
-        puts("Fetched:     #{file_name} [100%]\n")
-    end
-
     def fetch_build(package)
         mkdir_p("/tmp/post/#{package}")
         cd("/tmp/post/#{package}")
@@ -57,26 +28,12 @@ class FetchSource < Plugin
 
         file = "#{package}-#{sync_data['version']}-#{sync_data['architecture']}.pstbuild"
         url = ("#{repo_url}/pstbuilds/#{file}")
-        begin
-            if url.include?('file://')
-                url.sub!("file://", '')
-                cp(url, "/tmp/post/#{package}/#{file}")
-            else
-                get_file(url, "/tmp/post/#{package}/#{file}")
-            end
-        rescue
-            raise IncompleteError, "Error:      '#{url}' does not exist."
-        end
-
-        extract_xz(file)
-            
+        get_file(url, "/tmp/post/#{package}/#{filename}")
+        extract_xz(file) 
     end
 end
 
-
 class BuildPackage < Plugin
-
-
     def get_source(package)
         cd("/tmp/post/#{package}")
         file = open("packageData", 'r')
@@ -88,20 +45,9 @@ class BuildPackage < Plugin
         cp("remove", "#{spec['name']}-build/data/.remove")
         cd("/tmp/post/#{package}/#{spec['name']}-build")
         for source in spec['source']
-            if source.include?("http://") or source.include?("ftp://")
-                action = system("wget -c #{source}")
-                if action == false
-                    puts("Could not download #{source}.")
-                end
-            elsif source.include?("git://")
-                action = system("git clone #{source}")
-                if action == false
-                    puts("Could not download #{source}.")
-                end
-            end
+            get_file(source, File.basename(source))
         end
     end
-    
     def cleanup(package, package_filename)
         wd = "/tmp/post/#{package}"
         rm_r("#{wd}/#{package}-build")
@@ -111,10 +57,9 @@ class BuildPackage < Plugin
         rm("#{wd}/build")
         rm("#{wd}/#{package_filename}build")
     end
-
     def build_package(package)
         cd("/tmp/post/#{package}")
-        wd = pwd()
+        wd = pwd
         file = open("packageData", 'r')
         spec = YAML::load(file)
 
@@ -124,11 +69,6 @@ class BuildPackage < Plugin
         build_thread = Thread.new { eval(build) }
         build_thread.join
         packageFiles = Dir["**/*"].reject {|file| File.directory?(file) }
-        for file in packageFiles
-            if file.include?("/bin/") or file.include?("/lib/")
-                system("strip #{file}")
-            end
-        end
         cd("#{wd}/#{package}-build/data")
         package_name = "#{spec['name']}-#{spec['version']}-#{RbConfig::CONFIG["build_cpu"]}.pst"
         system("tar cf #{package_name} * .packageData .install .remove")
