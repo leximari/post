@@ -20,13 +20,52 @@ plugin_directory = File.join(path, "plugins")
 require('set')
 require("fileutils")
 
+class IncompleteError < Exception
+end
+
 class Plugin
 	include FileUtils
 	def initialize(root = '/', database)
         @root = root
         @database = database
     end
+    def get_file(url, file)
+        begin
+        if url.include?('file://')
+            url.sub!("file://", '')
+            cp(url, file)
+        else
+            url = URI.parse(url)
+            file_name = File.basename(file)
+            saved_file = File.open(file, 'w')
+            http = Net::HTTP.new(url.host, url.port)
+            http.use_ssl = true if url.scheme == "https"
 
+            http.request_get(url.path) do |response|
+                length = response['Content-Length'].to_i
+                saved_file_length = 0.0
+                response.read_body do |fragment|
+                    saved_file << fragment
+                    saved_file_length += fragment.length
+                    progress = (saved_file_length / length) * 100
+                    print("\rFetching:    #{file_name} [#{progress.round}%]")
+                end
+            end
+            saved_file.close()
+            print("\r")
+            puts("Fetched:     #{file_name} [100%]\n")
+        end
+        rescue
+            raise IncompleteError, "Error:      '#{url + ".sha256"}' does not exist."
+        end
+    end
+
+    def extract_xz(filename)
+        ## This is dirty and makes me feel dirty. system() should be avoided.
+        system("mv #{filename} #{filename}.xz")
+        system("unxz #{filename}.xz")
+        system("tar xf #{filename}")
+    end
     def cleanup
         rm_r("/tmp/post") if File.exists?("/tmp/post")
         mkdir("/tmp/post")
@@ -43,8 +82,10 @@ class Plugin
     end
 end
 
+require(File.join(plugin_directory, "dependency_resolver.rb"))
 require(File.join(plugin_directory, "http_fetch_binary.rb"))
 require(File.join(plugin_directory, "install_binary.rb"))
 require(File.join(plugin_directory, "remove_binary.rb"))
 require(File.join(plugin_directory, "verify_sha256.rb"))
 require(File.join(plugin_directory, "fetch_source.rb"))
+require(File.join(plugin_directory, "dependency_resolver.rb"))

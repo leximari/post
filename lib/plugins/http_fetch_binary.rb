@@ -16,85 +16,16 @@
 require('net/http')
 require('fileutils')
 
-class IncompleteError < Exception
-end
-
-class DepResolver < Plugin
-
-    def initialize(root, database)
-        super(root, database)
-        @queue = []
-    end
-    def conflict?(variable)
-        for conflict in @database.get_sync_data(variable)['conflicts']
-            raise ConflictingEntry,
-                "Error:      '#{conflict}' conflicts with '#{variable}'" if @queue.include?(conflict)
-        end
-    end
-
-    def get_queue()
-        @queue
-    end
-
-    def build_tree(package)
-        group = []
-        repo = @database.get_group_repo(package).to_s
-        group = @database.get_repodata(repo)[package].to_a
-        if (group.to_a.empty?) and (@database.upgrade?(package))
-            deps = @database.get_sync_data(package)['dependencies']
-            deps.each { |dependency| build_tree(dependency) }
-            #@queue.push(package)
-            unless (@queue.include?(package))
-                conflict?(package)
-                #build_tree(package)
-                @queue.push(package)
-            end
-        else
-            group.each { |member| build_tree(member) }
-        end
-    end
-end
-
 class CommandLineFetch < Plugin
-    def get_file(url, file)
-        url = URI.parse(url)
-        file_name = File.basename(file)
-        saved_file = File.open(file, 'w')
-
-        Net::HTTP.new(url.host, url.port).request_get(url.path) do |response|
-            length = response['Content-Length'].to_i
-            saved_file_length = 0.0
-            response.read_body do |fragment|
-                saved_file << fragment
-                saved_file_length += fragment.length
-                progress = (saved_file_length / length) * 100
-                print("\rFetching:    #{file_name} [#{progress.round}%]")
-            end
-        end
-        saved_file.close()
-        print("\r")
-        puts("Fetched:     #{file_name} [100%]\n")
-    end
-
     def fetch_package(package)
         mkdir_p("/tmp/post/#{package}")
 
         sync_data = @database.get_sync_data(package)
         repo_url = @database.get_url(@database.get_repo(package))
 
-        file = "#{package}-#{sync_data['version']}-#{sync_data['architecture']}.pst"
-        url = ("#{repo_url}/#{file}")
-        begin
-            if url.include?('file://')
-                url.sub!("file://", '')
-                cp(url, "/tmp/post/#{package}/#{file}")
-            else
-                get_file(url, "/tmp/post/#{package}/#{file}")
-            end
-        rescue
-            raise IncompleteError, "Error:      '#{url}' does not exist."
-        end
-            
+        filename = "#{package}-#{sync_data['version']}-#{sync_data['architecture']}.pst"
+        url = ("#{repo_url}/#{filename}")
+        get_file(url, "/tmp/post/#{package}/#{filename}")  
     end
 end
 

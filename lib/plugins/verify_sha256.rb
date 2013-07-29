@@ -20,45 +20,19 @@ require('digest')
 class MismatchedHash < Exception
 end
 
-class IncompleteError < Exception
-end
-
-class Sha256Check < Plugin  
-    def get_file(url, file)
-        url = URI.parse(url)
-        file_name = File.basename(file)
-        saved_file = File.open(file, 'w')
-
-        Net::HTTP.new(url.host, url.port).request_get(url.path) do |response|
-            response.read_body do |fragment|
-                saved_file << fragment
-            end
-        end
-        saved_file.close()
-    end
-    
+class Sha256Check < Plugin
     def verify_package(package)
         cd("/tmp/post/#{package}")
         sync_data = @database.get_sync_data(package)
         repo_url = @database.get_url(@database.get_repo(package))
 
         filename = "#{package}-#{sync_data['version']}-#{sync_data['architecture']}.pst"
-        url = ("#{repo_url}/#{filename}")
-        begin
-            if url.include?('file://')
-                url.sub!("file://", '')
-                cp(url + ".sha256", "/tmp/post/#{package}/#{filename}.sha256")
-            else
-                get_file(url + ".sha256", "/tmp/post/#{package}/#{filename}.sha256")
-            end
-        rescue
-            raise IncompleteError, "Error:      '#{url + ".sha256"}' does not exist."
-        end
-        file_hash = Digest::SHA256.hexdigest(open(filename, "r").read())
-        real_hash = File.open("#{filename}.sha256").read().strip()
-        unless (file_hash == real_hash)
-            raise MismatchedHash, "Error:       #{filename} is corrupt."
-        end
+        url = "#{repo_url}/#{filename}.sha256"
+        get_file(url, "/tmp/post/#{package}/#{filename}.sha256")
+        file_hash = Digest::SHA256.hexdigest(open(filename, "r").read)
+        real_hash = File.open("#{filename}.sha256").read.strip
+            raise MismatchedHash, 
+                "Error:       #{filename} is corrupt." unless (file_hash == real_hash)
         rm("#{filename}.sha256")
     end
 end

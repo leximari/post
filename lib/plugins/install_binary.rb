@@ -15,12 +15,6 @@
 
 require('fileutils')
 
-def extract_xz(filename)
-    system("mv #{filename} #{filename}.xz")
-    system("unxz #{filename}.xz")
-    system("tar xf #{filename}")
-end
-
 class InstallPackage < Plugin
     def do_install(filename)
         extract_xz(filename)

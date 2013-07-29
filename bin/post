@@ -93,10 +93,10 @@ end
 
 #puts("Loading:     Downloading package information.\n")
 
-begin
+#begin
     DATA.update_database()
-rescue
-end
+#rescue
+#end
 
 ###############################################################################
 #### Package Installation Functions
@@ -149,9 +149,9 @@ def install_source_packages(args)
             end
         end
     rescue MismatchedHash => error
-        log_puts("#{error.message}")
+        log_puts(error.message)
     rescue ConflictingEntry => error
-        log_puts("#{error.message}")
+        log_puts(error.message)
     end
 end
 
@@ -183,7 +183,6 @@ def install_packages(args)
                 log_puts("Installing:  #{package}")
                 get_plugin(:install_package).install_package(package)
             end
-
         end
     rescue MismatchedHash => error
         log_puts(error.message)
