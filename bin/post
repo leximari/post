@@ -44,9 +44,9 @@ rescue
     OPTIONS[:editor] = "/usr/bin/vi"
 end
 
-## Starting database.
+#### Starting database.
 
-DATA = PackageDataBase.new()
+DATA = PackageDataBase.new
 DATA.set_root(OPTIONS[:root])
 
 ###############################################################################
@@ -122,7 +122,7 @@ def install_source_packages(args)
     begin
         args.each do |package|
             dep_resolver.build_tree(package)
-            queue = dep_resolver.get_queue
+            queue = dep_resolver.queue
         end
         if confirmation(queue)
             queue.each do |package|
@@ -164,7 +164,7 @@ def install_packages(args)
     begin
         args.each do |package|
             dep_resolver.build_tree(package)
-            queue = dep_resolver.get_queue
+            queue = dep_resolver.queue
         end
         if confirmation(queue)
             threads = []

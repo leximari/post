@@ -38,14 +38,10 @@ def runs_on_this?(arch)
 end
 
 class PackageDataBase
+    attr_accessor :root
     include FileUtils
     def initialize(root = '/')
-        @repos = []
-        set_root(root)
-    end
-
-    def get_root()
-        @root
+        @root = root
     end
     
     def set_root(root)
@@ -68,22 +64,6 @@ class PackageDataBase
             data['version'] = "0"
         end
         return data
-    end
-
-    def normalise(data)
-        data['version'] = data['version'].to_s()
-
-        data['conflicts'] = [] if data['conflicts'] == nil
-        data['dependencies'] = [] if data['dependencies'] == nil
-        data['version'] = "0" if data['version'].empty?
-        return data
-    end
-
-    def get_repos()
-        list = Dir.entries("/etc/post/repos.d")
-        list.delete('.')
-        list.delete('..')
-        return list
     end
     
     def get_repo(package)
@@ -169,11 +149,11 @@ class PackageDataBase
         rm_r(dir_name)
     end
 
-    def get_available_packages()
+    def get_available_packages
         list = []
         for repo in get_repos
             list += Dir["#{@sync_database}/#{repo}/*"].map() { |package| File.basename(package) }
-            list.delete("repo.yaml")
+            list.delete("repo.info")
         end
         return list
     end
@@ -181,7 +161,7 @@ class PackageDataBase
     def get_group_repo(group)
         group_repo = nil
         for repo in get_repos
-            data = YAML::load_file("#{@sync_database}/#{repo}/repo.yaml")
+            data = YAML::load_file("#{@sync_database}/#{repo}/repo.info")
             unless data[group] == nil
                 group_repo = repo
             end
@@ -191,13 +171,13 @@ class PackageDataBase
     
     def get_repodata(repo)
         if get_repos.include?(repo)
-            return YAML::load_file("#{@sync_database}/#{repo}/repo.yaml")
+            return YAML::load_file("#{@sync_database}/#{repo}/repo.info")
         else
             return {}
         end
     end
 
-    def get_installed_packages()
+    def get_installed_packages
         Dir["#{@install_database}/*"].map() { |package| File.basename(package) }
     end
 
@@ -217,6 +197,7 @@ class PackageDataBase
         return YAML::load_file("/etc/post/repos.d/#{repo}")['url']
     end
 
+
     def update_database()
         rm_r("/tmp/post") if (File.exists?("/tmp/post"))
         rm_r(@sync_database) if (File.exists?(@sync_database))
@@ -228,32 +209,54 @@ class PackageDataBase
         for repo in get_repos
 
             source_url = get_url(repo) + '/info.tar'
-            if source_url.include?("file://")
-                source_url.sub!("file://", '')
-                cp(source_url, 'info.tar')
-            else
-                File.open('info.tar', 'w') do |file|
-                    file.puts(open(source_url).read)
-                end
-            end
+            get_file(source_url, "info.tar")
 
             system("tar xf info.tar")
             cp_r('info', "#{@sync_database}/#{repo}")
-        
-            source_url = get_url(repo) + '/repo.yaml'
-            if source_url.include?("file://")
-                source_url.sub!("file://", '')
-                cp(source_url, 'repo.yaml')
-            else
-                File.open('repo.yaml', 'w') do |file|
-                    file.puts(open(source_url).read)
-                end
-            end
-            cp_r('repo.yaml', "#{@sync_database}/#{repo}/repo.yaml")
-            rm('repo.yaml')
             rm('info.tar')
             rm_r('info')
         end
+    end
+
+    private
+    def get_file(url, file)
+        begin
+        if url.include?('file://')
+            url.sub!("file://", '')
+            cp(url, file)
+        else
+            url = URI.parse(url)
+            file_name = File.basename(file)
+            saved_file = File.open(file, 'w')
+            http = Net::HTTP.new(url.host, url.port)
+            http.use_ssl = true if url.scheme == "https"
+
+            http.request_get(url.path) do |response|
+                response.read_body do |fragment|
+                    saved_file << fragment
+                end
+            end
+            saved_file.close
+        end
+        rescue
+            raise IncompleteError, "Error:      '#{url}' does not exist."
+        end
+    end
+
+    def normalise(data)
+        data['version'] = data['version'].to_s()
+
+        data['conflicts'] = [] if data['conflicts'] == nil
+        data['dependencies'] = [] if data['dependencies'] == nil
+        data['version'] = "0" if data['version'].empty?
+        return data
+    end
+
+    def get_repos
+        list = Dir.entries("/etc/post/repos.d")
+        list.delete('.')
+        list.delete('..')
+        return list
     end
 end
 

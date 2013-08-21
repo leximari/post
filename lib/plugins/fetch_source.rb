@@ -27,7 +27,7 @@ class FetchSource < Plugin
         repo_url = @database.get_url(@database.get_repo(package))
 
         file = "#{package}-#{sync_data['version']}-#{sync_data['architecture']}.pstbuild"
-        url = ("#{repo_url}/pstbuilds/#{file}")
+        url = "#{repo_url}/pstbuilds/#{file}"
         get_file(url, "/tmp/post/#{package}/#{filename}")
         extract_xz(file) 
     end
