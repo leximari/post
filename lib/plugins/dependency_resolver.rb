@@ -18,6 +18,7 @@ class ConflictingEntry < Exception
 end
 
 class DepResolver < Plugin
+    attr_accessor :queue
     def initialize(root, database)
         super(root, database)
         @queue = []
@@ -27,9 +28,6 @@ class DepResolver < Plugin
             raise ConflictingEntry,
                 "Error: '#{conflict}' conflicts with '#{package}'" if @queue.include?(conflict)
         end
-    end
-    def get_queue
-        @queue
     end
     def build_tree(package)
         group = []

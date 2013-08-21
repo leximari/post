@@ -24,6 +24,7 @@ class IncompleteError < Exception
 end
 
 class Plugin
+    attr_accessor :root
 	include FileUtils
 	def initialize(root = '/', database)
         @root = root
@@ -56,10 +57,9 @@ class Plugin
             puts("Fetched:     #{file_name} [100%]\n")
         end
         rescue
-            raise IncompleteError, "Error:      '#{url + ".sha256"}' does not exist."
+            raise IncompleteError, "Error:      '#{url}' does not exist."
         end
     end
-
     def extract_xz(filename)
         ## This is dirty and makes me feel dirty. system() should be avoided.
         system("mv #{filename} #{filename}.xz")
@@ -88,4 +88,3 @@ require(File.join(plugin_directory, "install_binary.rb"))
 require(File.join(plugin_directory, "remove_binary.rb"))
 require(File.join(plugin_directory, "verify_sha256.rb"))
 require(File.join(plugin_directory, "fetch_source.rb"))
-require(File.join(plugin_directory, "dependency_resolver.rb"))
