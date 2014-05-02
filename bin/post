@@ -1,5 +1,5 @@
 #!/usr/bin/ruby
-# Copyright (C) Thomas Chace 2011-2013 <tchacex@gmail.com>
+# Copyright (C) Thomas Chace 2011-2014 <tchacex@gmail.com>
 # This file is part of Post.
 # Post is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Lesser General Public License as published by
@@ -24,7 +24,7 @@ require('yaml')
 ###############################################################################
 
 STDOUT.sync = true
-VERSION = "2.4.6"
+VERSION = "2.4.7"
 PWD = Dir.pwd()
 OPTIONS = {}
 
@@ -38,10 +38,12 @@ begin
     OPTIONS[:confirmation] = CONFIG["confirmation"]
     OPTIONS[:root] = CONFIG["root"]
     OPTIONS[:editor] = CONFIG["editor"]
+    OPTIONS[:verify] = CONFIG["verify"]
 rescue
     OPTIONS[:confirmation] = true
     OPTIONS[:root] = "/"
     OPTIONS[:editor] = "/usr/bin/vi"
+    OPTIONS[:verify] = true
 end
 
 #### Starting database.
@@ -173,8 +175,14 @@ def install_packages(args)
                     ## Fetches a package.
                     get_plugin(:fetch_package).fetch_package(package)
                     ## Verifies that all packages have been acquired without corruption
-                    log_puts("Verifying:   #{package}")
-                    get_plugin(:verify_package).verify_package(package)
+                    if OPTIONS[:verify]
+                        begin
+                        log_puts("Verifying:   #{package}")
+                        get_plugin(:verify_package).verify_package(package)
+                        rescue NoMethodError => error
+                            log_puts("Warning:     No verification plugin")
+                        end
+                    end
                 end }
             threads.each { |thread| thread.join }
             queue.each do |package|
@@ -184,7 +192,7 @@ def install_packages(args)
                 get_plugin(:install_package).install_package(package)
             end
         end
-    rescue MismatchedHash => error
+    rescue VerificationFailure => error
         log_puts(error.message)
     rescue ConflictingEntry => error
         log_puts(error.message)
@@ -219,7 +227,7 @@ options = ARGV.options()
 options.set_summary_indent('    ')
 options.banner =    "Usage: post [OPTIONS] [PACKAGES]"
 options.version =   "Post #{VERSION}"
-options.define_head "Copyright (C) Thomas Chace 2011-2013 <tchacex@gmail.com>"
+options.define_head "Copyright (C) Thomas Chace 2011-2014 <tchacex@gmail.com>"
 
 #### Settings
 
@@ -249,7 +257,7 @@ options.on('-u', '--upgrade',
     end
 
 options.separator("")
-    
+
 #### Database options.
 
 options.on('--depends PACKAGE', String,
