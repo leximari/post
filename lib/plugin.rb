@@ -23,6 +23,9 @@ require("fileutils")
 class IncompleteError < Exception
 end
 
+class VerificationFailure < Exception
+end
+
 class Plugin
     attr_accessor :root
 	include FileUtils

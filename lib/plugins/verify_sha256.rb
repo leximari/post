@@ -17,9 +17,6 @@ require('net/http')
 require('fileutils')
 require('digest')
 
-class MismatchedHash < Exception
-end
-
 class Sha256Check < Plugin
     def verify_package(package)
         cd("/tmp/post/#{package}")
@@ -31,7 +28,7 @@ class Sha256Check < Plugin
         get_file(url, "/tmp/post/#{package}/#{filename}.sha256")
         file_hash = Digest::SHA256.hexdigest(open(filename, "r").read)
         real_hash = File.open("#{filename}.sha256").read.strip
-            raise MismatchedHash, 
+            raise VerificationFailure, 
                 "Error:       #{filename} is corrupt." unless (file_hash == real_hash)
         rm("#{filename}.sha256")
     end
