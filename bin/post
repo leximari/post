@@ -131,7 +131,7 @@ def install_source_packages(args)
                 ## Fetches a package.
                 puts("Building:    Fetching pstbuild file.")
                 get_plugin(:fetch_build).fetch_build(package)
-                print("Edit pstbuild? [y/n] ")
+                print("Edit #{package}.pstbuild? [y/n] ")
                 if gets.include?('y')
                     system("#{OPTIONS[:editor]} /tmp/post/#{package}/packageData")
                     system("#{OPTIONS[:editor]} /tmp/post/#{package}/build")
@@ -150,8 +150,6 @@ def install_source_packages(args)
                 get_plugin(:install_package).install_package(package)
             end
         end
-    rescue MismatchedHash => error
-        log_puts(error.message)
     rescue ConflictingEntry => error
         log_puts(error.message)
     end

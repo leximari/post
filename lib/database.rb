@@ -207,7 +207,6 @@ class PackageDataBase
         mkdir_p(@sync_database)
 
         for repo in get_repos
-
             source_url = get_url(repo) + '/info.tar'
             get_file(source_url, "info.tar")
 
