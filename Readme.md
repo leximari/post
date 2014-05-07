@@ -11,16 +11,20 @@ Post is is supported by Rubinius(1.1+), but also works well on Ruby 1.9+.
 ## Dependencies:
 	lzma(liblzma-dev on Ubuntu/Debian)
 
-## Installing Post
+## Building Post Yourself
 
         git clone git://github.com/thomashc/Post.git
         cd Post
         gem build post.gemspec
         gem install post-2.0.0.gem
 
+## Installing from Rubygems:
+
+	gem install post
+
 ## Configuring The Test Repository
 
-        sudo cp cfg/channel /etc/post/channel
+        sudo cp cfg/tchace /etc/post/repos.d/tchace
 
 ## Testing The Installation
 
