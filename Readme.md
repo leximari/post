@@ -17,7 +17,7 @@ Post is is supported on Rubinius(1.1+), but also works well on Ruby 1.9+.
 
 ## Configuring The Test Repository
 
-        sudo cp cfg/bellaciao /etc/post/repos.d/bellaciao
+        sudo cp cfg/tchace /etc/post/repos.d/tchace
 
 ## Testing The Installation
 
