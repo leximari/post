@@ -20,7 +20,7 @@ Post is is supported by Rubinius(1.1+), but also works well on Ruby 1.9+.
 
 ## Installing from Rubygems:
 
-	gem install post
+	gem install post -v 2.0.4
 
 ## Configuring The Test Repository
 
