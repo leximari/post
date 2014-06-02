@@ -15,7 +15,7 @@ Gem::Specification.new do |s|
     s.name        = 'post'
     s.license     = 'LGPL'
     s.executables << 'post'
-    s.version     = '2.4.6'
+    s.version     = '2.4.7'
     s.date        = date
     s.summary     = 'Package manager for Linux/Unix in pure ruby.'
     s.description = 'Post is a small, fast package manager for linux and unix systems based on principles of simplicity.'
