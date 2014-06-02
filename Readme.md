@@ -13,7 +13,7 @@ Post is is supported on Rubinius(1.1+), but also works well on Ruby 1.9+.
         git clone git://github.com/thomashc/Post.git
         cd Post
         gem build post.gemspec
-        gem install post-2.4.6.gem
+        gem install post-2.4.7.gem
 
 ## Configuring The Test Repository
 

@@ -19,6 +19,11 @@ require('post')
 require('optparse')
 require('yaml')
 
+#### Get root access
+#if ENV["USER"] != "root"
+#    exec("sudo #{ENV['_']} #{ARGV.join(' ')}")
+#end
+
 ###############################################################################
 #### Configuration Options
 ###############################################################################
@@ -27,10 +32,6 @@ STDOUT.sync = true
 VERSION = "2.4.7"
 PWD = Dir.pwd()
 OPTIONS = {}
-
-#### Setting up log file.
-
-LOGFILE = File.open("/var/log/post.log", "a")
 
 #### Loading config file.
 begin
@@ -47,9 +48,25 @@ rescue
 end
 
 #### Starting database.
-
 DATA = PackageDataBase.new
 DATA.set_root(OPTIONS[:root])
+
+#### Setting up log file.
+begin
+    LOGFILE = File.open("/var/log/post.log", "a")
+    LOG = true
+rescue
+    LOG = false
+end
+
+def post_setup
+    #### Database Updating
+    #puts("Loading:     Downloading package information.\n")
+    begin
+        DATA.update_database()
+    rescue
+    end
+end
 
 ###############################################################################
 #### Tools
@@ -64,8 +81,9 @@ end
 def log_puts(x, stdout = true)
     ## Lets us write to logs and to stdout if we choose.
     message = "#{Time.now}: #{x}"
-    LOGFILE.puts(message)
-    if (stdout)
+    if LOG
+        LOGFILE.puts(message)
+    elsif (stdout)
         puts(x)
     end
 end
@@ -87,17 +105,6 @@ def confirmation(queue)
     puts("Queue:       #{queue.to_a.join(" ")}")
     print('Confirm:     [y/n] ')
     return true if gets.include?('y')
-end
-
-###############################################################################
-#### Database Updating
-###############################################################################
-
-puts("Loading:     Downloading package information.\n")
-
-begin
-    DATA.update_database()
-rescue
 end
 
 ###############################################################################
@@ -245,15 +252,31 @@ options.separator("")
 #### Package management options.
 
 options.on('-i', '--fetch PACKAGES', Array,
-    'Install a package.')  { |args| install_packages(args) }
+    'Install a package.')  { |args| 
+        post_setup
+        install_packages(args)
+    }
+
 options.on('-s', '--source PACKAGES', Array,
-    'Install a source package.')  { |args| install_source_packages(args) }
+    'Install a source package.')  { |args| 
+        post_setup
+        install_source_packages(args)
+    }
+
 options.on('-l', '--install PACKAGES', Array,
-    'Install a local package.')  { |args| install_local_packages(args) }
+    'Install a local package.')  { |args| 
+        post_setup
+        install_local_packages(args)
+    }
+
 options.on('-r', '--remove PACKAGES', Array,
-    'Remove a package.') { |args| remove_packages(args) }
+    'Remove a package.') { |args| 
+        post_setup
+        remove_packages(args)
+    }
 options.on('-u', '--upgrade',
     'Upgrade packages to latest versions.') do
+        post_setup
         packages = DATA.get_installed_packages()
         install_packages(packages)
     end

@@ -43,7 +43,7 @@ class PackageDataBase
     def initialize(root = '/')
         @root = root
     end
-    
+
     def set_root(root)
         @root = root
         @database_location = "#{@root}/var/lib/post/"
@@ -54,20 +54,20 @@ class PackageDataBase
             mkdir_p(@sync_database)
         end
     end
-    
+
     def get_data(package)
         begin
             package_data = File.join(@install_database, package, 'packageData')
-            data = normalise(YAML::load_file(package_data))
+            data = normalize(YAML::load_file(package_data))
         rescue
             data = {}
             data['version'] = "0"
         end
         return data
     end
-    
+
     def get_repo(package)
-    
+
         package_repo = ""
         version = "0"
 
@@ -77,7 +77,7 @@ class PackageDataBase
                 if member == package
                     package_repo = repo
                     package_data = File.join(@sync_database + "/" + repo, package)
-                    data = normalise(YAML::load_file(package_data))
+                    data = normalize(YAML::load_file(package_data))
                     unless (runs_on_this?(data['architecture'].to_s))
                         data['version'] = "0"
                     end
@@ -85,7 +85,7 @@ class PackageDataBase
                         version = data['version']
                         package_repo = repo
                     end
-                
+
                 end
             end
         end
@@ -95,8 +95,8 @@ class PackageDataBase
     def get_sync_data(package)
         repo = File.join(@sync_database, get_repo(package))
         package_data = File.join(repo, package)
-        data = normalise(YAML::load_file(package_data))
-        
+        data = normalize(YAML::load_file(package_data))
+
         unless runs_on_this?(data['architecture'].to_s)
             data['version'] = "0"
         end
@@ -106,8 +106,8 @@ class PackageDataBase
     def get_installed_data(package)
         repo = File.join(@install_database)
         package_data = File.join(repo, package, "packageData")
-        data = normalise(YAML::load_file(package_data))
-        
+        data = normalize(YAML::load_file(package_data))
+
         unless runs_on_this?(data['architecture'].to_s)
             data['version'] = "0"
         end
@@ -157,7 +157,7 @@ class PackageDataBase
         end
         return list
     end
-    
+
     def get_group_repo(group)
         group_repo = nil
         for repo in get_repos
@@ -168,7 +168,7 @@ class PackageDataBase
         end
         return group_repo
     end
-    
+
     def get_repodata(repo)
         if get_repos.include?(repo)
             return YAML::load_file("#{@sync_database}/#{repo}/repo.info")
@@ -242,7 +242,7 @@ class PackageDataBase
         end
     end
 
-    def normalise(data)
+    def normalize(data)
         data['version'] = data['version'].to_s()
 
         data['conflicts'] = [] if data['conflicts'] == nil
