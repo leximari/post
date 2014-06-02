@@ -283,6 +283,13 @@ options.on('-u', '--upgrade',
 
 options.separator("")
 
+#### Building packages.
+
+options.on_tail("-m", "--makepkg",
+    "Make a package.") do
+        MakePackage.new("packageData")
+    end
+
 #### Database options.
 
 options.on('--depends PACKAGE', String,
