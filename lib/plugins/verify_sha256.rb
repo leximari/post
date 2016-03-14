@@ -1,4 +1,4 @@
-# Copyright (C) Thomas Chace 2011-2013 <tchacex@gmail.com>
+# Copyright (C) Alexandra Chace 2011-2015 <achace@student.gsu.edu>
 # This file is part of Post.
 # Post is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Lesser General Public License as published by
@@ -16,6 +16,9 @@
 require('net/http')
 require('fileutils')
 require('digest')
+
+class VerificationFailure < Exception
+end
 
 class Sha256Check < Plugin
     def verify_package(package)

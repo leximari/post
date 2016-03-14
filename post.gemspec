@@ -19,8 +19,8 @@ Gem::Specification.new do |s|
     s.date        = date
     s.summary     = 'Package manager for Linux/Unix in pure ruby.'
     s.description = 'Post is a small, fast package manager for linux and unix systems based on principles of simplicity.'
-    s.authors     = ['Thomas Chace']
-    s.email       = 'tchacex@gmail.com'
+    s.authors     = ['Alexandra Chace']
+    s.email       = 'achace@student.gsu.edu'
     s.files       = ["lib/post.rb", "lib/plugins", "lib/plugins/http_fetch_binary.rb",
             "lib/plugins/install_binary.rb", "lib/plugins/verify_sha256.rb", "lib/plugins/remove_binary.rb",
             "lib/database.rb", "lib/buildtools.rb", "lib/makepkg.rb", "lib/plugins/fetch_source.rb", "lib/plugin.rb", "lib/plugins/dependency_resolver.rb"]
