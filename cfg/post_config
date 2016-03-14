@@ -5,3 +5,10 @@ verbose: yes
 confirmation: yes
 editor: /usr/bin/vi
 verify: yes
+plugins:
+- dependency_resolver
+- fetch_source
+- http_fetch_binary
+- install_binary
+- remove_binary
+- verify_sha256

@@ -1,5 +1,5 @@
 ---
-maintainer: Thomas Chace <ithomashc@gmail.com>
+maintainer: Alexandra Chace <achace@student.gsu.edu>
 name: post
 version: 2.0
 release: 1
@@ -7,9 +7,9 @@ license: GPL
 architecture: i686
 conflicts: ~
 dependencies: ~
-url: http://github.com/thomashc/Post
+url: http://github.com/alychace/Post
 description: A lightweight and feature rich package manager with a focus on speed and good design.
 source:
-- git://github.com/thomashc/Post.git
+- git://github.com/alychace/Post.git
 build-dependencies:
 - ruby
