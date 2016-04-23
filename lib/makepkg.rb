@@ -1,5 +1,5 @@
 #!/usr/bin/ruby
-# Copyright (C) Thomas Chace 2011-2014 <tchacex@gmail.com>
+# Copyright (C) Alexandra Chace 2011-2015 <achace@student.gsu.edu>
 
 # Scribe is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Lesser General Public License as published by
