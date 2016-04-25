@@ -57,7 +57,7 @@ a {
   color: #fff;
   text-align: center;
   background-color: #159957;
-  background-image: "/post_screenshot.png"; }
+  background-image: linear-gradient(120deg, #CE5C00, #8AE234); }
   @media screen and (min-width: 64em) {
     .page-header {
       padding: 5rem 6rem; } }
