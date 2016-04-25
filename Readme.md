@@ -8,8 +8,6 @@ Post is package manager for unix systems that focuses on clean design, efficienc
 
 ## Installing Post
 
-        git clone git://github.com/leximari/Post.git
-        cd Post
         gem build post.gemspec
         gem install post-2.4.7.gem
 
