@@ -13,10 +13,10 @@ Post is package manager for unix systems that focuses on clean design, efficienc
 
 ## Adding Repositories
 	
-	Repositories files are placed in /etc/post/repos.d/. An example can be found in cfg/tchace.
+Repositories files are placed in /etc/post/repos.d/. An example can be found in cfg/tchace.
 
 ## More Information
 	
-	Please see `post -h` for more usage information.
+Please see `post -h` for more usage information.
 
 If you have questions, email me at <achace@student.gsu.edu>.
