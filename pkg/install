@@ -1,4 +1,0 @@
-file = open(".packageData", 'r')
-spec = YAML::load(file)
-
-system("gem install /tmp/post-#{spec['version']}.gem")
