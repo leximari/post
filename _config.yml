@@ -1,7 +1,7 @@
 # Setup
 title:        Post
 tagline:      A simple package manager for linux systems.
-baseurl:      "leximch.github.io/post"
+baseurl:      "http://leximch.github.io/post"
 paginate:     1
 
 # About/contact
