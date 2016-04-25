@@ -6,8 +6,6 @@ Post is available under the Lesser General Public license.
 
 Post is package manager for unix systems that focuses on clean design, efficiency, and simplicity.
 
-Post is is supported on Rubinius(1.1+), but also works well on Ruby 1.9+.
-
 ## Installing Post
 
         git clone git://github.com/leximari/Post.git
@@ -15,13 +13,12 @@ Post is is supported on Rubinius(1.1+), but also works well on Ruby 1.9+.
         gem build post.gemspec
         gem install post-2.4.7.gem
 
-## Configuring The Test Repository
+## Adding Repositories
+	
+	Repositories files are placed in /etc/post/repos.d/. An example can be found in cfg/tchace.
 
-        sudo cp cfg/tchace /etc/post/repos.d/tchace
-
-## Testing The Installation
-
-        sudo post -h
-        sudo post -i zile
+## More Information
+	
+	Please see `post -h` for more usage information.
 
 If you have questions, email me at <achace@student.gsu.edu>.
