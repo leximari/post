@@ -3,7 +3,7 @@ title:        Post
 tagline:      A simple package manager for linux systems.
 baseurl:      "http://leximch.github.io/post"
 paginate:     1
-github:       "http://github.com/leximch/post/"
+github:       "github.com/leximch/post/"
 
 # About/contact
 author:
