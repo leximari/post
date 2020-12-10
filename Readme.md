@@ -19,4 +19,4 @@ Repositories files are placed in `/etc/post/repos.d/`. An example can be found i
 	
 Please see `post -h` for more usage information.
 
-If you have questions, email me at <achace@student.gsu.edu>.
+If you have questions, email me at <achacega@gmail.com>.
