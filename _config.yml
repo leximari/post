@@ -1,14 +1,14 @@
 # Setup
 title:        Post
 tagline:      A simple package manager for linux systems.
-baseurl:      "http://marilync.co/post/"
+baseurl:      "https://alexchace.com/post/"
 paginate:     1
-github:       "http://github.com/marilyncco/post/"
+github:       "http://github.com/leximch/post/"
 
 # About/contact
 author:
   name:       Alexandra Chace
-  url:        http://leximch.wordpress.com 
+  url:        https://alychace.com
 
 # Gems
 gems:
